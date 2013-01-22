@@ -31,7 +31,7 @@ inline double INTFxGx(double a, double b, double c, double d, double up, double 
 double DiscretedIntegrator::Integrate(point *fx, point *gx, int size) {
   double subsum  = 0.0, sum = 0.0;
   double fa, fb, ga, gb;
-  for (int i = 0; i < size - 1; ++i) {
+  for (int i = 0; i < size - 2; ++i) {
     subsum = 0.0;
     point xa = fx[i],
           xb = gx[i],
@@ -39,9 +39,9 @@ double DiscretedIntegrator::Integrate(point *fx, point *gx, int size) {
           yb = gx[i+1];
     getAB(xa, ya, &fa, &fb);
     getAB(xb, yb, &ga, &gb);
-    printf("fa: %f, fb: %f ", fa, fb);
+//    printf("x: %f, fa: %f, fb: %f, ga: %f, gb: %f ", xa.x, fa, fb, ga, gb);
     subsum = INTFxGx(fa, fb, ga, gb, ya.x, xa.x);
-    printf("Subsum:%f\n", subsum);
+//    printf("Subsum:%f\n", subsum);
     sum += subsum;
   }
   return sum;
