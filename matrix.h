@@ -109,6 +109,7 @@ class Matrix {
   // m * n matrix
   int m, n;
   
+  
 public:
   Matrix(int m, int n){
     this->m = m;
