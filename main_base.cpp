@@ -15,11 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef __APPLE__
-#  include <GLUT/glut.h>
-#else
-#  include <GL/glut.h>
-#endif
+#include "GLCommonHeader.h"
 
 #define WIDTH 1024
 #define HEIGHT 768
