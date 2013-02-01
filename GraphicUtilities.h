@@ -13,10 +13,12 @@ typedef void (*render_callback)();
 
 class GraphicUtilities {
 public:
-  static void AntiAlias(int level);
+  // AntiAlias the image, require glutInitDisplayMode(GLUT_ACCUM)
+  static void AntiAlias(int level, render_callback render_frame);
   
   static char* read_shader_program(char *filename);
   
+  static void jitterCamera(GLfloat pix_x, GLfloat pix_y);
 
 };
 

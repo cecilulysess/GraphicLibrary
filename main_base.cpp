@@ -2,8 +2,8 @@
 //  main.cpp
 //  PhysicalAnimation
 //
-//  Created by Julian Wu on 8/23/12.
-//  Copyright (c) 2012 Julian Wu. All rights reserved.
+//  Created by Julian Wu on 1/22/2013
+//  Copyright (c) 2013 Julian Wu. All rights reserved.
 //
 
 //  Style comments
@@ -16,9 +16,13 @@
 #include <stdlib.h>
 
 #include "GLCommonHeader.h"
+#include "GraphicUtilities.h"
 
 #define WIDTH 1024
 #define HEIGHT 768
+
+bool AntiAliasMarker = false;
+bool WantToRedraw = false;
 
 struct point {
   float x, y, z;
@@ -77,7 +81,7 @@ void draw_stuff(){
     glNormal3fv(normal[i]);
     glDrawElements(GL_QUADS, 4, GL_UNSIGNED_BYTE, (void*)(4 * i) );
   }
-  glFlush();
+  
 }
 
 void do_lights(){
@@ -144,7 +148,15 @@ void KeyBoardHandler(unsigned char key, int x, int y){
       glDeleteBuffers(2, /*(GLuint*)*/ mybuf);
       exit(1);
       break;
-      
+    case 'a':
+      AntiAliasMarker = ! AntiAliasMarker;
+      printf("Set AA to %d \n", AntiAliasMarker);
+      WantToRedraw = true;
+      break;
+    case 'w':
+      GraphicUtilities::jitterCamera(0.2, 0.2);
+      WantToRedraw = true;
+      break;
     default:
       break;
   }
@@ -154,7 +166,25 @@ void KeyBoardHandler(unsigned char key, int x, int y){
  On Redraw request, erase the window and redraw everything
  */
 void RenderScene(){
-  draw_stuff();
+  if (AntiAliasMarker) {
+    
+    GraphicUtilities::AntiAlias(8, draw_stuff);
+    
+  } else {
+//    glEnable(GL_MULTISAMPLE);
+    draw_stuff();
+  }
+  glFlush();
+  glutSwapBuffers();
+  printf("\tDraw\n");
+  WantToRedraw = false;
+}
+
+void Redraw(){
+//  if (WantToRedraw)
+//    RenderScene();
+  
+  glutPostRedisplay();
 }
 
 
@@ -178,7 +208,7 @@ int main(int argc, char* argv[]){
   // make GLUT select a double buffered display that uses RGBA colors
   // Julian: Add GLUT_DEPTH when in 3D program so that 3D objects drawed
   // correctly regardless the order they draw
-  glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH);
+  glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE | GLUT_ACCUM );
   glutInitWindowSize(WIDTH, HEIGHT);
   //  glutInitWindowPosition(50, 50);
   glutCreateWindow("New Animation");
@@ -193,7 +223,7 @@ int main(int argc, char* argv[]){
 //  glutMouseFunc(mouseEventHandler);
 //  glutMotionFunc(motionEventHandler);
   glutKeyboardFunc(KeyBoardHandler);
-//  glutIdleFunc(Simulate);
+  glutIdleFunc(Redraw);
   
   
   /* Set shading to flat shading */
