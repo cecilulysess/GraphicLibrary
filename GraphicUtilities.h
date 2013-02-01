@@ -10,16 +10,58 @@
 #define __Graphic__GraphicUtilities__
 
 typedef void (*render_callback)();
+class Frustum {
+public:
+  
+  Frustum(float near, float far, float left, float right, float bottom, float top);
+  
+  Frustum(float fovy, float aspect, float near, float far);
+  
+  double Left() {
+    return this->left;
+  }
+  
+  double Right() {
+    return this->right;
+  }
+  
+  double Top(){
+    return this->top;
+  }
+  
+  double Bottom(){
+    return this->bottom;
+  }
+  
+  double Near(){
+    return this->near;
+  }
+  
+  double Far(){
+    return this->far;
+  }
+  
+  const double* GetMatrix(){
+    return this->matrix;
+  }
+  
+private:
+  float near, far, left, right, bottom, top;
+  
+  double matrix[16];
+};
+
 
 class GraphicUtilities {
 public:
   // AntiAlias the image, require glutInitDisplayMode(GLUT_ACCUM)
-  static void AntiAlias(int level, render_callback render_frame);
+  static void AntiAlias(int level, render_callback render_frame, Frustum* fru);
   
   static char* read_shader_program(char *filename);
   
-  static void jitterCamera(GLfloat pix_x, GLfloat pix_y);
+  static void jitterCamera(GLfloat pix_x, GLfloat pix_y, Frustum* fru);
 
 };
+
 
 #endif /* defined(__Graphic__GraphicUtilities__) */

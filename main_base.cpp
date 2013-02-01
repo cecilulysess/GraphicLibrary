@@ -28,11 +28,14 @@ struct point {
   float x, y, z;
 };
 
+Frustum* frustum;
+
 void setup_the_viewvolume(){
   struct point eye, view, up;
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  gluPerspective(50.0, (float)WIDTH/ (float)HEIGHT, 0.1, 20.0);
+  frustum = new Frustum(50.0, (float)WIDTH/ (float)HEIGHT, 0.1, 20.0);
+  glMultMatrixd(frustum->GetMatrix());
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   eye.x = 2.0, eye.y = 2.0, eye.z = 2.0;
@@ -154,7 +157,7 @@ void KeyBoardHandler(unsigned char key, int x, int y){
       WantToRedraw = true;
       break;
     case 'w':
-      GraphicUtilities::jitterCamera(0.2, 0.2);
+      GraphicUtilities::jitterCamera(0.1, 0.1, frustum);
       WantToRedraw = true;
       break;
     default:
@@ -168,7 +171,7 @@ void KeyBoardHandler(unsigned char key, int x, int y){
 void RenderScene(){
   if (AntiAliasMarker) {
     
-    GraphicUtilities::AntiAlias(8, draw_stuff);
+    GraphicUtilities::AntiAlias(8, draw_stuff, frustum);
     
   } else {
 //    glEnable(GL_MULTISAMPLE);
