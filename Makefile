@@ -22,7 +22,7 @@ else
   endif
 endif
 
-HFILES 	= GraphicUtilities.${H}
+HFILES 	= GraphicUtilities.${H} GLCommonHeader.${H}
 OFILES 	= GraphicUtilities.o
 PROJECT = main
 
