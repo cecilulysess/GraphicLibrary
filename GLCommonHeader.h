@@ -11,7 +11,7 @@
 #define Graphic_GLCommonHeader_h
 
 #ifdef __APPLE__
-  #include <GLUT/glut.h>
+  #include<GLUT/glut.h>
   #include<OpenGL/gl.h>
   #include<OpenGL/glu.h>
   #include<OpenGL/glext.h>
