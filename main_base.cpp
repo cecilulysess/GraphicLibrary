@@ -14,6 +14,7 @@
 //  C++ stdlib here
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include "GLCommonHeader.h"
 #include "GraphicUtilities.h"
@@ -30,19 +31,28 @@ struct point {
 
 Frustum* frustum;
 
+
 void setup_the_viewvolume(){
   struct point eye, view, up;
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  frustum = new Frustum(50.0, (float)WIDTH/ (float)HEIGHT, 0.1, 20.0);
-  glMultMatrixd(frustum->GetMatrix());
+//  frustum = new Frustum(50.0, (float)WIDTH / (float)HEIGHT, 0.1, 40.0);
+//  frustum = new Frustum(-0.5, 0.5, -0.5, 0.5, 0.1, 20);
+//  glMultMatrixd(frustum->GetMatrix());
+  glFrustum(-0.2, 0.2, -0.15, 0.15, 0.1, 20);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   eye.x = 2.0, eye.y = 2.0, eye.z = 2.0;
   view.x = 0.0, view.y = 0.0, view.z = 0.0;
   up.x = 0.0, up.y = 1.0, up.z = 0.0;
-  gluLookAt(eye.x, eye.y, eye.z, view.x, view.y, view.z, up.x, up.y, up.z);
+  glRotated(0, 0, 0, 1);
+  glRotated(45, 1, 0, 0);
+  glRotated(-45, 0, 1, 0);
+  glTranslated(-2, -2, -2);
+//  gluLookAt(eye.x, eye.y, eye.z, view.x, view.y, view.z, up.x, up.y, up.z);
 }
+
+
 
 GLfloat vertices[] = {
   0.0, 0.0, 0.0,
@@ -79,7 +89,8 @@ void draw_stuff(){
   glEnable(GL_DEPTH_TEST);
   glClearColor(0.35, 0.35, 0.35, 0.0);
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-  
+  GraphicUtilities::DrawGrid(10, 1);
+//  drawFrustum(50, 4.0/3.0, 0.1, 20);
   for (i = 0; i < 6; ++i) {
     glNormal3fv(normal[i]);
     glDrawElements(GL_QUADS, 4, GL_UNSIGNED_BYTE, (void*)(4 * i) );
@@ -157,7 +168,7 @@ void KeyBoardHandler(unsigned char key, int x, int y){
       WantToRedraw = true;
       break;
     case 'w':
-      GraphicUtilities::jitterCamera(0.1, 0.1, frustum);
+      GraphicUtilities::JitterCamera(0.1, 0.1, frustum);
       WantToRedraw = true;
       break;
     default:
