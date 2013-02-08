@@ -9,9 +9,11 @@
 #ifndef Graphic_common_data_structure_h
 #define Graphic_common_data_structure_h
 
+#include "GraphicMath.h"
 
-typedef struct point {
-	double x,y;
-} point;
+//A alias for 3d point
+typedef Vec3d Point;
+typedef Vec3d Normal;
+
 
 #endif

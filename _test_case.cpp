@@ -6,15 +6,16 @@
 //  Copyright (c) 2013 Julian Wu. All rights reserved.
 //
 
-#include "test_case.h"
+#include "_test_case.h"
 
 #include "GraphicMath.h"
 #include <assert.h>
 #include <math.h>
-
+#include <time.h>
 
 
 bool test_Vector() {
+  clock_t ss = clock();
   Vector<double> zero = { 0.0, 0.0, 0.0 };
   Vector<double> a = { 1.99, 2.02, 6.7 };
   Vector<double> b = { -0.1, 7.0, 2.22 };
@@ -85,5 +86,9 @@ bool test_Vector() {
   assert(v2.Normalize() == nv2);
   
   std::cout<<"Vec3d passed Test!"<<std::endl;
+  
+  clock_t  ed = clock();
+  std::cout<<"Vector Test Running time: "<<
+    (double) (ed - ss) / (double) CLOCKS_PER_SEC <<"s"<<std::endl;
   return true;
 }

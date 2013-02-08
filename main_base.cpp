@@ -22,7 +22,7 @@
 #define TESTING_
 
 #ifdef TESTING_
-#include "test_case.h"
+#include "_test_case.h"
 #endif
 
 #define WIDTH 1024
