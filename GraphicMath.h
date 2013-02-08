@@ -197,7 +197,7 @@ public:
   
   Vec3d(Vec3d& li);
   //return the norm of this vector
-  double Norm();
+  double Norm() const;
   //return the normalized version of this vector
   Vec3d& Normalize();
 };
@@ -209,23 +209,36 @@ class Matrixd {
 public:
   Matrixd(std::initializer_list<std::initializer_list<double>> il);
   Matrixd(const Matrixd& mat);
-  Matrixd(int size);
   
-  const Matrixd& operator=(const Matrixd& mat);
+  Matrixd& operator=(const Matrixd& mat);
   const Matrixd& operator*=(const Matrixd& mat);
   const Matrixd& operator*(const Matrixd& mat);
   const Matrixd& operator*=(const double e);
   const Matrixd& operator*(const double e);
+  // Get the number of rows in this matrix;
+  int row() const;
+  // Get the number of columns in this matrix
+  int col() const;
   //get a value
-  double get(int row, int col);
+  double get(int row, int col) const;
   //set a value
   double set(int row, int col, double val);
-
+  //Debug utility
+  void ShowMatrix() const;
+  
   //Get an identity matrix
   static Matrixd& Identity(int size);
 
   //Get an zero matrix
   static Matrixd& Zeros(int row, int col);
+
+protected:
+  // Generate nxn square matrix that is all zero
+  explicit Matrixd(int n);
+  
+private:
+  vector<double> mat;
+  int _row, _col;
 
 };
 

@@ -95,7 +95,7 @@ bool test_Vector() {
 
 bool test_Matrix() {
   Matrixd mat = {{1, 3, 4}, {3, 3, 3}};
-  
+  mat.ShowMatrix();
   
   return true;
 }

@@ -3,6 +3,8 @@
 //  Graphic
 //  Copyright (c) 2013 Julian Wu. All rights reserved.
 //
+//  Released under Apache 2.0 listence
+//
 //  Author: cosmobserver@gmail.com (Yanxiang Wu <Julian>)
 //
 //  The common header file which loading necessary OpenGL Include files
