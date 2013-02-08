@@ -32,9 +32,23 @@ ${PROJECT}:	${PROJECT}.o $(OFILES)
 ${PROJECT}.o: ${PROJECT}.${C} $(HFILES)
 	${CC} $(CFLAGS) -c ${PROJECT}.${C}
 
-GraphicUtilities.o: GraphicUtilities.${C} GraphicUtilities.${H}
-	${CC} $(CFLAGS) -c GraphicUtilities.${C}
+Camera.o: Camera.${C} Camera.${H} Matrix.${H} Vector.${H} Utility.${H} 
+	${CC} $(CFLAGS) -c Camera.${C}
 
+Matrix.o: Matrix.${C} Matrix.${H} Vector.${H} Utility.${H} 
+	${CC} $(CFLAGS) -c Matrix.${C}
+
+Vector.o: Vector.${C} Vector.${H} Utility.${H} 
+	${CC} $(CFLAGS) -c Vector.${C}
+
+Utility.o: Utility.${C} Utility.${H}
+	${CC} $(CFLAGS) -c Utility.${C}
+  
+Quaternion.o : Quaternion.${C} Quaternion.${H}
+	${CC} $(CFLAGS) -c Quaternion.${C}
+
+ObjLoader.o : ObjLoader.${C} ObjLoader.${H}
+	${CC} $(CFLAGS) -c ObjLoader.${C}
   
 debug:
 	make 'DFLAGS = /usr/lib/debug/malloc.o'
