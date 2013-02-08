@@ -1,9 +1,14 @@
 //
 //  GraphicUtilities.h
 //  Graphic
-//
-//  Created by Julian Wu on 1/31/13.
 //  Copyright (c) 2013 Julian Wu. All rights reserved.
+//
+//  Author: cosmobserver@gmail.com (Yanxiang Wu <Julian>)
+//
+//  This file contains very useful self defined utilities that would be
+//    very helpful to use when develop openGL program.
+//
+//  Created on 1/31/13.
 //
 
 #ifndef __Graphic__GraphicUtilities__
@@ -65,6 +70,21 @@ public:
   static void JitterCamera(GLfloat pix_x, GLfloat pix_y, Frustum* fru);
 
   static void DrawGrid(float size, float step);
+};
+
+class Camera {
+public:
+  float near_plane();
+  float far_plane();
+  float fov();
+  
+private:
+  float _near_plane;
+  float _far_plane;
+  float _fov;
+  
+  
+  
 };
 
 

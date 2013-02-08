@@ -19,7 +19,7 @@
 #include "GLCommonHeader.h"
 #include "GraphicUtilities.h"
 
-//#define TESTING_
+#define TESTING_
 
 #ifdef TESTING_
 #include "_test_case.h"
@@ -215,6 +215,7 @@ void Redraw(){
 int main(int argc, char* argv[]){
 #ifdef TESTING_
   test_Vector();
+  test_Matrix();
 #endif
   //  if(argc != 2){
   //    fprintf(stderr, "usage: bounce paramfile\n");

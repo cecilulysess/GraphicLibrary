@@ -2,8 +2,11 @@
 //  GraphicUtilities.cpp
 //  Graphic
 //
-//  Created by Julian Wu on 1/31/13.
 //  Copyright (c) 2013 Julian Wu. All rights reserved.
+//
+//  Author: cosmobserver@gmail.com (Yanxiang Wu <Julian>)
+//
+//  Created on 1/31/13
 //
 #include "GLCommonHeader.h"
 #include "GraphicUtilities.h"
@@ -260,3 +263,12 @@ void GraphicUtilities::DrawGrid(float size, float step) {
   // enable lighting back
   glEnable(GL_LIGHTING);
 }
+
+
+inline float Camera::near_plane() { return _near_plane; }
+
+inline float Camera::far_plane() { return  _far_plane; }
+
+inline float Camera::fov() { return _fov; }
+
+

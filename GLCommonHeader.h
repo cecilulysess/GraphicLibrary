@@ -1,11 +1,13 @@
 //
 //  GLCommonHeader.h
 //  Graphic
-//  The common header file which loading necessary OpenGL Include files
-//
-//  Created by Julian Wu on 1/31/13.
 //  Copyright (c) 2013 Julian Wu. All rights reserved.
 //
+//  Author: cosmobserver@gmail.com (Yanxiang Wu <Julian>)
+//
+//  The common header file which loading necessary OpenGL Include files
+//
+//  Created on 1/31/13
 
 #ifndef Graphic_GLCommonHeader_h
 #define Graphic_GLCommonHeader_h

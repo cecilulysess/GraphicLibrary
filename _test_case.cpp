@@ -92,3 +92,10 @@ bool test_Vector() {
     (double) (ed - ss) / (double) CLOCKS_PER_SEC <<"s"<<std::endl;
   return true;
 }
+
+bool test_Matrix() {
+  Matrixd mat = {{1, 3, 4}, {3, 3, 3}};
+  
+  
+  return true;
+}

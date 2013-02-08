@@ -1,12 +1,14 @@
 //
 //  GraphicMath.h
 //  Graphic
+//  Copyright (c) 2013 Julian Wu. All rights reserved.
+//
+//  Author: cosmobserver@gmail.com (Yanxiang Wu <Julian>)
 //
 //  This files contains a list of data structures that is very helpful for
 //  spatial graphic relationship calculation.
 //
-//  Created by Julian Wu on 2/5/13.
-//  Copyright (c) 2013 Julian Wu. All rights reserved.
+//  Created on 2/5/13.
 //
 
 #ifndef __Graphic__GraphicMath__
@@ -154,8 +156,8 @@ public:
   }
   
   void ShowVector() const {
-    for ( int i = 0; i < n; ++i ) {
-      cout<<vec[i]<<"\t";
+    for ( T& e : vec) {
+      cout<<e<<"\t";
     }
     cout<<endl;
   }
@@ -186,6 +188,9 @@ template <class T> bool operator==(const Vector<T>& a, const Vector<T>& b) {
 }
 
 //======================Vector base==============================
+// A 3d vector class with doulbe value as element type.
+//  This is a good type to use when you want good accuracy
+//  Can be initalized by Vec3d pt = {1, 3, 5};
 class Vec3d : public Vector<double> {
 public:
   Vec3d(std::initializer_list<double> il);
@@ -195,6 +200,33 @@ public:
   double Norm();
   //return the normalized version of this vector
   Vec3d& Normalize();
+};
+
+
+//==============================End of Vector================================
+// A matrix which contains doulbe as its element type.
+class Matrixd {
+public:
+  Matrixd(std::initializer_list<std::initializer_list<double>> il);
+  Matrixd(const Matrixd& mat);
+  Matrixd(int size);
+  
+  const Matrixd& operator=(const Matrixd& mat);
+  const Matrixd& operator*=(const Matrixd& mat);
+  const Matrixd& operator*(const Matrixd& mat);
+  const Matrixd& operator*=(const double e);
+  const Matrixd& operator*(const double e);
+  //get a value
+  double get(int row, int col);
+  //set a value
+  double set(int row, int col, double val);
+
+  //Get an identity matrix
+  static Matrixd& Identity(int size);
+
+  //Get an zero matrix
+  static Matrixd& Zeros(int row, int col);
+
 };
 
 #endif /* defined(__Graphic__GraphicMath__) */
