@@ -19,6 +19,12 @@
 #include "GLCommonHeader.h"
 #include "GraphicUtilities.h"
 
+#define TESTING_
+
+#ifdef TESTING_
+#include "test_case.h"
+#endif
+
 #define WIDTH 1024
 #define HEIGHT 768
 
@@ -190,7 +196,7 @@ void RenderScene(){
   }
   glFlush();
   glutSwapBuffers();
-  printf("\tDraw\n");
+//  printf("\tDraw\n");
   WantToRedraw = false;
 }
 
@@ -207,6 +213,9 @@ void Redraw(){
  Main program to draw the square, change colors, and wait for quit
  */
 int main(int argc, char* argv[]){
+#ifdef TESTING_
+  test_Vector();
+#endif
   //  if(argc != 2){
   //    fprintf(stderr, "usage: bounce paramfile\n");
   //    exit(1);
