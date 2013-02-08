@@ -19,7 +19,7 @@
 #include "GLCommonHeader.h"
 #include "GraphicUtilities.h"
 
-#define TESTING_
+//#define TESTING_
 
 #ifdef TESTING_
 #include "_test_case.h"
