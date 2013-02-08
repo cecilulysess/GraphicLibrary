@@ -18,13 +18,13 @@ ifeq ("$(shell uname)", "Darwin")
   LDFLAGS     = -framework Foundation -framework GLUT -framework OpenGL -lm
 else
   ifeq ("$(shell uname)", "Linux")
-    LDFLAGS     = -lglut -lGL -lGLU -lm
+    LDFLAGS     = -lglut -lGL -lGLU -lm -lXmu -lX11 -O2
   endif
 endif
 
-HFILES 	= Matrix.${H} Vector.${H} Utility.${H} Camera.${H} gauss.${H} Quaternion.${H} ObjLoader.${H}
-OFILES 	= Matrix.o Vector.o Utility.o Camera.o Quaternion.o ObjLoader.o
-PROJECT = main
+HFILES 	= GraphicUtilities.${H} GLCommonHeader.${H}
+OFILES 	= GraphicUtilities.o
+PROJECT = main_base
 
 ${PROJECT}:	${PROJECT}.o $(OFILES)
 	${CC} $(CFLAGS) -o ${PROJECT} ${PROJECT}.o $(OFILES) $(LDFLAGS)

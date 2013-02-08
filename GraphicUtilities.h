@@ -17,6 +17,9 @@ public:
   
   Frustum(float fovy, float aspect, float near, float far);
   
+  // Draw current frustum, need alittle changes in detail
+  void DrawFrustum(float fovY, float aspectRatio, float nearPlane, float farPlane);
+  
   double Left() {
     return this->left;
   }
@@ -59,8 +62,9 @@ public:
   
   static char* read_shader_program(char *filename);
   
-  static void jitterCamera(GLfloat pix_x, GLfloat pix_y, Frustum* fru);
+  static void JitterCamera(GLfloat pix_x, GLfloat pix_y, Frustum* fru);
 
+  static void DrawGrid(float size, float step);
 };
 
 
