@@ -16,7 +16,7 @@
 
 bool test_Vector() {
   clock_t ss = clock();
-  Vector<double> zero = { 0.0, 0.0, 0.0 };
+  
   Vector<double> a = { 1.99, 2.02, 6.7 };
   Vector<double> b = { -0.1, 7.0, 2.22 };
   Vector<double> c = { 3.3, -3.3, 0.0 };
@@ -65,14 +65,14 @@ bool test_Vector() {
   assert(a * b - a_dot_b < 1e-9);
   assert(a * c - a_dot_c < 1e-9);
   assert(b * c - b_dot_c < 1e-9);
-  assert(a * 2.99 == a_dot2_99);
-  assert(a * 0.0 == zero );
+  
   
   
   std::cout<<"Vector passed Test!"<<std::endl;
   
   
-  
+  Vec3d zero = { 0.0, 0.0, 0.0 };
+  Vec3d va = { 1.99, 2.02, 6.7 };
   Vec3d v1 = {1.99, 2.02, 6.7 };
   Vec3d v2 = {-0.1, 7.0, 2.22};
   Vec3d nv1 = {0.273526921854589,  0.277650443289583, 0.920919787148616};
@@ -85,6 +85,11 @@ bool test_Vector() {
   assert(v1.Normalize() == nv1);
   assert(v2.Normalize() == nv2);
   
+  assert(va * 2.99 == a_dot2_99);
+  assert(va * 0.0 == zero );
+  assert(-v1 == v1 * -1.0);
+  assert(v1 * -1.0 == -1.0 * v1);
+  assert(-(-v1) == v1);
   std::cout<<"Vec3d passed Test!"<<std::endl;
   
   clock_t  ed = clock();
@@ -94,8 +99,40 @@ bool test_Vector() {
 }
 
 bool test_Matrix() {
-  Matrixd mat = {{1, 3, 4}, {3, 3, 3}};
-  mat.ShowMatrix();
+  Matrixd a = { {1, 4, 9},
+    {6, 4, 2},
+    {8, 0, 3},
+    {3, 3, 8} };
+  
+  
+  Matrixd b = {{6.0000, 7.0000, 12.5000, -88.3423},
+    {2.0000, -8.1100, 3.1415, 4.7000},
+    {0.1250, -2.3390, 3.5820, 98.3810} };
+  
+  Matrixd a_t_b = {{15.125, -46.491, 57.304, 815.88666},
+    {44.25, 4.882, 94.73, -314.49204},
+    {48.375, 48.983, 110.746, -411.59572},
+    {25, -22.042, 75.5805, 536.12098} };
+  
+  Matrixd a_t_777 =  {{7.7700, 31.0800, 69.9300},
+    {46.6200, 31.0800, 15.5400},
+    {62.1600, 0, 23.3100},
+    {23.3100, 23.3100, 62.1600}};
+  
+  
+  Matrixd b_t_a = {{-117.0270, -213.0270, -601.2387},
+    {-7.4280, -10.3400, 48.8045},
+    {309.8900, 286.2870, 794.2410}};
+//  (a*b).ShowMatrix();
+  assert((a * b) == a_t_b);
+  assert((a * 7.77) == a_t_777);
+  assert((b * a) == b_t_a);
+  assert((-a * 1.0) == a * -1.0);
+  assert(-(-(a * 1.0)) == a);
+  assert(a * -1.0 == -1.0 * a);
+  assert(Matrixd::Identity(4) * a_t_b == a_t_b);
+  assert(Matrixd::Zeros(3, 4) * a == Matrixd::Zeros(3, 3));
+  cout<<"Matrixd passed Test!"<<endl;
   
   return true;
 }

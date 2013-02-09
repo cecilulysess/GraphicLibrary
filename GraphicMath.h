@@ -21,6 +21,7 @@ using std::endl;
 using std::cout;
 using std::equal;
 
+// Base class of vectors, don't use this class
 template <class T>
 class Vector {
 public:
@@ -72,13 +73,6 @@ public:
     return *this;
   }
   
-  const Vector<T>& operator-(){
-    for(int i = 0; i < n; ++i ) {
-      this->vec[i] *= -1;
-    }
-    return *this;
-  }
-  
   // Dot product
   T& operator*=(const Vector<T>& v) {
     if ( this->n != v.n ) {
@@ -91,7 +85,7 @@ public:
     return res;
   };
   
-  const T& operator*(const Vector<T>& v) {
+  const T& operator*(const Vector<T>& v) const {
     Vector<T>* res = new Vector<T>(*this);
     return *res *= v;
   }
@@ -103,11 +97,7 @@ public:
     return *this;
   }
   
-  Vector<T>& operator*(const T& e) {
-    Vector<T>* res = new Vector<T>(*this);
-    *res *= e;
-    return *res;
-  }
+  
   
   // Cross product
   Vector& operator%=(const Vector& v) {
@@ -194,8 +184,12 @@ template <class T> bool operator==(const Vector<T>& a, const Vector<T>& b) {
 class Vec3d : public Vector<double> {
 public:
   Vec3d(std::initializer_list<double> il);
+  Vec3d(const Vec3d& li);
   
-  Vec3d(Vec3d& li);
+  Vec3d& operator-() const;
+  friend Vec3d& operator*(const double e, const Vec3d& v);
+  friend Vec3d& operator*(const Vec3d& v, const double e);
+  
   //return the norm of this vector
   double Norm() const;
   //return the normalized version of this vector
@@ -209,12 +203,18 @@ class Matrixd {
 public:
   Matrixd(std::initializer_list<std::initializer_list<double>> il);
   Matrixd(const Matrixd& mat);
+  Matrixd(int row, int col);
   
   Matrixd& operator=(const Matrixd& mat);
-  const Matrixd& operator*=(const Matrixd& mat);
-  const Matrixd& operator*(const Matrixd& mat);
-  const Matrixd& operator*=(const double e);
-  const Matrixd& operator*(const double e);
+  Matrixd& operator*=(const Matrixd& mat);
+  Matrixd& operator*(const Matrixd& mat) const;
+  Matrixd& operator*=(const double e);
+  Matrixd& operator-() const;
+  
+  friend Matrixd& operator*(const Matrixd& mat, const double e);
+  friend Matrixd& operator*(const double e, const Matrixd& mat);
+  
+  
   // Get the number of rows in this matrix;
   int row() const;
   // Get the number of columns in this matrix
@@ -222,7 +222,7 @@ public:
   //get a value
   double get(int row, int col) const;
   //set a value
-  double set(int row, int col, double val);
+  void set(int row, int col, double val);
   //Debug utility
   void ShowMatrix() const;
   
@@ -241,5 +241,10 @@ private:
   int _row, _col;
 
 };
+
+bool operator==(const Matrixd& a, const Matrixd& b) ;
+
+
+
 
 #endif /* defined(__Graphic__GraphicMath__) */
