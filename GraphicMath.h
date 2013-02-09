@@ -257,6 +257,7 @@ public:
   Matrix4d(std::initializer_list<std::initializer_list<double>> il);
   Matrix4d();
   
+  double& operator[](const int idx);
   int Size();
   
   // get a point to the data field

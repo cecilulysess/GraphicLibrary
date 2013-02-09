@@ -29,6 +29,7 @@
 #define HEIGHT 768
 
 bool AntiAliasMarker = false;
+int AALevel = 4;
 bool WantToRedraw = false;
 
 struct point {
@@ -42,13 +43,14 @@ void setup_the_viewvolume(){
   struct point eye, view, up;
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-//  frustum = new Frustum(50.0, (float)WIDTH / (float)HEIGHT, 0.1, 40.0);
-//  frustum = new Frustum(-0.5, 0.5, -0.5, 0.5, 0.1, 20);
-//  glMultMatrixd(frustum->GetMatrix());
-  glFrustum(-0.2, 0.2, -0.15, 0.15, 0.1, 20);
+//  gluPerspective(45, (float)WIDTH / (float)HEIGHT, 0.1 , 100.0);
+  frustum = new Frustum(45, (float)WIDTH / (float)HEIGHT, 0.1, 100.0);
+//  frustum = new Frustum(-0.2, 0.2, -0.15, 0.15, 0.1, 20);
+  glLoadMatrixd(frustum->GetMatrix().Transpose().GetPtr());
+//  glFrustum(-0.2, 0.2, -0.15, 0.15, 0.1, 20);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  eye.x = 2.0, eye.y = 2.0, eye.z = 2.0;
+  eye.x = 4.0, eye.y = 4.0, eye.z = 4.0;
   view.x = 0.0, view.y = 0.0, view.z = 0.0;
   up.x = 0.0, up.y = 1.0, up.z = 0.0;
   glRotated(0, 0, 0, 1);
@@ -62,12 +64,12 @@ void setup_the_viewvolume(){
 
 GLfloat vertices[] = {
   0.0, 0.0, 0.0,
-  0.0, 1.0, 0.0,
-  1.0, 1.0, 0.0,
+  0.0, 3.0, 0.0,
+  1.0, 3.0, 0.0,
   1.0, 0.0, 0.0,
   0.0, 0.0, 1.0,
-  0.0, 1.0, 1.0,
-  1.0, 1.0, 1.0,
+  0.0, 3.0, 1.0,
+  1.0, 3.0, 1.0,
   1.0, 0.0, 1.0,
 };
 
@@ -96,7 +98,7 @@ void draw_stuff(){
   glClearColor(0.35, 0.35, 0.35, 0.0);
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
   GraphicUtilities::DrawGrid(10, 1);
-//  drawFrustum(50, 4.0/3.0, 0.1, 20);
+//  frustum->DrawFrustum(50, 4.0/3.0, 0.1, 20);
   for (i = 0; i < 6; ++i) {
     glNormal3fv(normal[i]);
     glDrawElements(GL_QUADS, 4, GL_UNSIGNED_BYTE, (void*)(4 * i) );
@@ -174,7 +176,10 @@ void KeyBoardHandler(unsigned char key, int x, int y){
       WantToRedraw = true;
       break;
     case 'w':
-      GraphicUtilities::JitterCamera(0.1, 0.1, frustum);
+      AALevel = (AALevel + 4)%16;
+      if (AALevel == 0) {
+        AALevel = 16;
+      }
       WantToRedraw = true;
       break;
     default:
@@ -188,7 +193,7 @@ void KeyBoardHandler(unsigned char key, int x, int y){
 void RenderScene(){
   if (AntiAliasMarker) {
     
-    GraphicUtilities::AntiAlias(8, draw_stuff, frustum);
+    GraphicUtilities::AntiAlias(AALevel, draw_stuff, frustum);
     
   } else {
 //    glEnable(GL_MULTISAMPLE);
@@ -201,10 +206,10 @@ void RenderScene(){
 }
 
 void Redraw(){
-//  if (WantToRedraw)
-//    RenderScene();
+  if (WantToRedraw)
+    RenderScene();
   
-  glutPostRedisplay();
+//  glutPostRedisplay();
 }
 
 

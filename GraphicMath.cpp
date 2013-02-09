@@ -252,6 +252,13 @@ Matrix4d::Matrix4d(std::initializer_list<std::initializer_list<double>> il) :
   }
 }
 
+double&  Matrix4d::operator[](const int idx){
+  if (idx < 0 || idx > mat.size() ) {
+    throw "Invalid idx";
+  }
+  return this->mat[idx];
+}
+
 int Matrix4d::Size() { return 4; }
 
 const double* Matrix4d::GetPtr() {

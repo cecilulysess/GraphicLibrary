@@ -32,7 +32,12 @@ char* GraphicUtilities::read_shader_program(char *filename){
   return content;
 }
 
-float jitterTable[][2] = {
+//http://www.glprogramming.com/red/chapter10.html
+Matrixd jitterTable4 = {
+  {0.375, 0.25}, {0.125, 0.75}, {0.875, 0.25}, {0.625, 0.75}
+};
+
+Matrixd jitterTable8 = {
   {0.5625, 0.4375},
   {0.0625, 0.9375},
   {0.3125, 0.6875},
@@ -43,20 +48,58 @@ float jitterTable[][2] = {
   {0.1875, 0.3125}
 };
 
-void GraphicUtilities::AntiAlias(int level, render_callback render_frame, Frustum* fru){
-  glClearAccum(0, 0, 0, 0);
+Matrixd jitterTable12 = {
+  {0.4166666666, 0.625}, {0.9166666666, 0.875}, {0.25, 0.375},
+  
+  {0.4166666666, 0.125}, {0.75, 0.125}, {0.0833333333, 0.125}, {0.75, 0.625},
+  
+  {0.25, 0.875}, {0.5833333333, 0.375}, {0.9166666666, 0.375},
+  
+  {0.0833333333, 0.625}, {0.583333333, 0.875}
+};
+
+Matrixd jitterTable16 = {
+  {0.375, 0.4375}, {0.625, 0.0625}, {0.875, 0.1875}, {0.125, 0.0625},
+  
+  {0.375, 0.6875}, {0.875, 0.4375}, {0.625, 0.5625}, {0.375, 0.9375},
+  
+  {0.625, 0.3125}, {0.125, 0.5625}, {0.125, 0.8125}, {0.375, 0.1875},
+  
+  {0.875, 0.9375}, {0.875, 0.6875}, {0.125, 0.3125}, {0.625, 0.8125}
+};
+
+static Matrixd& GetJitterTable(int level) {
+  if (level == 4) return jitterTable4;
+  if (level == 8) return jitterTable8;
+  if (level == 12)
+    return jitterTable12;
+  else
+    return jitterTable16;
+}
+
+
+void GraphicUtilities::AntiAlias(int level, render_callback render_frame,
+                                 Frustum* fru){
+  float time_factor = 0.6;
+  cout<<"Do AA at level:"<<level<<endl;
+  Matrixd& jitterTable = GetJitterTable(level);
+//  glClearAccum(0, 0, 0, 0);
   glClear(GL_ACCUM_BUFFER_BIT);
   for (int i = 0 ; i < level; ++i) {
-    JitterCamera(jitterTable[i][0], jitterTable[i][1], fru);
+    JitterCamera(jitterTable.get(i, 0) * sqrt(level) * time_factor ,
+                 jitterTable.get(i, 1) * sqrt(level) * time_factor, fru);
     render_frame();
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glAccum(GL_ACCUM, 1.0/(float)level);
   }
   glAccum(GL_RETURN, 1.0);
+  
 }
 
-// jitter a camera by pixels in x and y
-void GraphicUtilities::JitterCamera(GLfloat pix_x, GLfloat pix_y, Frustum* fru) {
+void GraphicUtilities::JitterCamera(GLfloat pix_x, GLfloat pix_y,
+                                    GLfloat eye_x, GLfloat eye_y,
+                                    GLdouble focus,
+                                    Frustum* fru){
   GLint viewport_params[4];
   // from OpenGL doc: When used with non-indexed variants of glGet
   //  (such as glGetIntegerv), params returns four values: the x
@@ -67,69 +110,89 @@ void GraphicUtilities::JitterCamera(GLfloat pix_x, GLfloat pix_y, Frustum* fru) 
   glGetIntegerv(GL_VIEWPORT, viewport_params);
   GLfloat wndWidth=viewport_params[2];
   GLfloat WndHeight=viewport_params[3];
-  GLfloat frustumWidth=fru->Right() - fru->Left();
-  GLfloat frustumHeight=fru->Top() - fru->Bottom();
+  GLfloat frustumWidth= fru->Right() - fru->Left();
+  GLfloat frustumHeight= fru->Top() - fru->Bottom();
+  
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   
   GLfloat dx, dy;
-  dx = pix_x*frustumWidth/wndWidth;
-  dy = pix_y*frustumHeight/WndHeight;
-  printf("world delta = %f %f\n",dx,dy);
+  dx = - pix_x*frustumWidth/wndWidth + eye_x * fru->Near()/ fru->Far();
+  dy = pix_y*frustumHeight/WndHeight + eye_y * fru->Near()/ fru->Far();
+  //  printf("world delta = %f %f\n",dx,dy);
   glFrustum(fru->Left() + dx, fru->Right() - dx, fru->Bottom() + dy, fru->Top() + dy, fru->Near(), fru->Far() );
   glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
+  glTranslatef(-eye_x, -eye_y, 0.0);
 }
 
-Frustum::Frustum(float near, float far, float left, float right, float bottom, float top){
+// jitter a camera by pixels in x and y
+void GraphicUtilities::JitterCamera(GLfloat pix_x, GLfloat pix_y, Frustum* fru) {
+  JitterCamera(pix_x, pix_y, 0.0f, 0.0f, 1.0f, fru);
+}
+
+Frustum::Frustum(float left, float right, float bottom, float top,
+                 float near, float far){
   this->near = near;
   this->far = far;
   this->left = left;
   this->right = right;
   this->top = top;
   this->bottom = bottom;
-  matrix[0] = (2 * near) / (right - left);
-  matrix[1] = 0;
-  matrix[2] = 0;
-  matrix[3] = 0;
-  matrix[4] = 0;
-  matrix[5] = (2 * near) / (top - bottom);
-  matrix[6] = 0;
-  matrix[7] = 0;
-  matrix[8] = (right + left) / (right - left);
-  matrix[9] = (top + bottom) / (top - bottom);
-  matrix[10] = - (far + near) / (far - near);
-  matrix[11] = -1;
-  matrix[12] = 0;
-  matrix[13] = 0;
-  matrix[14] = - ( 2 * far * near) / (far - near);
-  matrix[15] = 0;
+  matrix[0] = 2.0 * near / (right - left);
+  matrix[2] = (right + left) / (right - left);
+  matrix[5] = 2.0 * near / ( top - bottom);
+  matrix[6] = (top + bottom) / (top - bottom);
+  matrix[10] = - (far + near) / ( far - near);
+  matrix[11] = - 2.0 * (far * near) / (far - near);
+  matrix[14] = -1.0;
 }
 
 Frustum::Frustum(float fovy, float aspect, float near, float far){
+  double f = tan(fovy / 2 * 3.141592653/180.0);
+  this->top = near * f;
+  this->right = top * aspect;
+  this->left = - right;
+  this->bottom = - top;
   this->near = near;
   this->far = far;
-  this->top = near * tan(fovy);
-  this->bottom = - this->top;
-  this->right = top * aspect;
-  this->left = - this->right;
-  matrix[0] = near/right;
-  matrix[1] = 0;
-  matrix[2] = 0;
-  matrix[3] = 0;
-  matrix[4] = 0;
-  matrix[5] = near /top;
-  matrix[6] = 0;
-  matrix[7] = 0;
-  matrix[8] = 0;
-  matrix[9] = 0;
+  matrix[0] = near / right;
+  matrix[5] = near / top;
   matrix[10] = - (far + near) / (far - near);
-  matrix[11] = -1;
-  matrix[12] = 0;
-  matrix[13] = 0;
-  matrix[14] = - ( 2 * far * near) / (far - near);
-  matrix[15] = 0;
+  matrix[11] = -2.0 * (far * near) / (far - near);
+  matrix[14] = -1.0;
 }
+
+
+inline double Frustum::Left() {
+  return this->left;
+}
+
+inline double Frustum::Right() {
+  return this->right;
+}
+
+inline double Frustum::Top(){
+  return this->top;
+}
+
+inline double Frustum::Bottom(){
+  return this->bottom;
+}
+
+inline double Frustum::Near(){
+  return this->near;
+}
+
+inline double Frustum::Far(){
+  return this->far;
+}
+
+Matrix4d& Frustum::GetMatrix(){
+  return this->matrix;
+}
+
+
+
 
 // This function comes from the code of Songho's works:
 //    http://www.songho.ca/opengl/gl_transform.html#modelview
