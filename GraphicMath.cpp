@@ -17,6 +17,8 @@
 using std::cout;
 using std::endl;
 
+
+
 Vec3d::Vec3d(std::initializer_list<double> il) : Vector<double>(il){
   if (il.size() != 3) {
     throw "Illigal parameter length";
@@ -53,7 +55,17 @@ double Vec3d::Norm() const{
   return sqrtl(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2]);
 }
 
+inline double Vec3d::x() const { return vec[0]; };
 
+inline double Vec3d::y() const { return vec[1]; };
+
+inline double Vec3d::z() const { return vec[2]; };
+
+inline double& Vec3d::x() { return vec[0]; };
+
+inline double& Vec3d::y() { return vec[1]; };
+
+inline double& Vec3d::z() { return vec[2]; };
 //============================Matrix======================================
 Matrixd::Matrixd(std::initializer_list<std::initializer_list<double>> il){
   int col = 0;
@@ -226,3 +238,104 @@ Matrixd& Matrixd::Zeros(int row, int col) {
   Matrixd* mat = new Matrixd(row, col);
   return * mat;
 }
+
+//===================================================
+
+Matrix4d::Matrix4d() : Matrixd(4, 4) {
+ 
+}
+Matrix4d::Matrix4d(std::initializer_list<std::initializer_list<double>> il) :
+  Matrixd(il)
+{
+  if (row() != col() && row() != 4) {
+    throw "Invalid initializer list";
+  }
+}
+
+int Matrix4d::Size() { return 4; }
+
+const double* Matrix4d::GetPtr() {
+  return &mat[0];
+}
+
+Matrix4d& Matrix4d::Transpose() {
+  Matrix4d* mat = new Matrix4d();
+  for (int i = 0; i < this->Size(); ++i) {
+    for (int j = 0; j < this->Size(); ++j) {
+      mat->set(i, j, get(j, i));
+    }
+  }
+  return *mat;
+}
+
+Matrix4d& Matrix4d::Identity() {
+  Matrix4d* mat = new Matrix4d();
+  for (int i = 0; i < 4; ++i) {
+    mat->set(i, i, 1.0);
+  }
+  return *mat;
+}
+
+Matrix4d& Matrix4d::Zeros() {
+  return *(new Matrix4d());
+}
+
+Matrix4d& Matrix4d::Translate(double x, double y, double z){
+  Matrix4d& mat = Matrix4d::Identity();
+  mat.set(0, 3, x);
+  mat.set(1, 3, y);
+  mat.set(2, 3, z);
+  return mat;
+}
+
+Matrix4d& Matrix4d::Translate(const Vec3d &t_vector) {
+  return Matrix4d::Translate(t_vector.x(), t_vector.y(), t_vector.z());
+}
+
+Matrix4d& Matrix4d::Scale(double x, double y, double z) {
+  Matrix4d& mat = Matrix4d::Identity();
+  mat.set(0, 0, x);
+  mat.set(1, 1, y);
+  mat.set(2, 2, z);
+  return mat;
+}
+
+Matrix4d& Matrix4d::Scale(double factor) {
+  return Matrix4d::Scale(factor, factor, factor);
+}
+
+inline double deg2rad(double deg) { return 3.141592653 / 180.0 * deg; }
+
+Matrix4d& Matrix4d::Rotate(double deg, double x, double y, double z) {
+  double c = cos(deg2rad(deg)), s = sin(deg2rad(deg));
+  double mi = 1 - c, xx = x * x, xy = x * y, xz = x * z, yy = y * y,
+         yz = y * z, zz = z * z;
+  Matrix4d& mat = Matrix4d::Identity();
+  mat.set(0, 0, xx * mi + c);
+  mat.set(0, 1, xy * mi - z * s);
+  mat.set(0, 2, xz * mi + y * s);
+  mat.set(1, 0, xy * mi + z * s);
+  mat.set(1, 1, yy * mi + c);
+  mat.set(1, 2, yz * mi - x * s);
+  mat.set(2, 0, xz * mi - y * s);
+  mat.set(2, 1, yz * mi + x * s);
+  mat.set(2, 2, zz * mi + c);
+  return mat;
+}
+
+Matrix4d& Matrix4d::Rotate(double deg, const Vec3d &axis) {
+  return Rotate(deg, axis.x(), axis.y(), axis.z());
+}
+
+Matrix4d& Matrix4d::RotateX(double deg) {
+  return Rotate(deg, 1, 0, 0);
+}
+
+Matrix4d& Matrix4d::RotateY(double deg) {
+  return Rotate(deg, 0, 1, 0);
+}
+
+Matrix4d& Matrix4d::RotateZ(double deg) {
+  return Rotate(deg, 0, 0, 1);
+}
+

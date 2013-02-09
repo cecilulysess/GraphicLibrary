@@ -190,6 +190,14 @@ public:
   friend Vec3d& operator*(const double e, const Vec3d& v);
   friend Vec3d& operator*(const Vec3d& v, const double e);
   
+  // Auxillary getter
+  double x() const ;
+  double& x();
+  double y() const ;
+  double& y();
+  double z() const ;
+  double& z();
+  
   //return the norm of this vector
   double Norm() const;
   //return the normalized version of this vector
@@ -235,16 +243,59 @@ public:
 protected:
   // Generate nxn square matrix that is all zero
   explicit Matrixd(int n);
+  vector<double> mat;
   
 private:
-  vector<double> mat;
   int _row, _col;
 
 };
 
 bool operator==(const Matrixd& a, const Matrixd& b) ;
 
-
+class Matrix4d : public Matrixd {
+public:
+  Matrix4d(std::initializer_list<std::initializer_list<double>> il);
+  Matrix4d();
+  
+  int Size();
+  
+  // get a point to the data field
+  const double* GetPtr();
+  
+  // get a transpose of the matrix
+  Matrix4d& Transpose();
+  
+  
+  static Matrix4d& Identity();
+  static Matrix4d& Zeros();
+  
+  // get a translate matrix
+  // 1 0 0 x
+  // 0 1 0 y
+  // 0 0 1 z
+  // 0 0 0 1
+  static Matrix4d& Translate(double x, double y, double z);
+  
+  static Matrix4d& Translate(const Vec3d& t_vector);
+  
+  // get a scale matrix
+  static Matrix4d& Scale(double factor);
+  
+  static Matrix4d& Scale(double x, double y, double z);
+  
+  // get rotation matrix for rotate deg about (x, y, z) axis
+  static Matrix4d& Rotate(double deg, double x, double y, double z);
+  
+  // get rotation matrix for rotate deg about axis
+  static Matrix4d& Rotate(double deg, const Vec3d& axis);
+  
+  // Auxillary short cut for Rotate
+  static Matrix4d& RotateX(double deg);
+  
+  static Matrix4d& RotateY(double deg);
+  
+  static Matrix4d& RotateZ(double deg);
+};
 
 
 #endif /* defined(__Graphic__GraphicMath__) */

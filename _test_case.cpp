@@ -134,5 +134,10 @@ bool test_Matrix() {
   assert(Matrixd::Zeros(3, 4) * a == Matrixd::Zeros(3, 3));
   cout<<"Matrixd passed Test!"<<endl;
   
+  
+  Matrix4d m = { { 1, 2, 3, 4}, {5, 6, 7, 8},
+    {9, 10, 11, 12}, {13, 14, 15, 16} };
+  assert(m.Transpose().Transpose() == m);
+  assert(!(m.Transpose() == m));
   return true;
 }
