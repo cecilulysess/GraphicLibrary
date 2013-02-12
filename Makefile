@@ -7,7 +7,7 @@
 CC = g++
 C	= cpp
 H	= h
-CFLAGS 	= -g
+CFLAGS 	= -g -std=c++0x
 
 ifeq ("$(shell uname)", "Darwin")
   LDFLAGS     = -framework Foundation -framework GLUT -framework OpenGL -lm
@@ -32,7 +32,7 @@ GraphicUtilities.o: GraphicUtilities.${C} GraphicUtilities.${H} GraphicMath.${H}
 
 GraphicMath.o: GraphicMath.${C} GraphicMath.${H} 
 	${CC} $(CFLAGS) -c GraphicMath.${C}
-l  
+
 debug:
 	make 'DFLAGS = /usr/lib/debug/malloc.o'
 

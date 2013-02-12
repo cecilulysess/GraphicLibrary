@@ -88,8 +88,8 @@ void GraphicUtilities::AntiAlias(int level, render_callback render_frame,
   glClear(GL_ACCUM_BUFFER_BIT);
   for (int i = 0 ; i < level; ++i) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    JitterCamera(jitterTable.get(i, 0) * sqrt(level) * time_factor ,
-                 jitterTable.get(i, 1) * sqrt(level) * time_factor, fru);
+    JitterCamera(jitterTable.get(i, 0) * time_factor,
+                 jitterTable.get(i, 1) * time_factor, fru);
     render_frame();
     glAccum(GL_ACCUM, 1.0/(float)level);
   }
@@ -107,26 +107,28 @@ void GraphicUtilities::DoFScene(render_callback render_frame, Frustum* fru,
     accu_percent = 1.0 / DoF_Level;
   }
   Matrixd& AAjT = GetJitterTable(AAlevel);
-  Matrixd& DoFjT = GetJitterTable(DoF_Level);
   glClearAccum(0, 0, 0, 0);
   glClear(GL_ACCUM_BUFFER_BIT);
+  //accu_percent = 1.0/DoF_Level/DoF_Level;
   if (IsAA) {
     for (int i = 0 ; i < DoF_Level ; ++i) {
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    //	for (int j = 0 ; j < DoF_Level ; ++j) {
+      //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       
-      JitterCamera(AAjT.get(i, 0) * sqrt(AAlevel) * AA_time_factor,
-                   AAjT.get(i, 1) * sqrt(AAlevel) * AA_time_factor,
-                   DoFjT.get(i, 0) * DoF_time_factor,
-                   0.0,//DoFjT.get(i, 1) * DoF_time_factor,
+      JitterCamera(AAjT.get(i, 0) ,
+                   AAjT.get(i, 1) ,
+		   i,
+                   i,//DoFjT.get(i, 1) * DoF_time_factor,
                    focus,
                    fru);
        render_frame();
        glAccum(GL_ACCUM, accu_percent);
+	//}
     }
   } else {
     printf("Doing jitter eye only\n");
-    for (float xt = -0.05; xt < 0.05; xt += 0.01) {
-      for (float yt = -0.05; yt < 0.05; yt += 0.01) {
+    for (float xt = -0.04; xt < 0.04; xt += 0.01) {
+      for (float yt = -0.04; yt < 0.04; yt += 0.01) {
         JitterCamera(0.0, 0.0,
                      xt,
                      yt,//yt,
