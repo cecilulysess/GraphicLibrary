@@ -51,7 +51,7 @@ public:
   
   // Depth of Field effect
   static void DoFScene(render_callback render_frame, Frustum* fru,
-                       double focus, bool IsAA, int AAlevel);
+                       double focus);
   
   static char* read_shader_program(char *filename);
   

@@ -179,6 +179,8 @@ void KeyBoardHandler(unsigned char key, int x, int y){
       exit(1);
       break;
     case 'a':
+      if ((RENDER_MODE & (~GL_CONTROL_DEF::KAA_MARKER)) != 0 )
+        RENDER_MODE = 0;
       RENDER_MODE ^= GL_CONTROL_DEF::KAA_MARKER;
       printf("Set AA to %d \n", (RENDER_MODE & GL_CONTROL_DEF::KAA_MARKER) > 0);
       WantToRedraw = true;
@@ -195,6 +197,8 @@ void KeyBoardHandler(unsigned char key, int x, int y){
       WantToRedraw = true;
       break;
     case 'b':
+      if ((RENDER_MODE & (~GL_CONTROL_DEF::KDOF_MARKER)) != 0 )
+        RENDER_MODE = 0;
       RENDER_MODE ^= GL_CONTROL_DEF::KDOF_MARKER;
       printf("Set DoF to %d \n", (RENDER_MODE & GL_CONTROL_DEF::KDOF_MARKER) > 0);
       WantToRedraw = true;
@@ -221,13 +225,9 @@ void RenderScene(){
       cout<<"AA only"<<endl;
       GraphicUtilities::AntiAlias(AALevel, draw_stuff, frustum);
       break;
-    case GL_CONTROL_DEF::KRM_DOF_AA:
-      cout<<"AA and DoF at focus:"<<focus<<" and AA:"<<AALevel<<endl;
-      GraphicUtilities::DoFScene(draw_stuff, frustum, focus, true, AALevel);
-      break;
     case GL_CONTROL_DEF::KRM_DOF_ONLY:
       cout<<"DoF at focus:"<<focus<<endl;
-      GraphicUtilities::DoFScene(draw_stuff, frustum, focus, false, AALevel);
+      GraphicUtilities::DoFScene(draw_stuff, frustum, focus);
       break;
     default:
       //    glEnable(GL_MULTISAMPLE);
