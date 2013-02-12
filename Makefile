@@ -1,15 +1,10 @@
-#----------------------------------------------
-#    Example Makefile for compiling a program that uses
-#    the Matrix and Vector classes
-#----------------------------------------------
-#
-#  Programmer: Donald House
-#  Date: March 8, 1999
-#
-#  Copyright (C) - Donald H. House. 2005
-#
+#------------------------------------------------------------
+# Makefile for My GraphicLibrary, this require the support
+# of c++11
+# Author: Julian Wu
+#------------------------------------------------------------
 
-CC      = g++
+CC = g++
 C	= cpp
 H	= h
 CFLAGS 	= -g
@@ -22,8 +17,8 @@ else
   endif
 endif
 
-HFILES 	= GraphicUtilities.${H} GLCommonHeader.${H}
-OFILES 	= GraphicUtilities.o
+HFILES 	= GraphicUtilities.${H} GLCommonHeader.${H} GraphicMath.${H}
+OFILES 	= GraphicUtilities.o GraphicMath.o 
 PROJECT = main_base
 
 ${PROJECT}:	${PROJECT}.o $(OFILES)
@@ -32,24 +27,12 @@ ${PROJECT}:	${PROJECT}.o $(OFILES)
 ${PROJECT}.o: ${PROJECT}.${C} $(HFILES)
 	${CC} $(CFLAGS) -c ${PROJECT}.${C}
 
-Camera.o: Camera.${C} Camera.${H} Matrix.${H} Vector.${H} Utility.${H} 
-	${CC} $(CFLAGS) -c Camera.${C}
+GraphicUtilities.o: GraphicUtilities.${C} GraphicUtilities.${H} GraphicMath.${H} 
+	${CC} $(CFLAGS) -c GraphicUtilities.${C}
 
-Matrix.o: Matrix.${C} Matrix.${H} Vector.${H} Utility.${H} 
-	${CC} $(CFLAGS) -c Matrix.${C}
-
-Vector.o: Vector.${C} Vector.${H} Utility.${H} 
-	${CC} $(CFLAGS) -c Vector.${C}
-
-Utility.o: Utility.${C} Utility.${H}
-	${CC} $(CFLAGS) -c Utility.${C}
-  
-Quaternion.o : Quaternion.${C} Quaternion.${H}
-	${CC} $(CFLAGS) -c Quaternion.${C}
-
-ObjLoader.o : ObjLoader.${C} ObjLoader.${H}
-	${CC} $(CFLAGS) -c ObjLoader.${C}
-  
+GraphicMath.o: GraphicMath.${C} GraphicMath.${H} 
+	${CC} $(CFLAGS) -c GraphicMath.${C}
+l  
 debug:
 	make 'DFLAGS = /usr/lib/debug/malloc.o'
 
