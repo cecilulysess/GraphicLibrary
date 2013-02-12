@@ -49,6 +49,10 @@ public:
   // AntiAlias the image, require glutInitDisplayMode(GLUT_ACCUM)
   static void AntiAlias(int level, render_callback render_frame, Frustum* fru);
   
+  // Depth of Field effect
+  static void DoFScene(render_callback render_frame, Frustum* fru,
+                       double focus, bool IsAA, int AAlevel);
+  
   static char* read_shader_program(char *filename);
   
   static void JitterCamera(GLfloat pix_x, GLfloat pix_y, Frustum* fru);

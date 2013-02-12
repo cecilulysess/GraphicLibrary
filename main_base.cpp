@@ -17,9 +17,10 @@
 #include <math.h>
 
 #include "GLCommonHeader.h"
+#include "common_data_structure.h"
 #include "GraphicUtilities.h"
 
-#define TESTING_
+//#define TESTING_
 
 #ifdef TESTING_
 #include "_test_case.h"
@@ -28,9 +29,11 @@
 #define WIDTH 1024
 #define HEIGHT 768
 
-bool AntiAliasMarker = false;
+unsigned int RENDER_MODE = 0;
+
 int AALevel = 4;
 bool WantToRedraw = false;
+double focus = 5.0;
 
 struct point {
   float x, y, z;
@@ -44,7 +47,7 @@ void setup_the_viewvolume(){
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
 //  gluPerspective(45, (float)WIDTH / (float)HEIGHT, 0.1 , 100.0);
-  frustum = new Frustum(45, (float)WIDTH / (float)HEIGHT, 0.1, 100.0);
+  frustum = new Frustum(60, (float)WIDTH / (float)HEIGHT, 1.0, 20.0);
 //  frustum = new Frustum(-0.2, 0.2, -0.15, 0.15, 0.1, 20);
   glLoadMatrixd(frustum->GetMatrix().Transpose().GetPtr());
 //  glFrustum(-0.2, 0.2, -0.15, 0.15, 0.1, 20);
@@ -54,9 +57,9 @@ void setup_the_viewvolume(){
   view.x = 0.0, view.y = 0.0, view.z = 0.0;
   up.x = 0.0, up.y = 1.0, up.z = 0.0;
   glRotated(0, 0, 0, 1);
-  glRotated(45, 1, 0, 0);
+  glRotated(0, 1, 0, 0);
   glRotated(-45, 0, 1, 0);
-  glTranslated(-2, -2, -2);
+  glTranslated(-5, -0.5, -5);
 //  gluLookAt(eye.x, eye.y, eye.z, view.x, view.y, view.z, up.x, up.y, up.z);
 }
 
@@ -64,12 +67,12 @@ void setup_the_viewvolume(){
 
 GLfloat vertices[] = {
   0.0, 0.0, 0.0,
-  0.0, 3.0, 0.0,
-  1.0, 3.0, 0.0,
+  0.0, 1.0, 0.0,
+  1.0, 1.0, 0.0,
   1.0, 0.0, 0.0,
   0.0, 0.0, 1.0,
-  0.0, 3.0, 1.0,
-  1.0, 3.0, 1.0,
+  0.0, 1.0, 1.0,
+  1.0, 1.0, 1.0,
   1.0, 0.0, 1.0,
 };
 
@@ -93,12 +96,17 @@ GLfloat normal[6][3] = {
 
 void draw_stuff(){
   int i;
-  
   glEnable(GL_DEPTH_TEST);
   glClearColor(0.35, 0.35, 0.35, 0.0);
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
   GraphicUtilities::DrawGrid(10, 1);
 //  frustum->DrawFrustum(50, 4.0/3.0, 0.1, 20);
+
+  glPushMatrix();
+  glTranslated(2.5, 0, 2.5);
+  glRotated(45, 0, 1, 0);
+  glutSolidTeapot (0.5);
+  glPopMatrix();
   for (i = 0; i < 6; ++i) {
     glNormal3fv(normal[i]);
     glDrawElements(GL_QUADS, 4, GL_UNSIGNED_BYTE, (void*)(4 * i) );
@@ -171,8 +179,8 @@ void KeyBoardHandler(unsigned char key, int x, int y){
       exit(1);
       break;
     case 'a':
-      AntiAliasMarker = ! AntiAliasMarker;
-      printf("Set AA to %d \n", AntiAliasMarker);
+      RENDER_MODE ^= GL_CONTROL_DEF::KAA_MARKER;
+      printf("Set AA to %d \n", (RENDER_MODE & GL_CONTROL_DEF::KAA_MARKER) > 0);
       WantToRedraw = true;
       break;
     case 'w':
@@ -180,6 +188,23 @@ void KeyBoardHandler(unsigned char key, int x, int y){
       if (AALevel == 0) {
         AALevel = 16;
       }
+      WantToRedraw = true;
+      break;
+    case 't':
+      GraphicUtilities::JitterCamera(0.0, 0.0, 0.1 ,0.0 , 5.0, frustum);
+      WantToRedraw = true;
+      break;
+    case 'b':
+      RENDER_MODE ^= GL_CONTROL_DEF::KDOF_MARKER;
+      printf("Set DoF to %d \n", (RENDER_MODE & GL_CONTROL_DEF::KDOF_MARKER) > 0);
+      WantToRedraw = true;
+      break;
+    case 'z':
+      if(focus > 3.0) focus -= 0.1;
+      WantToRedraw = true;
+      break;
+    case 'x':
+      if(focus < 100.0) focus += 0.1;
       WantToRedraw = true;
       break;
     default:
@@ -191,13 +216,22 @@ void KeyBoardHandler(unsigned char key, int x, int y){
  On Redraw request, erase the window and redraw everything
  */
 void RenderScene(){
-  if (AntiAliasMarker) {
-    
-    GraphicUtilities::AntiAlias(AALevel, draw_stuff, frustum);
-    
-  } else {
-//    glEnable(GL_MULTISAMPLE);
-    draw_stuff();
+  switch (RENDER_MODE) {
+    case GL_CONTROL_DEF::KRM_AAONLY:
+      cout<<"AA only"<<endl;
+      GraphicUtilities::AntiAlias(AALevel, draw_stuff, frustum);
+      break;
+    case GL_CONTROL_DEF::KRM_DOF_AA:
+      cout<<"AA and DoF at focus:"<<focus<<" and AA:"<<AALevel<<endl;
+      GraphicUtilities::DoFScene(draw_stuff, frustum, focus, true, AALevel);
+      break;
+    case GL_CONTROL_DEF::KRM_DOF_ONLY:
+      cout<<"DoF at focus:"<<focus<<endl;
+      GraphicUtilities::DoFScene(draw_stuff, frustum, focus, false, AALevel);
+      break;
+    default:
+      //    glEnable(GL_MULTISAMPLE);
+      draw_stuff();
   }
   glFlush();
   glutSwapBuffers();

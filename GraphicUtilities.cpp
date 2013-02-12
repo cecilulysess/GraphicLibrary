@@ -32,7 +32,8 @@ char* GraphicUtilities::read_shader_program(char *filename){
   return content;
 }
 
-//http://www.glprogramming.com/red/chapter10.html
+// These data comes from OpenGL Programming Guide
+// http://www.glprogramming.com/red/chapter10.html
 Matrixd jitterTable4 = {
   {0.375, 0.25}, {0.125, 0.75}, {0.875, 0.25}, {0.625, 0.75}
 };
@@ -80,20 +81,64 @@ static Matrixd& GetJitterTable(int level) {
 
 void GraphicUtilities::AntiAlias(int level, render_callback render_frame,
                                  Frustum* fru){
-  float time_factor = 0.6;
+  float time_factor = 1.0;
   cout<<"Do AA at level:"<<level<<endl;
   Matrixd& jitterTable = GetJitterTable(level);
-//  glClearAccum(0, 0, 0, 0);
+  glClearAccum(0, 0, 0, 0);
   glClear(GL_ACCUM_BUFFER_BIT);
   for (int i = 0 ; i < level; ++i) {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     JitterCamera(jitterTable.get(i, 0) * sqrt(level) * time_factor ,
                  jitterTable.get(i, 1) * sqrt(level) * time_factor, fru);
     render_frame();
-//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glAccum(GL_ACCUM, 1.0/(float)level);
   }
   glAccum(GL_RETURN, 1.0);
   
+}
+
+void GraphicUtilities::DoFScene(render_callback render_frame, Frustum* fru,
+              double focus, bool IsAA, int AAlevel) {
+  float AA_time_factor = 1.2, DoF_time_factor = 1.0;
+  int DoF_Level = 8;
+  float accu_percent = 1.0 / 8.0;
+  if(IsAA) {
+    DoF_Level = AAlevel;
+    accu_percent = 1.0 / DoF_Level;
+  }
+  Matrixd& AAjT = GetJitterTable(AAlevel);
+  Matrixd& DoFjT = GetJitterTable(DoF_Level);
+  glClearAccum(0, 0, 0, 0);
+  glClear(GL_ACCUM_BUFFER_BIT);
+  if (IsAA) {
+    for (int i = 0 ; i < DoF_Level ; ++i) {
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      
+      JitterCamera(AAjT.get(i, 0) * sqrt(AAlevel) * AA_time_factor,
+                   AAjT.get(i, 1) * sqrt(AAlevel) * AA_time_factor,
+                   DoFjT.get(i, 0) * DoF_time_factor,
+                   0.0,//DoFjT.get(i, 1) * DoF_time_factor,
+                   focus,
+                   fru);
+       render_frame();
+       glAccum(GL_ACCUM, accu_percent);
+    }
+  } else {
+    printf("Doing jitter eye only\n");
+    for (float xt = -0.05; xt < 0.05; xt += 0.01) {
+      for (float yt = -0.05; yt < 0.05; yt += 0.01) {
+        JitterCamera(0.0, 0.0,
+                     xt,
+                     yt,//yt,
+                     focus,
+                     fru);
+        render_frame();
+        glAccum(GL_ACCUM, 1.0/100.0);
+      }
+    }
+  }
+  glAccum(GL_RETURN, 1.0);
+//  glFlush();
 }
 
 void GraphicUtilities::JitterCamera(GLfloat pix_x, GLfloat pix_y,
@@ -117,12 +162,22 @@ void GraphicUtilities::JitterCamera(GLfloat pix_x, GLfloat pix_y,
   glLoadIdentity();
   
   GLfloat dx, dy;
-  dx = - pix_x*frustumWidth/wndWidth + eye_x * fru->Near()/ fru->Far();
-  dy = pix_y*frustumHeight/WndHeight + eye_y * fru->Near()/ fru->Far();
-  //  printf("world delta = %f %f\n",dx,dy);
-  glFrustum(fru->Left() + dx, fru->Right() - dx, fru->Bottom() + dy, fru->Top() + dy, fru->Near(), fru->Far() );
+  dx = - (pix_x * frustumWidth/wndWidth + eye_x * fru->Near() / focus);
+//  dx = (eye_x - fru->Near()/focus * eye_x);
+  dy = - (pix_y * frustumHeight/WndHeight + eye_y * fru->Near() / focus);
+  //  printf("world delta = %f %f\n",dx,dy);q
+  glFrustum(fru->Left() + dx, fru->Right() + dx, fru->Bottom() + dy, fru->Top() + dy, fru->Near(), fru->Far() );
   glMatrixMode(GL_MODELVIEW);
+//  glPushMatrix();
+  //Problematic to do a view translation here, it will remove the materials.
+  glLoadIdentity();
+  glRotated(0, 0, 0, 1);
+  glRotated(0, 1, 0, 0);
+  glRotated(-45, 0, 1, 0);
+  glTranslated(-5, -0.5, -5);
+//  cout<<"Translate Eye:"<<eye_x <<", "<<eye_y<<endl;
   glTranslatef(-eye_x, -eye_y, 0.0);
+//  glPopMatrix();
 }
 
 // jitter a camera by pixels in x and y
