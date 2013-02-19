@@ -98,16 +98,16 @@ void GraphicUtilities::AntiAlias(int level, render_callback render_frame,
 }
 
 void GraphicUtilities::DoFScene(render_callback render_frame, Frustum* fru,
-              double focus) {
+              double focus, int blur_level) {
  
   glClearAccum(0, 0, 0, 0);
   glClear(GL_ACCUM_BUFFER_BIT);
-  int accu_times = 64;
-  for (int xt = -4; xt < 4; xt ++) {
-    for (int yt = -4; yt < 4; yt ++) {
+  int accu_times = blur_level * blur_level;
+  for (int xt = -blur_level/2; xt < blur_level/2; xt ++) {
+    for (int yt = -blur_level/2; yt < blur_level/2; yt ++) {
       JitterCamera(0.0, 0.0,
-                   (float)xt / 100,
-                   (float)xt / 100,//yt,
+                   (float)xt / (100 * blur_level / 4),
+                   (float)xt / (100 * blur_level / 4),//yt,
                    focus,
                    fru);
       render_frame();

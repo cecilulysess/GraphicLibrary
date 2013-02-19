@@ -118,7 +118,7 @@ void do_lights(){
   float light0_ambient[] = { 0.0, 0.0, 0.0, 0.0 };
   float light0_diffuse[] = { 1.0, 1.0, 1.0, 0.0 };
   float light0_specular[] = { 1.0, 1.0, 1.0, 0.0 };
-  float light0_position[] = { 1.5, 2.0, 2.0, 1.0 };
+  float light0_position[] = { 3, 4, 4, 1.0 };
   float light0_direction[] = { -1.5, -2.0, -2.0, 1.0 };
   
   glLightModelfv(GL_LIGHT_MODEL_AMBIENT, light0_ambient);
@@ -227,10 +227,11 @@ void RenderScene(){
       break;
     case GL_CONTROL_DEF::KRM_DOF_ONLY:
       cout<<"DoF at focus:"<<focus<<endl;
-      GraphicUtilities::DoFScene(draw_stuff, frustum, focus);
+      glEnable(GL_MULTISAMPLE);
+      GraphicUtilities::DoFScene(draw_stuff, frustum, focus, 8);
       break;
     default:
-      //    glEnable(GL_MULTISAMPLE);
+     
       draw_stuff();
   }
   glFlush();
@@ -271,7 +272,9 @@ int main(int argc, char* argv[]){
   // make GLUT select a double buffered display that uses RGBA colors
   // Julian: Add GLUT_DEPTH when in 3D program so that 3D objects drawed
   // correctly regardless the order they draw
-  glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE | GLUT_ACCUM );
+  glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH |
+                       GLUT_DOUBLE | GLUT_ACCUM |
+                       GLUT_MULTISAMPLE );
   glutInitWindowSize(WIDTH, HEIGHT);
   //  glutInitWindowPosition(50, 50);
   glutCreateWindow("New Animation");
