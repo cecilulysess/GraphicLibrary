@@ -29,6 +29,12 @@
 #define WIDTH 1024
 #define HEIGHT 768
 
+char* VERT_SHADER_FILE_DIR =
+  "/Users/julian/Programming/CS605/Graphic/Graphic/el.vert";
+
+char* FRAG_SHADER_FILE_DIR =
+  "/Users/julian/Programming/CS605/Graphic/Graphic/el.frag";
+
 unsigned int RENDER_MODE = 0;
 
 int AALevel = 4;
@@ -111,7 +117,7 @@ void draw_stuff(){
     glNormal3fv(normal[i]);
     glDrawElements(GL_QUADS, 4, GL_UNSIGNED_BYTE, (void*)(4 * i) );
   }
-  
+  glFlush();
 }
 
 void do_lights(){
@@ -153,6 +159,32 @@ void do_material(){
 }
 
 unsigned int mybuf[2] = { 1, 2 };
+
+// set up shaders for using GLSL
+void SetShaders(){
+  GLint vertCompiled, fragCompiled;
+  char *vs, *fs;
+  GLuint v, f, p;
+  
+  v = glCreateShader(GL_VERTEX_SHADER);
+  f = glCreateShader(GL_FRAGMENT_SHADER);
+  vs = GraphicUtilities::read_shader_program(VERT_SHADER_FILE_DIR);
+  fs = GraphicUtilities::read_shader_program(FRAG_SHADER_FILE_DIR);
+  // shader, # of string, array of string and array of tring length
+  glShaderSource(v, 1, (const char**)&vs, NULL);
+  glShaderSource(f, 1, (const char**)&fs, NULL);
+  free(vs);
+  free(fs);
+  glCompileShader(v);
+  glCompileShader(f);
+  p = glCreateProgram();
+  glAttachShader(p, f);
+  glAttachShader(p, v);
+  glLinkProgram(p);
+  glUseProgram(p);
+  cout<<"Finished Set up of Shaders"<<endl;
+  return;
+}
 
 
 void init() {
@@ -285,11 +317,13 @@ int main(int argc, char* argv[]){
   // set up the callback routines to be called when glutMainLoop() detects
   // an event
   //  glutReshapeFunc(doReshape);
+  
+  SetShaders();
   glutDisplayFunc(RenderScene);
 //  glutMouseFunc(mouseEventHandler);
 //  glutMotionFunc(motionEventHandler);
   glutKeyboardFunc(KeyBoardHandler);
-  glutIdleFunc(Redraw);
+//  glutIdleFunc(Redraw);
   
   
   /* Set shading to flat shading */
