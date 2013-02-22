@@ -53,7 +53,7 @@ public:
   static void DoFScene(render_callback render_frame, Frustum* fru,
                        double focus, int blur_level);
   
-  static char* read_shader_program(char *filename);
+  static char* read_shader_program(const char *filename);
   
   static void JitterCamera(GLfloat pix_x, GLfloat pix_y, Frustum* fru);
   static void JitterCamera(GLfloat pix_x, GLfloat pix_y,

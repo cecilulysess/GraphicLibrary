@@ -7,6 +7,8 @@
 //uniform sampler2D diffuse_irr_map;
 //uniform sampler2D specular_irr_map;
 
+uniform float twist;
+
 void main() {
 //  vec2 d_irr_index, s_irr_index;
 //  vec3 N, R, d_irr, s_irr;
@@ -30,9 +32,17 @@ void main() {
 //  specular_color *= vec4(s_irr, 1.0);
 //  gl_FragColor = diffuse_color + 0.5*specular_color;
 
-  vec3 my_displaced_vertex;    
+  float angle, c, s;
+  mat2 rotation;
+  vec2 new_position;
   
-  my_displaced_vertex = 0.25* gl_Vertex.xyz + vec3(0.5, 0.5, 0.0);
-  gl_Position = vec4(my_displaced_vertex, 1.0);
-  gl_FrontColor = vec4(0.0, 1.0, 0.0, 1.0);
+  angle = twist * length(gl_Vertex.xy)
+  s = sin(angle);
+  c = cos(angle);
+  rotation = mat2(c, -s, s, c);
+  new_position = rotation * gl_Vertex.xy;
+  gl_Position = vec4(new_position, 0.0, 1.0);
+  gl_FrontColor = gl_Color;
+  
+  
 }

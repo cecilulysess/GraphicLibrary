@@ -17,7 +17,7 @@
 #include <math.h>
 
 
-char* GraphicUtilities::read_shader_program(char *filename){
+char* GraphicUtilities::read_shader_program(const char *filename){
   FILE *fp;
   char *content = NULL;
   int fd, count;
