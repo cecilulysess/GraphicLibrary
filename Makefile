@@ -7,7 +7,6 @@
 CC = g++
 C	= cpp
 H	= h
-CFLAGS 	= -g -std=c++0x
 
 ifeq ("$(shell uname)", "Darwin")
   LDFLAGS     = -framework Foundation -framework GLUT -framework OpenGL -lm
@@ -17,6 +16,7 @@ ifeq ("$(shell uname)", "Darwin")
 else
   ifeq ("$(shell uname)", "Linux")
     LDFLAGS     = -lglut -lGL -lGLU -lm -lXmu -lX11 -O2
+    CFLAGS 	= -g -std=c++0x
   endif
 endif
 

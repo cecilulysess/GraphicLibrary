@@ -1,5 +1,6 @@
 #include <fstream>
 #include <cstdio>
+#include <assert.h>
 #include <cmath>
 #include "graphic_object.h"
 using std::ifstream;
@@ -82,6 +83,7 @@ void GraphicObject::calculateVectors() {
   for (int i=0; i< vertex_num; i++) { 
     for (it = vertices[i].begin(); it != vertices[i].end(); it++) 
       results[i] = results[i] + *it;
+    assert(results[i].x == results[i].x);
     rx = results[i].x; ry = results[i].y; rz = results[i].z;
     results[i] = results[i] / sqrt(rx*rx + ry*ry + rz*rz);
     //cout << "length: " << sqrt(rx*rx+ry*ry+rz*rz) << endl;
