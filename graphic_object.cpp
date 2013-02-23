@@ -45,21 +45,21 @@ void GraphicObject::readFile() {
 
 void GraphicObject::calculateVectors() {
   //vertices.reserve(vertex_num);
-  vector<kPoint> vertices[vertex_num];
-  kPoint p0, p1, p2, v1, v2, vp; // vp: vertex point
+  vector<Vec3d> vertices[vertex_num];
+  Vec3d p0, p1, p2, v1, v2, vp; // vp: vertex point
   for (int i=0; i<faces.size(); i++) {
     // First Point
-    p0.x = properties[faces[i].x].x;
-    p0.y = properties[faces[i].x].y;
-    p0.z = properties[faces[i].x].z;
+    p0.x = properties[faces[i].x].x();
+    p0.y = properties[faces[i].x].y();
+    p0.z = properties[faces[i].x].z();
     // Second Point
-    p1.x = properties[faces[i].y].x;
-    p1.y = properties[faces[i].y].y;
-    p1.z = properties[faces[i].y].z;
+    p1.x = properties[faces[i].y].x();
+    p1.y = properties[faces[i].y].y();
+    p1.z = properties[faces[i].y].z();
     // Thrid Point
-    p2.x = properties[faces[i].z].x;
-    p2.y = properties[faces[i].z].y;
-    p2.z = properties[faces[i].z].z;
+    p2.x = properties[faces[i].z].x();
+    p2.y = properties[faces[i].z].y();
+    p2.z = properties[faces[i].z].z();
     // get p0 vector and save p0
     v1 = p1 - p0;
     v2 = p2 - p0;
@@ -77,16 +77,13 @@ void GraphicObject::calculateVectors() {
     vertices[faces[i].z].push_back(vp);
   }
   // sum the vector and normalize it
-  results = new kPoint[vertex_num];
+  results = new Vec3d[vertex_num];
   float rx, ry, rz;
-  vector<kPoint>::iterator it;
+  vector<Vec3d>::iterator it;
   for (int i=0; i< vertex_num; i++) { 
     for (it = vertices[i].begin(); it != vertices[i].end(); it++) 
-      results[i] = results[i] + *it;
-    assert(results[i].x == results[i].x);
-    rx = results[i].x; ry = results[i].y; rz = results[i].z;
-    results[i] = results[i] / sqrt(rx*rx + ry*ry + rz*rz);
-    //cout << "length: " << sqrt(rx*rx+ry*ry+rz*rz) << endl;
+      results[i] += *it;
+    results[i] = results[i].Normalize();
   }
 }
 

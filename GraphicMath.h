@@ -119,6 +119,22 @@ public:
     *res %= v;
     return *res;
   }
+
+  Vector& operator-=(const Vector& v) {
+    if (this->n != v.n) {
+       throw "Unmatched vector length for operator-";
+    }
+    for (int i = 0; i < this->n; ++i ) {
+       this->vec[i] -= v.vec[i];
+    }
+    return *this;
+  }
+
+  Vector& operator -(const Vector& v) {
+    Vector<T> * res = new Vector<T>(*this);
+    *res -= v;
+    return *res;
+  }
   
   // do a element-wise mulitplication with v
   const Vector<T>& ele_mult(const Vector<T>& v) const {
@@ -199,6 +215,7 @@ class Vec3d : public Vector<double> {
 public:
   Vec3d(std::initializer_list<double> il);
   Vec3d(const Vec3d& li);
+  Vec3d();
   
   Vec3d& operator-() const;
   friend Vec3d& operator*(const double e, const Vec3d& v);
