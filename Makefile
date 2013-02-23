@@ -7,11 +7,13 @@
 CC = g++
 C	= cpp
 H	= h
-CFLAGS 	= -g #-std=c++0x
+CFLAGS 	= -g -std=c++0x
 
 ifeq ("$(shell uname)", "Darwin")
-#  LDFLAGS     = -framework Foundation -framework GLUT -framework OpenGL -lm
-  LDFLAGS = -framework OpenGL
+  LDFLAGS     = -framework Foundation -framework GLUT -framework OpenGL -lm
+  CC = clang++
+#  LDFLAGS = -framework OpenGL
+  CFLAGS = -g -std=c++11 -stdlib=libc++ 
 else
   ifeq ("$(shell uname)", "Linux")
     LDFLAGS     = -lglut -lGL -lGLU -lm -lXmu -lX11 -O2
@@ -20,7 +22,7 @@ endif
 
 HFILES 	= GraphicUtilities.${H} GLCommonHeader.${H} GraphicMath.${H}
 OFILES 	= GraphicUtilities.o GraphicMath.o 
-PROJECT = main_base
+PROJECT = main_practise
 
 ${PROJECT}:	${PROJECT}.o $(OFILES)
 	${CC} $(CFLAGS) -o ${PROJECT} ${PROJECT}.o $(OFILES) $(LDFLAGS)
