@@ -46,6 +46,7 @@ void GraphicObject::calculateVectors() {
   //vertices.reserve(vertex_num);
   vector<kPoint> vertices[vertex_num];
   kPoint p0, p1, p2, v1, v2, vp; // vp: vertex point
+  //Vec3d vv3;
   for (int i=0; i<faces.size(); i++) {
     // First Point
     p0.x = properties[faces[i].x].x;
@@ -63,19 +64,26 @@ void GraphicObject::calculateVectors() {
     v1 = p1 - p0;
     v2 = p2 - p0;
     vp = v1 * v2;
+    cout << vp.x << ", " << vp.y << ", " << vp.z << endl;
     vertices[faces[i].x].push_back(vp);
     // get p1 vector and save p1
     v1 = p2 - p1;
     v2 = p0 - p1;
     vp = v1 * v2;
+    cout << vp.x << ", " << vp.y << ", " << vp.z << endl;
     vertices[faces[i].y].push_back(vp);
     // get p2 vector and save p2
     v1 = p0 - p2;
     v2 = p1 - p2;
     vp = v1 * v2;
+    cout << vp.x << ", " << vp.y << ", " << vp.z << endl;
     vertices[faces[i].z].push_back(vp);
   }
+  // test correctness
+  cout << "the vertices[50] size: " << vertices[50].size() << endl;
+  
   // sum the vector and normalize it
+  //results = new kPoint[vertex_num];
   results = new kPoint[vertex_num];
   float rx, ry, rz;
   vector<kPoint>::iterator it;
@@ -95,6 +103,6 @@ void GraphicObject::test() {
   cout << "z in last face element: " << faces[size].z << endl; 
   calculateVectors();
   //cout << "vertics number: " << vertices.size() << endl;
-  for (int i=0; i< vertex_num; i++) 
-    cout << "(" << results[i].x << ", " << results[i].y << ", " << results[i].z << ")" << endl;
+  //for (int i=0; i< vertex_num; i++) 
+    //cout << "(" << results[i].x << ", " << results[i].y << ", " << results[i].z << ")" << endl;
 }
