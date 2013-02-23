@@ -21,6 +21,7 @@ using std::endl;
 using std::cout;
 using std::equal;
 
+// 
 // Base class of vectors, don't use this class
 template <class T>
 class Vector {
@@ -181,6 +182,19 @@ template <class T> bool operator==(const Vector<T>& a, const Vector<T>& b) {
 // A 3d vector class with doulbe value as element type.
 //  This is a good type to use when you want good accuracy
 //  Can be initalized by Vec3d pt = {1, 3, 5};
+// Methods:
+//  Vec3d v = {1, 2, 3} // greate a vector with x == 1, y == 2
+//    z == 3
+//  Vec3d t(v)
+//  t =  -v * 3;
+//  t =  3 * -v;
+//  t = t % v  // cross product 
+//  t %= v     // t = t % v
+//  t *= 3     // t = t * 3
+//  t.Norm()   // get t's norm
+//  t.Normalize() //return a copy of normalized t
+//  t.x(), t.y(), t.z()  // get xyz component
+//  t[0], t[1], t[2] // access xyz component
 class Vec3d : public Vector<double> {
 public:
   Vec3d(std::initializer_list<double> il);
