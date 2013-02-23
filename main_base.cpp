@@ -1,3 +1,5 @@
+
+
 //
 //  main.cpp
 //  PhysicalAnimation
@@ -15,11 +17,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <assert.h>
 
 #include "GLCommonHeader.h"
 #include "common_data_structure.h"
 #include "GraphicUtilities.h"
 
+#ifdef MAIN_PROG
 //#define TESTING_
 
 #ifdef TESTING_
@@ -29,11 +33,12 @@
 #define WIDTH 1024
 #define HEIGHT 768
 
+
 unsigned int RENDER_MODE = 0;
 
 int AALevel = 4;
 bool WantToRedraw = false;
-double focus = 5.0;
+double focus = 4;
 
 struct point {
   float x, y, z;
@@ -111,14 +116,14 @@ void draw_stuff(){
     glNormal3fv(normal[i]);
     glDrawElements(GL_QUADS, 4, GL_UNSIGNED_BYTE, (void*)(4 * i) );
   }
-  
+  glFlush();
 }
 
 void do_lights(){
   float light0_ambient[] = { 0.0, 0.0, 0.0, 0.0 };
   float light0_diffuse[] = { 1.0, 1.0, 1.0, 0.0 };
   float light0_specular[] = { 1.0, 1.0, 1.0, 0.0 };
-  float light0_position[] = { 1.5, 2.0, 2.0, 1.0 };
+  float light0_position[] = { 3, 4, 4, 1.0 };
   float light0_direction[] = { -1.5, -2.0, -2.0, 1.0 };
   
   glLightModelfv(GL_LIGHT_MODEL_AMBIENT, light0_ambient);
@@ -153,6 +158,47 @@ void do_material(){
 }
 
 unsigned int mybuf[2] = { 1, 2 };
+
+bool CompileSuccess(int obj) {
+  int status;
+  glGetShaderiv(obj, GL_COMPILE_STATUS, &status);
+  if (status != GL_TRUE) printf("Compile Status: %d\n", status);
+  return status == GL_TRUE;
+}
+
+bool LinkSuccessful(int obj) {
+  int status;
+  glGetProgramiv(obj, GL_LINK_STATUS, &status);
+  return status == GL_TRUE;
+}
+// set up shaders for using GLSL
+void SetShadersOrDie(){
+  GLint vertCompiled, fragCompiled;
+  char *vs, *fs;
+  GLuint v, f, p;
+  
+  v = glCreateShader(GL_VERTEX_SHADER);
+  f = glCreateShader(GL_FRAGMENT_SHADER);
+  vs = GraphicUtilities::read_shader_program(VERT_SHADER_FILE_DIR);
+  fs = GraphicUtilities::read_shader_program(FRAG_SHADER_FILE_DIR);
+  // shader, # of string, array of string and array of tring length
+  glShaderSource(v, 1, (const char**)&vs, NULL);
+  glShaderSource(f, 1, (const char**)&fs, NULL);
+  free(vs);
+  free(fs);
+  glCompileShader(v);
+  assert(CompileSuccess(v));
+  glCompileShader(f);
+  assert(CompileSuccess(f));
+  p = glCreateProgram();
+  glAttachShader(p, f);
+  glAttachShader(p, v);
+  glLinkProgram(p);
+  assert(LinkSuccessful(p));
+  glUseProgram(p);
+  cout<<"Finished Set up of Shaders: "<<p<<endl;
+  return;
+}
 
 
 void init() {
@@ -227,10 +273,11 @@ void RenderScene(){
       break;
     case GL_CONTROL_DEF::KRM_DOF_ONLY:
       cout<<"DoF at focus:"<<focus<<endl;
-      GraphicUtilities::DoFScene(draw_stuff, frustum, focus);
+      glEnable(GL_MULTISAMPLE);
+      GraphicUtilities::DoFScene(draw_stuff, frustum, focus, 8);
       break;
     default:
-      //    glEnable(GL_MULTISAMPLE);
+     
       draw_stuff();
   }
   glFlush();
@@ -271,7 +318,10 @@ int main(int argc, char* argv[]){
   // make GLUT select a double buffered display that uses RGBA colors
   // Julian: Add GLUT_DEPTH when in 3D program so that 3D objects drawed
   // correctly regardless the order they draw
-  glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE | GLUT_ACCUM );
+  glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH |
+                       GLUT_DOUBLE ); // | GLUT_ACCUM |
+                       //GLUT_MULTISAMPLE );
+  // glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH );
   glutInitWindowSize(WIDTH, HEIGHT);
   //  glutInitWindowPosition(50, 50);
   glutCreateWindow("New Animation");
@@ -282,6 +332,8 @@ int main(int argc, char* argv[]){
   // set up the callback routines to be called when glutMainLoop() detects
   // an event
   //  glutReshapeFunc(doReshape);
+  
+  SetShadersOrDie();
   glutDisplayFunc(RenderScene);
 //  glutMouseFunc(mouseEventHandler);
 //  glutMotionFunc(motionEventHandler);
@@ -299,3 +351,5 @@ int main(int argc, char* argv[]){
   glutMainLoop();
   return 0;
 }
+
+#endif

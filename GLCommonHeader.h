@@ -28,5 +28,14 @@
   #include <GL/glext.h>
 #endif
 
+#define MAIN_PROG
 
+
+static const char* VERT_SHADER_FILE_DIR =
+ // "/Users/julian/Programming/CS605/Graphic/Graphic/el.vert";
+  "/home/yanxiaw/Programming/cs605/GraphicLibrary/el.vert";
+
+static const char* FRAG_SHADER_FILE_DIR =
+ // "/Users/julian/Programming/CS605/Graphic/Graphic/el.frag";
+  "/home/yanxiaw/Programming/cs605/GraphicLibrary/el.frag";
 #endif
