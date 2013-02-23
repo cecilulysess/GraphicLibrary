@@ -165,6 +165,12 @@ bool CompileSuccess(int obj) {
   if (status != GL_TRUE) printf("Compile Status: %d\n", status);
   return status == GL_TRUE;
 }
+
+bool LinkSuccessful(int obj) {
+  int status;
+  glGetProgramiv(obj, GL_LINK_STATUS, &status);
+  return status == GL_TRUE;
+}
 // set up shaders for using GLSL
 void SetShadersOrDie(){
   GLint vertCompiled, fragCompiled;
@@ -188,6 +194,7 @@ void SetShadersOrDie(){
   glAttachShader(p, f);
   glAttachShader(p, v);
   glLinkProgram(p);
+  assert(LinkSuccessful(p));
   glUseProgram(p);
   cout<<"Finished Set up of Shaders: "<<p<<endl;
   return;
