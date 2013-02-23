@@ -74,6 +74,7 @@ public:
   void readFile();
   void calculateVectors();
   void test();
+  void hasCoveredPoints();
   inline vector<Property> getProperties() { return properties; }
   inline vector<ElementFace> getFaces() { return faces; }
 private:
@@ -82,6 +83,7 @@ private:
   vector<Property> properties;    
   vector<ElementFace> faces;
   kPoint* results;
+  vector<kPoint> optimal_results;
 };
 
 #endif

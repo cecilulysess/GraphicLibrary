@@ -11,6 +11,7 @@ int main(int argc, char** argv) {
   cout << "this is a face test: " << test_f[0].y << endl;
   ob->calculateVectors();
   ob->test();
+  //ob->hasCoveredPoints();
   delete ob;
   return 0;
 }

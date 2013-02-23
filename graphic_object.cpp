@@ -8,7 +8,8 @@ GraphicObject::GraphicObject() : vertex_num(0),
                                  element_face_num(0),
                                  properties(), 
                                  faces(), 
-                                 results()
+                                 results(),
+                                 optimal_results()
 { }
 
 GraphicObject::~GraphicObject() {
@@ -77,16 +78,18 @@ void GraphicObject::calculateVectors() {
   }
   // test correctness
   cout << "the vertices[50] size: " << vertices[50].size() << endl;
-  
   // sum the vector and normalize it
   results = new kPoint[vertex_num];
-  float rx, ry, rz;
+  float rx, ry, rz, n;
+  optimal_results.reserve(vertex_num);
   vector<kPoint>::iterator it;
   for (int i=0; i< vertex_num; i++) { 
     for (it = vertices[i].begin(); it != vertices[i].end(); it++) 
       results[i] = results[i] + *it;
     rx = results[i].x; ry = results[i].y; rz = results[i].z;
     results[i] = results[i] / sqrt(rx*rx + ry*ry + rz*rz);
+    n = rx*rx + ry*ry + rz*rz;
+    if (n != 0) optimal_results.push_back(results[i]);
     //cout << "length: " << sqrt(rx*rx+ry*ry+rz*rz) << endl;
   }
 }
@@ -98,6 +101,23 @@ void GraphicObject::test() {
   cout << "z in last face element: " << faces[size].z << endl; 
   calculateVectors();
   //cout << "vertics number: " << vertices.size() << endl;
-  //for (int i=0; i< vertex_num; i++) 
-    //cout << "(" << results[i].x << ", " << results[i].y << ", " << results[i].z << ")" << endl;
+  for (int i=0; i< optimal_results.size(); i++) 
+    cout << "(" << optimal_results[i].x << ", " << optimal_results[i].y << ", " << optimal_results[i].z << ")" << endl;
+}
+
+void GraphicObject::hasCoveredPoints() {
+  int array[vertex_num];
+  for (int i=0; i<vertex_num; i++) array[i] = 0;
+  
+  for (int i=0; i<faces.size(); i++) {
+    array[faces[i].x]++;
+    array[faces[i].y]++;
+    array[faces[i].z]++;
+  } 
+  int uncovered_points = 0;
+  for (int i=0; i<vertex_num; i++) {
+    if (array[i] == 0) uncovered_points++;
+  }
+  cout << "The number of points in the picture: " << vertex_num << endl;
+  cout << "The number of uncovered points is: " << uncovered_points << endl;
 }
