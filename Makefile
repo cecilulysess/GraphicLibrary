@@ -20,9 +20,9 @@ else
   endif
 endif
 
-HFILES 	= GraphicUtilities.${H} GLCommonHeader.${H} GraphicMath.${H}
-OFILES 	= GraphicUtilities.o GraphicMath.o 
-PROJECT = main_practise
+HFILES 	= GraphicUtilities.${H} GLCommonHeader.${H} GraphicMath.${H} graphic_object.${H}
+OFILES 	= GraphicUtilities.o GraphicMath.o graphic_object.o
+PROJECT = qm_main
 
 ${PROJECT}:	${PROJECT}.o $(OFILES)
 	${CC} $(CFLAGS) -o ${PROJECT} ${PROJECT}.o $(OFILES) $(LDFLAGS)
@@ -35,6 +35,9 @@ GraphicUtilities.o: GraphicUtilities.${C} GraphicUtilities.${H} GraphicMath.${H}
 
 GraphicMath.o: GraphicMath.${C} GraphicMath.${H} 
 	${CC} $(CFLAGS) -c GraphicMath.${C}
+
+graphic_object.o: graphic_object.${C} graphic_object.${H} 
+	${CC} $(CFLAGS) -c graphic_object.${C}
 
 debug:
 	make 'DFLAGS = /usr/lib/debug/malloc.o'
