@@ -29,7 +29,7 @@
 #endif
 
 #define MAIN_PROG
-#define TESTING_
+//#define TESTING_
 
 static const char* VERT_SHADER_FILE_DIR =
  // "/Users/julian/Programming/CS605/Graphic/Graphic/el.vert";
