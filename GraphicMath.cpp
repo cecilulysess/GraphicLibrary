@@ -31,6 +31,12 @@ Vec3d::Vec3d(const Vec3d& li) : Vector<double>(li) {
   }
 }
 
+Vec3d::Vec3d(Vector<double> vec) : Vector<double>(3){
+  this->x() = vec[0];
+  this->y() = vec[1];
+  this->z() = vec[2];
+}
+
 Vec3d::Vec3d() : Vector<double>(3){
   this->x() = 0.0;
   this->y() = 0.0; 
@@ -41,6 +47,7 @@ Vec3d& Vec3d::operator-() const {
   return (*this * -1.0);
 }
 
+
 Vec3d& operator*(const Vec3d& v, const double e) {
   return e * v;
 }
@@ -50,6 +57,28 @@ Vec3d& operator*(const double e, const Vec3d& v) {
   *res *= e;
   return *res;
 }
+
+Vec3d& Vec3d::operator+=(const Vec3d& v) {
+  for (int i = 0; i < this->n; ++i ) {
+    this->vec[i] += v.vec[i];
+  }
+  return *this;
+}
+
+Vec3d& Vec3d::operator-=(const Vec3d& v) {
+  return (*this)+= -v;
+}
+
+const Vec3d& Vec3d::operator+(const Vec3d& v) const {
+  Vec3d* res = new Vec3d(*this);
+  *res += v;
+  return *res;
+}
+
+const Vec3d& Vec3d::operator-(const Vec3d& v) const {
+  return -((*this) + v);
+}
+
 
 Vec3d& Vec3d::Normalize(){
   Vec3d* res = new Vec3d(*this);

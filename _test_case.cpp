@@ -21,11 +21,12 @@ bool test_Vector() {
   Vector<double> b = { -0.1, 7.0, 2.22 };
   Vector<double> c = { 3.3, -3.3, 0.0 };
   Vector<double> cmpa = { 1.990, 2.02000, 6.700000};
+  Vector<double> a_b = {2.090, -4.980, 4.4800};
   
   // answer
   Vector<double> a_mult_b = {-0.1990,  14.1400,  14.8740};
   Vector<double> a_mult_c = {6.5670, -6.6660,     0};
-  Vector<double> b_mult_c = {-0.3300,  -23.1000,        0};
+  Vector<double> b_mult_c = {-0.3300,  -23.1000,  0};
   
   double a_dot_b = 28.815;
   double a_dot_c = -0.099;
@@ -66,8 +67,7 @@ bool test_Vector() {
   assert(a * c - a_dot_c < 1e-9);
   assert(b * c - b_dot_c < 1e-9);
   
-  
-  
+  assert((a - b) == a_b);
   std::cout<<"Vector passed Test!"<<std::endl;
   
   
@@ -75,8 +75,11 @@ bool test_Vector() {
   Vec3d va = { 1.99, 2.02, 6.7 };
   Vec3d v1 = {1.99, 2.02, 6.7 };
   Vec3d v2 = {-0.1, 7.0, 2.22};
+  Vec3d v1_2 = {2.09, -4.98, 4.48};
+  Vec3d v1p2 = {1.89, 9.02, 8.920000000000000};
   Vec3d nv1 = {0.273526921854589,  0.277650443289583, 0.920919787148616};
   Vec3d nv2 = {-0.013616044753350, 0.953123132734531,  0.302276193524380};
+  Vec3d croV12 = {-42.415599999999998,  -5.08780,  14.132};
   double n2 = 7.344276683241175;
   double n1 = 7.2753350;
 //  std::cout<<v1.Norm() - n1<<std::endl;
@@ -90,6 +93,11 @@ bool test_Vector() {
   assert(-v1 == v1 * -1.0);
   assert(v1 * -1.0 == -1.0 * v1);
   assert(-(-v1) == v1);
+  assert(v1 % v2 == croV12);
+  
+  assert(fabs(v1 * v2 - 28.815) < 1e-7);
+  assert(v1 - v2 == v1_2);
+  assert(v1 + v2 == v1p2);
   std::cout<<"Vec3d passed Test!"<<std::endl;
   
   clock_t  ed = clock();
