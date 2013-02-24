@@ -22,7 +22,7 @@ endif
 
 HFILES 	= GraphicUtilities.${H} GLCommonHeader.${H} GraphicMath.${H}
 OFILES 	= GraphicUtilities.o GraphicMath.o 
-PROJECT = main_practise
+PROJECT = main_base
 
 ${PROJECT}:	${PROJECT}.o $(OFILES)
 	${CC} $(CFLAGS) -o ${PROJECT} ${PROJECT}.o $(OFILES) $(LDFLAGS)

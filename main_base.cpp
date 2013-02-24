@@ -45,7 +45,8 @@ struct point {
 };
 
 Frustum* frustum;
-
+std::vector<GLuint> shaders;
+GLuint selected_shader_id = 0;
 
 void setup_the_viewvolume(){
   struct point eye, view, up;
@@ -68,6 +69,13 @@ void setup_the_viewvolume(){
 //  gluLookAt(eye.x, eye.y, eye.z, view.x, view.y, view.z, up.x, up.y, up.z);
 }
 
+void set_uniform_parameters(unsigned int p){
+  int location;
+  location = glGetUniformLocation(p, "eye_position");
+  glUniform3f(location, -5, -0.5, -5);
+  location = glGetUniformLocation(p, "light_position");
+  glUniform3f(location, 4.0, 4.0, 4.0); 
+}
 
 
 GLfloat vertices[] = {
@@ -102,11 +110,12 @@ GLfloat normal[6][3] = {
 void draw_stuff(){
   int i;
   glEnable(GL_DEPTH_TEST);
+  glUseProgram(0);
   glClearColor(0.35, 0.35, 0.35, 0.0);
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
   GraphicUtilities::DrawGrid(10, 1);
 //  frustum->DrawFrustum(50, 4.0/3.0, 0.1, 20);
-
+  glUseProgram(selected_shader_id);
   glPushMatrix();
   glTranslated(2.5, 0, 2.5);
   glRotated(45, 0, 1, 0);
@@ -159,10 +168,29 @@ void do_material(){
 
 unsigned int mybuf[2] = { 1, 2 };
 
+void GLSL_LogReport(int shader, bool is_print){
+  GLint maxLength = 0;
+  glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
+
+  // max length includes the NULL character
+  std::vector<GLchar> infoLog(maxLength);
+  glGetShaderInfoLog(shader, maxLength, &maxLength, &infoLog[0]);
+  
+  if (is_print){
+    for(int i = 0; i < infoLog.size(); ++i) {
+      cout<<infoLog[i];
+    }
+  }
+  cout<<endl;
+}
+
 bool CompileSuccess(int obj) {
   int status;
   glGetShaderiv(obj, GL_COMPILE_STATUS, &status);
-  if (status != GL_TRUE) printf("Compile Status: %d\n", status);
+  if (status != GL_TRUE) {
+    printf("Compile Status: %d\n", status);
+    GLSL_LogReport(obj, true);
+  }
   return status == GL_TRUE;
 }
 
@@ -172,32 +200,49 @@ bool LinkSuccessful(int obj) {
   return status == GL_TRUE;
 }
 // set up shaders for using GLSL
-void SetShadersOrDie(){
+void SetShadersOrDie(std::vector<GLuint>& shaders){
   GLint vertCompiled, fragCompiled;
-  char *vs, *fs;
-  GLuint v, f, p;
+  char *vs, *fs, *bpfs;
+  GLuint pv, pf, p, bpv, bpf, bp;
   
-  v = glCreateShader(GL_VERTEX_SHADER);
-  f = glCreateShader(GL_FRAGMENT_SHADER);
+  pv = glCreateShader(GL_VERTEX_SHADER);
+  pf = glCreateShader(GL_FRAGMENT_SHADER);
   vs = GraphicUtilities::read_shader_program(VERT_SHADER_FILE_DIR);
-  fs = GraphicUtilities::read_shader_program(FRAG_SHADER_FILE_DIR);
+  fs = GraphicUtilities::read_shader_program(
+    BLINN_PHONG_FRAG_SHADER_FILE_DIR);
+  bpfs = GraphicUtilities::read_shader_program(
+    BLINN_PHONG_FRAG_SHADER_FILE_DIR);
   // shader, # of string, array of string and array of tring length
-  glShaderSource(v, 1, (const char**)&vs, NULL);
-  glShaderSource(f, 1, (const char**)&fs, NULL);
+  glShaderSource(pv, 1, (const char**)&vs, NULL);
+  glShaderSource(pf, 1, (const char**)&fs, NULL);
+  glShaderSource(bpv, 1, (const char**)&vs, NULL);
+  glShaderSource(bpf, 1, (const char**)&bpfs, NULL);
   free(vs);
   free(fs);
-  glCompileShader(v);
-  assert(CompileSuccess(v));
-  glCompileShader(f);
-  assert(CompileSuccess(f));
+  free(bpfs);
+  glCompileShader(pv);
+  assert(CompileSuccess(pv));
+  glCompileShader(pf);
+  assert(CompileSuccess(pf));
+  //glCompileShader(bpv);
+  //assert(CompileSuccess(bpv));
+  //glCompileShader(bpf);
+  //assert(CompileSuccess(bpf));
   p = glCreateProgram();
-  glAttachShader(p, f);
-  glAttachShader(p, v);
+  //bp = glCreateProgram();
+  glAttachShader(p, pf);
+  glAttachShader(p, pv);
+  //glAttachShader(bp, bpf);
+  //glAttachShader(bp, pv);
   glLinkProgram(p);
   assert(LinkSuccessful(p));
+  //glLinkProgram(bp);
+  //assert(LinkSuccessful(bp));
+  shaders.push_back(p);
+  //shaders.push_back(bp);
   glUseProgram(p);
   cout<<"Finished Set up of Shaders: "<<p<<endl;
-  return;
+  return ;
 }
 
 
@@ -256,6 +301,9 @@ void KeyBoardHandler(unsigned char key, int x, int y){
     case 'x':
       if(focus < 100.0) focus += 0.1;
       WantToRedraw = true;
+      break;
+    case 's':
+      (++selected_shader_id) %= 2;
       break;
     default:
       break;
@@ -319,7 +367,7 @@ int main(int argc, char* argv[]){
   // Julian: Add GLUT_DEPTH when in 3D program so that 3D objects drawed
   // correctly regardless the order they draw
   glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH |
-                       GLUT_DOUBLE ); // | GLUT_ACCUM |
+                       GLUT_DOUBLE |GLUT_ACCUM ); // | GLUT_ACCUM |
                        //GLUT_MULTISAMPLE );
   // glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH );
   glutInitWindowSize(WIDTH, HEIGHT);
@@ -333,7 +381,7 @@ int main(int argc, char* argv[]){
   // an event
   //  glutReshapeFunc(doReshape);
   
-  SetShadersOrDie();
+  SetShadersOrDie(shaders); 
   glutDisplayFunc(RenderScene);
 //  glutMouseFunc(mouseEventHandler);
 //  glutMotionFunc(motionEventHandler);

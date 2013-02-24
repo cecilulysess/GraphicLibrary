@@ -17,5 +17,6 @@ void main() {
 //  diffuse_color = diffuse_color;
   diffuse_color *= max(dot(N, L), 0.0);
   specular_color *= pow(max(dot(H, N), 0.0), shininess);
+  specular_color /= (8.0 * 3.1415926 / (shininess + 2));
   gl_FragColor = diffuse_color + specular_color;
 }
