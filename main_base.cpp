@@ -38,7 +38,7 @@ unsigned int RENDER_MODE = 0;
 
 int AALevel = 4;
 bool WantToRedraw = false;
-double focus = 4;
+double focus = 6.0;
 
 struct point {
   float x, y, z;
