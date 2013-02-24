@@ -39,7 +39,7 @@ unsigned int RENDER_MODE = 0;
 
 int AALevel = 4;
 bool WantToRedraw = false;
-double focus = 4;
+double focus = 6.0;
 
 struct point {
   float x, y, z;
@@ -119,11 +119,11 @@ void draw_stuff(){
   GraphicUtilities::DrawGrid(10, 1);
 //  frustum->DrawFrustum(50, 4.0/3.0, 0.1, 20);
   glUseProgram(selected_shader_id);
-  glPushMatrix();
-  glTranslated(2.5, 0, 2.5);
-  glRotated(45, 0, 1, 0);
-  glutSolidTeapot (0.5);
-  glPopMatrix();
+ // glPushMatrix();
+ // glTranslated(2.5, 0, 2.5);
+ // glRotated(45, 0, 1, 0);
+ // glutSolidTeapot (0.5);
+ // glPopMatrix();
   for (i = 0; i < 6; ++i) {
     glNormal3fv(normal[i]);
     glDrawElements(GL_TRIANGLE_STRIP, 3, GL_UNSIGNED_INT, (void*)(3 * i) );

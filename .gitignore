@@ -15,3 +15,9 @@
 # unknown files
 *.swp
 *.gch
+
+#binary files
+main_base
+run
+test
+main_practise
