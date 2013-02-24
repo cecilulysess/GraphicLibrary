@@ -351,6 +351,7 @@ int main(int argc, char* argv[]){
   test_Vector();
   test_Matrix();
 #endif
+<<<<<<< HEAD
   //  if(argc != 2){
   //    fprintf(stderr, "usage: bounce paramfile\n");
   //    exit(1);
@@ -397,6 +398,54 @@ int main(int argc, char* argv[]){
   // Routine that loops forever looking for events. It calls the registered
   // callback routine to handle each event that is detected
   glutMainLoop();
+=======
+//  //  if(argc != 2){
+//  //    fprintf(stderr, "usage: bounce paramfile\n");
+//  //    exit(1);
+//  //  }
+//  //  LoadParameters(argv[1]);
+//  //  parafile = argv[1];
+//  
+//  
+//  // start up the glut utilities
+//  glutInit(&argc, argv);
+//  
+//  
+//  // make GLUT select a double buffered display that uses RGBA colors
+//  // Julian: Add GLUT_DEPTH when in 3D program so that 3D objects drawed
+//  // correctly regardless the order they draw
+//  glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH |
+//                       GLUT_DOUBLE ); // | GLUT_ACCUM |
+//                       //GLUT_MULTISAMPLE );
+//  // glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH );
+//  glutInitWindowSize(WIDTH, HEIGHT);
+//  //  glutInitWindowPosition(50, 50);
+//  glutCreateWindow("New Animation");
+//  
+//  // initialize the camera and such
+//  init();
+//  
+//  // set up the callback routines to be called when glutMainLoop() detects
+//  // an event
+//  //  glutReshapeFunc(doReshape);
+//  
+//  SetShadersOrDie();
+//  glutDisplayFunc(RenderScene);
+////  glutMouseFunc(mouseEventHandler);
+////  glutMotionFunc(motionEventHandler);
+//  glutKeyboardFunc(KeyBoardHandler);
+//  glutIdleFunc(Redraw);
+//  
+//  
+//  /* Set shading to flat shading */
+//  //  glShadeModel(GL_FLAT);
+//  
+//  //  MakeMenu();
+//  
+//  // Routine that loops forever looking for events. It calls the registered
+//  // callback routine to handle each event that is detected
+//  glutMainLoop();
+>>>>>>> 95f7fd7e4559b1239051a69df458ad1ae2c3f82c
   return 0;
 }
 

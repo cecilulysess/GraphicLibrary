@@ -63,11 +63,43 @@ public:
     return vec.end();
   }
   
-  Vector& operator=(const Vector& v) {
+  Vector<T>& operator-=(const Vector<T>& v) {
+    if (this->n != v.n) {
+      throw "Unmatched vector length for operator-";
+    }
+    for (int i = 0; i < this->n; ++i ) {
+      this->vec[i] -= v.vec[i];
+    }
+    return *this;
+  }
+  
+  const Vector<T>& operator-(const Vector<T>& v) const {
+    Vector<T> * res = new Vector<T>(*this);
+    *res -= v;
+    return *res;
+  }
+  
+  Vector<T>& operator+=(const Vector<T>& v) {
+    if (this->n != v.n) {
+      throw "Unmatched vector length for operator-";
+    }
+    for (int i = 0; i < this->n; ++i ) {
+      this->vec[i] += v.vec[i];
+    }
+    return *this;
+  }
+  
+  const Vector<T>& operator+(const Vector<T>& v) const {
+    Vector<T> * res = new Vector<T>(*this);
+    *res += v;
+    return *res;
+  }
+  
+  Vector<T>& operator=(const Vector<T>& v) {
     if (this != &v) {
       this->vec.clear();
       this->n = v.n;
-      for ( int i = 0 ; i < n; ++i ) {
+      for ( int i = 0; i < n; ++i ) {
         this->vec.push_back(v.vec[i]);
       }
     }
@@ -99,9 +131,8 @@ public:
   }
   
   
-  
   // Cross product
-  Vector& operator%=(const Vector& v) {
+  Vector<T>& operator%=(const Vector<T>& v) {
     if ( this->n != v.n || this->n != 3 ) {
       throw "Illigle cross product";
     }
@@ -120,21 +151,7 @@ public:
     return *res;
   }
 
-  Vector& operator-=(const Vector& v) {
-    if (this->n != v.n) {
-       throw "Unmatched vector length for operator-";
-    }
-    for (int i = 0; i < this->n; ++i ) {
-       this->vec[i] -= v.vec[i];
-    }
-    return *this;
-  }
-
-  Vector& operator -(const Vector& v) {
-    Vector<T> * res = new Vector<T>(*this);
-    *res -= v;
-    return *res;
-  }
+  
   
   // do a element-wise mulitplication with v
   const Vector<T>& ele_mult(const Vector<T>& v) const {
@@ -216,10 +233,16 @@ public:
   Vec3d(std::initializer_list<double> il);
   Vec3d(const Vec3d& li);
   Vec3d();
+  // create a Vec3d from vec
+  explicit Vec3d(Vector<double> vec);
   
   Vec3d& operator-() const;
   friend Vec3d& operator*(const double e, const Vec3d& v);
   friend Vec3d& operator*(const Vec3d& v, const double e);
+  Vec3d& operator+=(const Vec3d& v);
+  Vec3d& operator-=(const Vec3d& v);
+  const Vec3d& operator+(const Vec3d& v) const;
+  const Vec3d& operator-(const Vec3d& v) const;
   
   // Auxillary getter
   double x() const ;
