@@ -34,7 +34,7 @@ GraphicObject::~GraphicObject() {
 
 void GraphicObject::readFile() {
   ifstream myFile;
-  myFile.open("bunny.ply");
+  myFile.open("test.ply");
   float test_num;
   string ply, format, ascii, trash; float fl;
   myFile >> ply >> format >> ascii >> fl;
@@ -97,7 +97,7 @@ void GraphicObject::calculateVectors() {
     face_normal[i].z = vp.z/sqrt(vp.x*vp.x + vp.y*vp.y + vp.z*vp.z);
   }
   // test correctness
-  cout << "the vertices[50] size: " << vertices[50].size() << endl;
+  //cout << "the vertices[50] size: " << vertices[50].size() << endl;
   // sum the vector and normalize it
   results = new kPoint[vertex_num];
   optimal_results = new kPoint[vertex_num];
@@ -168,7 +168,7 @@ float* GraphicObject::getPointNormalization() {
   array_point_normalization = new float[length];
   for (int i=0; i<length; i++) {
     array_point_normalization[i] = vpn[i];
-    cout << array_point_normalization[i];
+    //cout << array_point_normalization[i];
   }
   return array_point_normalization;
 }

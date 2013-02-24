@@ -22,6 +22,7 @@
 #include "GLCommonHeader.h"
 #include "common_data_structure.h"
 #include "GraphicUtilities.h"
+#include "GraphicObject.h"
 
 #ifdef MAIN_PROG
 //#define TESTING_
@@ -78,34 +79,57 @@ void set_uniform_parameters(unsigned int p){
 }
 
 
-GLfloat vertices[] = {
-  0.0, 0.0, 0.0,
-  0.0, 1.0, 0.0,
-  1.0, 1.0, 0.0,
-  1.0, 0.0, 0.0,
-  0.0, 0.0, 1.0,
-  0.0, 1.0, 1.0,
-  1.0, 1.0, 1.0,
-  1.0, 0.0, 1.0,
-};
+//GLfloat vertices[] = {
+//  0.0, 0.0, 0.0,
+//  0.0, 1.0, 0.0,
+//  1.0, 1.0, 0.0,
+//  1.0, 0.0, 0.0,
+//  0.0, 0.0, 1.0,
+//  0.0, 1.0, 1.0,
+//  1.0, 1.0, 1.0,
+//  1.0, 0.0, 1.0,
+//};
+//
+//GLubyte face[] = {
+//  4, 7, 6, 5, //front
+//  0, 3, 2, 1, //back
+//  3, 2, 6, 7, //right
+//  1, 0, 4, 5, //left
+//  5, 6, 2, 1, //top
+//  3, 7, 4, 0, //bottom
+//};
+//
+//GLfloat normal[6][3] = {
+//  0.0, 0.0, 1.0,
+//  0.0, 0.0, -1.0,
+//  1.0, 0.0, 0.0,
+//  -1.0, 0.0, 0.0,
+//  0.0, 1.0, 0.0,
+//  0.0, -1.0, 0.0,
+//};
 
-GLubyte face[] = {
-  4, 7, 6, 5, //front
-  0, 3, 2, 1, //back
-  3, 2, 6, 7, //right
-  1, 0, 4, 5, //left
-  5, 6, 2, 1, //top
-  3, 7, 4, 0, //bottom
-};
+GLfloat* vertices;
+GLfloat vertices_number;
+GLuint* faces;
+GLuint faces_length;
+GLfloat* normal;
+GLuint normal_length;
+GLuint vertices_normal_length;
+GLfloat* vertices_normal;
 
-GLfloat normal[6][3] = {
-  0.0, 0.0, 1.0,
-  0.0, 0.0, -1.0,
-  1.0, 0.0, 0.0,
-  -1.0, 0.0, 0.0,
-  0.0, 1.0, 0.0,
-  0.0, -1.0, 0.0,
-};
+void load_object(){
+  GraphicObject* obj = new GraphicObject();
+  obj->readFile();
+  obj->calculateVectors();
+  vertices_number = obj->getPropertiesLength();
+  vertices = obj-> getProperties();
+  faces_length = obj->getFacesLength();
+  faces = obj->getFaces();
+  normal_length = faces_length;
+  normal = obj->getFaceNormalization();
+  vertices_normal_length = vertices_number;
+  vertices_normal = obj->getPointNormalization();
+}
 
 void draw_stuff(){
   int i;
@@ -121,9 +145,9 @@ void draw_stuff(){
  // glRotated(45, 0, 1, 0);
  // glutSolidTeapot (0.5);
  // glPopMatrix();
-  for (i = 0; i < 6; ++i) {
-    glNormal3fv(normal[i]);
-    glDrawElements(GL_QUADS, 4, GL_UNSIGNED_BYTE, (void*)(4 * i) );
+  for (i = 0; i < faces_length; ++i) {
+    glNormal3fv(&normal[i]);
+    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (void*)(3 * i) );
   }
   glFlush();
 }
@@ -250,6 +274,7 @@ void init() {
   setup_the_viewvolume();
   do_lights();
   do_material();
+  load_object();
   glBindBuffer(GL_ARRAY_BUFFER, mybuf[0]);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
   
@@ -258,7 +283,8 @@ void init() {
   glEnableClientState(GL_VERTEX_ARRAY);
   
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mybuf[1]);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(face), face,
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, faces_length * sizeof(GLfloat),
+               faces,
                GL_STATIC_DRAW);
 }
 
