@@ -116,11 +116,11 @@ void draw_stuff(){
   GraphicUtilities::DrawGrid(10, 1);
 //  frustum->DrawFrustum(50, 4.0/3.0, 0.1, 20);
   glUseProgram(selected_shader_id);
-  glPushMatrix();
-  glTranslated(2.5, 0, 2.5);
-  glRotated(45, 0, 1, 0);
-  glutSolidTeapot (0.5);
-  glPopMatrix();
+ // glPushMatrix();
+ // glTranslated(2.5, 0, 2.5);
+ // glRotated(45, 0, 1, 0);
+ // glutSolidTeapot (0.5);
+ // glPopMatrix();
   for (i = 0; i < 6; ++i) {
     glNormal3fv(normal[i]);
     glDrawElements(GL_QUADS, 4, GL_UNSIGNED_BYTE, (void*)(4 * i) );
