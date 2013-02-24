@@ -1,7 +1,7 @@
 #include <fstream>
 #include <cstdio>
 #include <cmath>
-#include "graphic_object.h"
+#include "GraphicObject.h"
 using std::ifstream;
 
 GraphicObject::GraphicObject() : vertex_num(0), 

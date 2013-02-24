@@ -70,7 +70,7 @@ void setup_the_viewvolume(){
 //  gluLookAt(eye.x, eye.y, eye.z, view.x, view.y, view.z, up.x, up.y, up.z);
 }
 
-GLfloat* vertices ;/*[] = {
+GLfloat vertices [] = {
   0.0, 0.0, 0.0,
   0.0, 1.0, 0.0,
   1.0, 1.0, 0.0,
@@ -79,18 +79,19 @@ GLfloat* vertices ;/*[] = {
   0.0, 1.0, 1.0,
   1.0, 1.0, 1.0,
   1.0, 0.0, 1.0,
-};*/
-GLuint* face;
-//GLubyte face[] = {
-//  4, 7, 6, 5, //front
-//  0, 3, 2, 1, //back
-//  3, 2, 6, 7, //right
-//  1, 0, 4, 5, //left
-//  5, 6, 2, 1, //top
-//  3, 7, 4, 0, //bottom
-//};
+};
+//GLuint* face;
+//Gluint faces_length;
+GLubyte face[] = {
+  4, 7, 6, 5, //front
+  0, 3, 2, 1, //back
+  3, 2, 6, 7, //right
+  1, 0, 4, 5, //left
+  5, 6, 2, 1, //top
+  3, 7, 4, 0, //bottom
+};
 GLuint normal_lenght = 0;
-GLfloat normal = {
+GLfloat normal[6][3]{
   0.0, 0.0, 1.0,
   0.0, 0.0, -1.0,
   1.0, 0.0, 0.0,
@@ -100,12 +101,12 @@ GLfloat normal = {
 };
 
 void load_object(){
-  GraphicObject* obj = new GraphicObject();
-  obj->readFile();
-  obj->calculateVectors();
-  int length = obj->getPropertiesLength();
-  vertices = obj->getProperties();
-  face = obj->getFaces(); 
+ // GraphicObject* obj = new GraphicObject();
+ // obj->readFile();
+ // obj->calculateVectors();
+ // int length = obj->getPropertiesLength();
+ // vertices = obj->getProperties();
+ // face = obj->getFaces(); 
 
 }
 
@@ -255,7 +256,7 @@ void init() {
   glBindBuffer(GL_ARRAY_BUFFER, mybuf[0]);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
   
-  //final arg is bte offset, not address
+  //final arg is byte offset, not address
   glVertexPointer(3, GL_FLOAT, 3 * sizeof(GLfloat), 0);
   glEnableClientState(GL_VERTEX_ARRAY);
   
