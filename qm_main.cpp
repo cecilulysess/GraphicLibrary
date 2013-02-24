@@ -12,6 +12,8 @@ int main(int argc, char** argv) {
   ob->calculateVectors();
   //ob->getProperties();
   //ob->test();
+  int length1 = ob->getPropertiesLength();
+  int length2 = ob->getFacesLength();
 
   
   
