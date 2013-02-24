@@ -75,14 +75,12 @@ public:
   void calculateVectors();
   void test();
   float* getProperties();
-  int* getFaces();
+  unsigned int* getFaces();
   float** getNormalization();
-  inline int getPropertiesLength() { return vertex_num; }
-  inline int getFacesLength() { return element_face_num; }
-  //int* getFaces();
-  //int** getNormalization();
-  //inline vector<Property> getProperties() { return properties; }
-  //inline vector<ElementFace> getFaces() { return faces; }
+  float* getFaceNormalization();
+  float* getPointNormalization();
+  inline int getPropertiesLength() { return vertex_num*3; }
+  inline int getFacesLength() { return element_face_num*3; }
 private:
   int vertex_num;
   int element_face_num;
@@ -91,7 +89,10 @@ private:
   kPoint* results;
   kPoint* optimal_results;
   float* array_properties;
-  int* array_faces;
+  unsigned int* array_faces;
   float** array_normalization;
+  kPoint* face_normal;
+  float* array_face_normalization;
+  float* array_point_normalization;
 };
 #endif

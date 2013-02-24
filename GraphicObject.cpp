@@ -12,12 +12,24 @@ GraphicObject::GraphicObject() : vertex_num(0),
                                  optimal_results(),
                                  array_properties(),
                                  array_faces(),
-                                 array_normalization()
+                                 array_normalization(),
+                                 face_normal(),
+                                 array_face_normalization(),
+                                 array_point_normalization()
 { }
 
 GraphicObject::~GraphicObject() {
   properties.clear();
   faces.clear();
+  //delete results;
+  //delete optimal_results;
+  delete array_properties;
+  delete array_faces;
+  for (int i=0; i<vertex_num; i++) 
+    delete array_normalization[i];
+  delete array_normalization;
+  delete array_face_normalization;
+  delete array_point_normalization;
 }
 
 void GraphicObject::readFile() {
@@ -50,6 +62,7 @@ void GraphicObject::calculateVectors() {
   //vertices.reserve(vertex_num);
   vector<kPoint> vertices[vertex_num];
   kPoint p0, p1, p2, v1, v2, vp; // vp: vertex point
+  face_normal = new kPoint[faces.size()];
   for (int i=0; i<faces.size(); i++) {
     // First Point
     p0.x = properties[faces[i].x].x;
@@ -78,6 +91,10 @@ void GraphicObject::calculateVectors() {
     v2 = p1 - p2;
     vp = v1 * v2;
     vertices[faces[i].z].push_back(vp);
+    // get face normal
+    face_normal[i].x = vp.x/sqrt(vp.x*vp.x + vp.y*vp.y + vp.z*vp.z);
+    face_normal[i].y = vp.y/sqrt(vp.x*vp.x + vp.y*vp.y + vp.z*vp.z);
+    face_normal[i].z = vp.z/sqrt(vp.x*vp.x + vp.y*vp.y + vp.z*vp.z);
   }
   // test correctness
   cout << "the vertices[50] size: " << vertices[50].size() << endl;
@@ -114,7 +131,7 @@ float* GraphicObject::getProperties() {
   return array_properties; 
 }
 
-int* GraphicObject::getFaces() {
+unsigned int* GraphicObject::getFaces() {
   vector<int> vf;
   for (int i=0; i<element_face_num; i++) {
     vf.push_back(faces[i].x);  
@@ -122,12 +139,41 @@ int* GraphicObject::getFaces() {
     vf.push_back(faces[i].z);  
   }
   int length = vf.size(); 
-  array_faces = new int[length];
+  array_faces = new unsigned int[length];
   for (int i=0; i<length; i++) array_faces[i] = vf[i];
   return array_faces;
 }
 
-float** GraphicObject::getNormalization() {
+float* GraphicObject::getFaceNormalization() {
+  vector<float> vfn;
+  for (int i=0; i<element_face_num; i++) {
+    vfn.push_back(face_normal[i].x);  
+    vfn.push_back(face_normal[i].y);  
+    vfn.push_back(face_normal[i].z);  
+  }
+  int length = vfn.size();
+  array_face_normalization = new float[length];
+  for (int i=0; i<length; i++) array_face_normalization[i] = vfn[i];
+  return array_face_normalization;
+}
+
+float* GraphicObject::getPointNormalization() {
+  vector<float> vpn;
+  for (int i=0; i<vertex_num; i++) {
+    vpn.push_back(optimal_results[i].x);  
+    vpn.push_back(optimal_results[i].y);  
+    vpn.push_back(optimal_results[i].z);  
+  }
+  int length = vpn.size();
+  array_point_normalization = new float[length];
+  for (int i=0; i<length; i++) {
+    array_point_normalization[i] = vpn[i];
+    cout << array_point_normalization[i];
+  }
+  return array_point_normalization;
+}
+
+float** GraphicObject::getNormalization() { // the same as getPontNormalization, but 2D
   array_normalization = new float*[vertex_num];
   for (int i=0; i<vertex_num; i++) array_normalization[i] = new float[3];
   for (int i=0; i<vertex_num; i++) {
@@ -139,6 +185,7 @@ float** GraphicObject::getNormalization() {
 }
 
 void GraphicObject::test() {
+  /*
   // check if the content read from the file is correct
   cout << "x in first vertex element: " << properties[0].x << endl;
   int size = faces.size() - 1;
@@ -150,5 +197,9 @@ void GraphicObject::test() {
   float* array = getProperties();
   for (int i=0; i<vertex_num*3; i++) {
     cout << array[i] << endl;
-  }
+  }*/
+  //cout << array_face_normalization[0] << endl;
+  //cout << array_point_normalization[0] << endl;
+  //for (int i=0; i<element_face_num; i++) cout << array_face_normalization[i] << endl;
+  //for (int i=0; i<vertex_num*3; i++) cout << array_point_normalization[i] << endl;
 }
