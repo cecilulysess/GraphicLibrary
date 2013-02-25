@@ -15,3 +15,7 @@
 # unknown files
 *.swp
 *.gch
+
+# developing test main file
+qm_main.cpp
+yx_main.cpp
