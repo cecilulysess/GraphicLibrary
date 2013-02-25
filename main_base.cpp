@@ -113,22 +113,16 @@ GLfloat vertices_number;
 GLuint* faces;
 GLuint faces_length;
 GLfloat* normal;
-GLuint normal_length;
+int normal_length;
 GLuint vertices_normal_length;
 GLfloat* vertices_normal;
 
 void load_object(){
   GraphicObject* obj = new GraphicObject();
-  obj->readFile();
-  obj->calculateVectors();
-  vertices_number = obj->getPropertiesLength();
-  vertices = obj-> getProperties();
-  faces_length = obj->getFacesLength();
-  faces = obj->getFaces();
-  normal_length = faces_length;
-  normal = obj->getFaceNormalization();
-  vertices_normal_length = vertices_number;
-  vertices_normal = obj->getPointNormalization();
+  obj->execute();
+  vertices = obj->getVertexPointer();
+  vertices_normal = obj->getNormalPointer();
+  normal_length = obj->getNormalLength();
 }
 
 void draw_stuff(){
@@ -140,16 +134,30 @@ void draw_stuff(){
   GraphicUtilities::DrawGrid(10, 1);
 //  frustum->DrawFrustum(50, 4.0/3.0, 0.1, 20);
   glUseProgram(selected_shader_id);
+ 
+  /*glPushMatrix();
+  glTranslatef(0.03,-0.1,0.0);
+
+  glEnableClientState(GL_VERTEX_ARRAY);
+  glEnableClientState(GL_NORMAL_ARRAY);
+  glVertexPointer(3, GL_FLOAT, 0, vertices);
+  glNormalPointer(GL_FLOAT, 0, vertices_normal);
+  glDrawArrays(GL_TRIANGLES, 0, normal_length);
+  glDisableClientState(GL_VERTEX_ARRAY);
+  glDisableClientState(GL_NORMAL_ARRAY);
+
+  glPopMatrix();
+  glFlush();*/
  // glPushMatrix();
  // glTranslated(2.5, 0, 2.5);
  // glRotated(45, 0, 1, 0);
  // glutSolidTeapot (0.5);
  // glPopMatrix();
-  for (i = 0; i < faces_length; ++i) {
+  /*for (i = 0; i < faces_length; ++i) {
     glNormal3fv(&normal[i]);
     glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (void*)(3 * i) );
   }
-  glFlush();
+  glFlush();*/
 }
 
 void do_lights(){

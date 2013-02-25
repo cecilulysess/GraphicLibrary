@@ -20,9 +20,9 @@ struct Property {
 
 struct ElementFace {
   int coordinate;
-  int x;
-  int y;
-  int z;
+  int p1;
+  int p2;
+  int p3;
 };
 
 class kPoint {
@@ -72,27 +72,22 @@ public:
   GraphicObject();
   ~GraphicObject();
   void readFile();
-  void calculateVectors();
+  void calculateVectorsStep1();
+  void calculateVectorsStep2();
+  void calculateVectorsStep3();
+  void execute();
+  kPoint getNormal(kPoint, kPoint, kPoint);
+  float* getVertexPointer() { return array_triangles; }
+  float* getNormalPointer() { return array_normalization; }
   void test();
-  float* getProperties();
-  unsigned int* getFaces();
-  float** getNormalization();
-  float* getFaceNormalization();
-  float* getPointNormalization();
-  inline int getPropertiesLength() { return vertex_num*3; }
-  inline int getFacesLength() { return element_face_num*3; }
+
 private:
   int vertex_num;
   int element_face_num;
   vector<Property> properties;    
   vector<ElementFace> faces;
-  kPoint* results;
-  kPoint* optimal_results;
-  float* array_properties;
-  unsigned int* array_faces;
-  float** array_normalization;
-  kPoint* face_normal;
-  float* array_face_normalization;
-  float* array_point_normalization;
+  float* array_normalization;
+  float* sum_normalization;
+  float* array_triangles;
 };
 #endif
