@@ -65,15 +65,15 @@ void setup_the_viewvolume(){
   up.x = 0.0, up.y = 1.0, up.z = 0.0;
   glRotated(0, 0, 0, 1);
   glRotated(0, 1, 0, 0);
-  glRotated(-45, 0, 1, 0);
-  glTranslated(-5, -0.5, -5);
+  glRotated(-130, 0, 1, 0);
+  glTranslated(-5, -0.5, 5);
 //  gluLookAt(eye.x, eye.y, eye.z, view.x, view.y, view.z, up.x, up.y, up.z);
 }
 
 void set_uniform_parameters(unsigned int p){
   int location;
   location = glGetUniformLocation(p, "eye_position");
-  glUniform3f(location, -5, -0.5, -5);
+  glUniform3f(location, -5, -0.5, 5);
   location = glGetUniformLocation(p, "light_position");
   glUniform3f(location, 4.0, 4.0, 4.0); 
 }
@@ -124,7 +124,7 @@ void load_object(const char* path){
   vertices = obj->getVertexPointer();
   vertices_normal = obj->getNormalPointer();
   normal_length = obj->getNormalLength();
-  faces_length = obj->getNormalLength()/3;
+  faces_length = obj->getNormalLength();
   obj->PrintAll();
 }
 
@@ -140,9 +140,9 @@ void draw_stuff(){
   
   glEnableClientState(GL_VERTEX_ARRAY); 
   glEnableClientState(GL_NORMAL_ARRAY);
-  glVertexPointer(3,GL_FLOAT, 0, vertices); 
-  glNormalPointer(GL_FLOAT, 0, vertices_normal);
-  glDrawArrays(GL_TRIANGLES, 0, 3 * faces_length); 
+  glVertexPointer(3,GL_FLOAT, 3 * sizeof(GLfloat), vertices); 
+  glNormalPointer(GL_FLOAT, 3 * sizeof(GLfloat), vertices_normal);
+  glDrawArrays(GL_TRIANGLES, 0, faces_length / 3 ); 
   glDisableClientState(GL_VERTEX_ARRAY);    
   glDisableClientState(GL_NORMAL_ARRAY); 
  // glPushMatrix();

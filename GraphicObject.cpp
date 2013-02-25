@@ -169,9 +169,22 @@ void GraphicObject::test() {
 }
 
 void GraphicObject::PrintAll() {
-  cout<<"Vertexs:"<<endl;
+  cout<<"Vertexs:"<<vertex_num<<endl;
   for (int i = 0; i < vertex_num; ++i) {
     Property& p = properties[i];
     printf("(%f, %f, %f)\n", p.x, p.y, p.z);
   }
+ cout<<"VertexPointerArray:"<<3*element_face_num<<endl;
+  for (int i = 0; i < 9*element_face_num - 2; i+=3) {
+    
+    printf("(%f, %f, %f)\n", array_triangles[i], array_triangles[i+1], array_triangles[i+2]);
+  }
+
+cout<<"NormalArray:"<<3*element_face_num<<endl;
+ float* na = array_normalization;
+  for (int i = 0; i < 9*element_face_num - 2; i+=3) {
+    float norm = sqrt(na[i] * na[i] +  na[i+1] * na[i+1] + na[i + 2] * na[i+2]); 
+    printf("(%f, %f, %f) : norm: %f\n", na[i], na[i+1], na[i+2], norm );
+  }
+
 }

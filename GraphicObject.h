@@ -79,7 +79,7 @@ public:
   kPoint getNormal(kPoint, kPoint, kPoint);
   float* getVertexPointer() { return array_triangles; }
   float* getNormalPointer() { return array_normalization;}
-  int getNormalLength() { return 3*element_face_num; }
+  int getNormalLength() { return 9*element_face_num; }
   void test();
   void PrintAll();
 private:
