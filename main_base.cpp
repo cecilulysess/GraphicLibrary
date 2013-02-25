@@ -119,6 +119,7 @@ GLfloat* vertices_normal;
 
 void load_object(){
   GraphicObject* obj = new GraphicObject();
+  obj->readFile();
   obj->execute();
   vertices = obj->getVertexPointer();
   vertices_normal = obj->getNormalPointer();
