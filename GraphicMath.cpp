@@ -19,25 +19,25 @@ using std::endl;
 
 
 
-Vec3d::Vec3d(std::initializer_list<double> il) : Vector<double>(il){
+Vec3d::Vec3d(std::initializer_list<double> il) : Vector_<double>(il){
   if (il.size() != 3) {
     throw "Illigal parameter length";
   }
 }
 
-Vec3d::Vec3d(const Vec3d& li) : Vector<double>(li) {
+Vec3d::Vec3d(const Vec3d& li) : Vector_<double>(li) {
   if (li.size() != 3) {
     throw "Illigal parameter length";
   }
 }
 
-Vec3d::Vec3d(Vector<double> vec) : Vector<double>(3){
+Vec3d::Vec3d(Vector_<double> vec) : Vector_<double>(3){
   this->x() = vec[0];
   this->y() = vec[1];
   this->z() = vec[2];
 }
 
-Vec3d::Vec3d() : Vector<double>(3){
+Vec3d::Vec3d() : Vector_<double>(3){
   this->x() = 0.0;
   this->y() = 0.0; 
   this->z() = 0.0;

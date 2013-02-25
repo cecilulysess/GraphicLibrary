@@ -23,243 +23,243 @@ using std::equal;
 
 // 
 // Base class of vectors, don't use this class
-template <class T>
-class Vector {
-public:
-  explicit Vector(int n) {
-    this->n = n;
-    this->vec = vector<T>();
-  }
-  
-  Vector(const Vector<T>& li){
-    this->n = li.n;
-    for (typename std::vector<T>::const_iterator it = li.vec.begin();
-          it != li.vec.end(); ++it) {
-      vec.push_back(*it);
-    }
-  }
-  
-  Vector(std::initializer_list<T> il) {
-    if (il.size() > 0){
-      this->n = (int)il.size();
-      this->vec = vector<T>();
-      for (const T* it = il.begin(); it != il.end(); ++it) {
-        vec.push_back(*it);
-      }
-    } else {
-      this->n = 0;              //default
-      this->vec = vector<T>(); 
-    }
-  }
-  
-  virtual ~Vector(){
-  }
-  
-  typename std::vector<T>::const_iterator begin() const {
-    return vec.begin();
-  }
-  
-  typename std::vector<T>::const_iterator end() const {
-    return vec.end();
-  }
-  
-  Vector<T>& operator-=(const Vector<T>& v) {
-    if (this->n != v.n) {
-      throw "Unmatched vector length for operator-";
-    }
-    for (int i = 0; i < this->n; ++i ) {
-      this->vec[i] -= v.vec[i];
-    }
-    return *this;
-  }
-  
-  const Vector<T>& operator-(const Vector<T>& v) const {
-    Vector<T> * res = new Vector<T>(*this);
-    *res -= v;
-    return *res;
-  }
-  
-  Vector<T>& operator+=(const Vector<T>& v) {
-    if (this->n != v.n) {
-      throw "Unmatched vector length for operator-";
-    }
-    for (int i = 0; i < this->n; ++i ) {
-      this->vec[i] += v.vec[i];
-    }
-    return *this;
-  }
-  
-  const Vector<T>& operator+(const Vector<T>& v) const {
-    Vector<T> * res = new Vector<T>(*this);
-    *res += v;
-    return *res;
-  }
-  
-  Vector<T>& operator=(const Vector<T>& v) {
-    if (this != &v) {
-      this->vec.clear();
-      this->n = v.n;
-      for ( int i = 0; i < n; ++i ) {
-        this->vec.push_back(v.vec[i]);
-      }
-    }
-    return *this;
-  }
-  
-  // Dot product
-  T& operator*=(const Vector<T>& v) {
-    if ( this->n != v.n ) {
-      throw "Vector Length not match";
-    }
-    T res = this->vec[0] * v.vec[0];
-    for ( int i = 1 ; i < n ; ++ i) {
-      res += this->vec[i] * v.vec[i];
-    }
-    return res;
-  };
-  
-  const T& operator*(const Vector<T>& v) const {
-    Vector<T>* res = new Vector<T>(*this);
-    return *res *= v;
-  }
-  
-  Vector<T>& operator*=(const T& e) {
-    for (int i = 0; i < n; ++i) {
-      vec[i] *= e;
-    }
-    return *this;
-  }
-  
-  
-  // Cross product
-  Vector<T>& operator%=(const Vector<T>& v) {
-    if ( this->n != v.n || this->n != 3 ) {
-      throw "Illigle cross product";
-    }
-    T a1 = this->vec[0], a2 = this->vec[1], a3 = this->vec[2];
-    T b1 = v.vec[0], b2 = v.vec[1], b3 = v.vec[2];
-    this->vec.clear();
-    this->vec.push_back(a2 * b3 - a3 * b2);
-    this->vec.push_back( - (a1 * b3 - a3 * b1));
-    this->vec.push_back( a1 * b2 - a2 * b1 );
-    return *this;
-  }
-  
-  const Vector<T>& operator%(const Vector<T>& v) const {
-    Vector<T> * res = new Vector<T>(*this);
-    *res %= v;
-    return *res;
-  }
-
-  
-  
-  // do a element-wise mulitplication with v
-  const Vector<T>& ele_mult(const Vector<T>& v) const {
-    if ( this-> n != v.n ) {
-      throw "Unmatched vector length";
-    }
-    Vector<T> * res = new Vector<T>(*this);
-    for (int i = 0; i < n ; ++i) {
-      (*res)[i] *= v[i];
-    }
-    return *res;
-  }
-  
-  T& operator[](const int idx) {
-    if (idx < 0 || idx > vec.size() ) {
-      throw "Invalid idx";
-    }
-    return this->vec[idx];
-  }
-  
-  const T& operator[](const int idx) const {
-    if (idx < 0 || idx > vec.size() ) {
-      throw "Invalid idx";
-    }
-    return this->vec[idx];
-  }
-  
-  void ShowVector() const {
-    for ( T& e : vec) {
-      cout<<e<<"\t";
-    }
-    cout<<endl;
-  }
-  
-  int size() const{
-    return n;
-  }
-  
-  
-  
-protected:
-  vector<T> vec;
-  int n;
-};
-
-template <class T> bool operator==(const Vector<T>& a, const Vector<T>& b) {
-  
-  if (a.size() != b.size()) return false;
-  typename std::vector<T>::const_iterator ita = a.begin();
-  typename std::vector<T>::const_iterator itb = b.begin();
-  for ( ; ita != a.end(); ++ita, ++itb){
-    // a tricky wrapper
-    if ( !(*ita == *itb || *ita - *itb < 1e-9)) {
-      return false;
-    }
-  }
-  return true;
-}
-
-//======================Vector base==============================
-// A 3d vector class with doulbe value as element type.
-//  This is a good type to use when you want good accuracy
-//  Can be initalized by Vec3d pt = {1, 3, 5};
-// Methods:
-//  Vec3d v = {1, 2, 3} // greate a vector with x == 1, y == 2
-//    z == 3
-//  Vec3d t(v)
-//  t =  -v * 3;
-//  t =  3 * -v;
-//  t = t % v  // cross product 
-//  t %= v     // t = t % v
-//  t *= 3     // t = t * 3
-//  t.Norm()   // get t's norm
-//  t.Normalize() //return a copy of normalized t
-//  t.x(), t.y(), t.z()  // get xyz component
-//  t[0], t[1], t[2] // access xyz component
-class Vec3d : public Vector<double> {
-public:
-  Vec3d(std::initializer_list<double> il);
-  Vec3d(const Vec3d& li);
-  Vec3d();
-  // create a Vec3d from vec
-  explicit Vec3d(Vector<double> vec);
-  
-  Vec3d& operator-() const;
-  friend Vec3d& operator*(const double e, const Vec3d& v);
-  friend Vec3d& operator*(const Vec3d& v, const double e);
-  Vec3d& operator+=(const Vec3d& v);
-  Vec3d& operator-=(const Vec3d& v);
-  const Vec3d& operator+(const Vec3d& v) const;
-  const Vec3d& operator-(const Vec3d& v) const;
-  
-  // Auxillary getter
-  double x() const ;
-  double& x();
-  double y() const ;
-  double& y();
-  double z() const ;
-  double& z();
-  
-  //return the norm of this vector
-  double Norm() const;
-  //return the normalized version of this vector
-  Vec3d& Normalize();
-};
-
-
-//==============================End of Vector================================
+ template <class T>
+ class Vector_ {
+ public:
+   explicit Vector_(int n) {
+     this->n = n;
+     this->vec = vector<T>();
+   }
+   
+   Vector_(const Vector_<T>& li){
+     this->n = li.n;
+     for (typename std::vector<T>::const_iterator it = li.vec.begin();
+           it != li.vec.end(); ++it) {
+       vec.push_back(*it);
+     }
+   }
+   
+   Vector_(std::initializer_list<T> il) {
+     if (il.size() > 0){
+       this->n = (int)il.size();
+       this->vec = vector<T>();
+       for (const T* it = il.begin(); it != il.end(); ++it) {
+         vec.push_back(*it);
+       }
+     } else {
+       this->n = 0;              //default
+       this->vec = vector<T>(); 
+     }
+   }
+   
+   virtual ~Vector_(){
+   }
+   
+   typename std::vector<T>::const_iterator begin() const {
+     return vec.begin();
+   }
+   
+   typename std::vector<T>::const_iterator end() const {
+     return vec.end();
+   }
+   
+   Vector_<T>& operator-=(const Vector_<T>& v) {
+     if (this->n != v.n) {
+       throw "Unmatched vector length for operator-";
+     }
+     for (int i = 0; i < this->n; ++i ) {
+       this->vec[i] -= v.vec[i];
+     }
+     return *this;
+   }
+   
+   const Vector_<T>& operator-(const Vector_<T>& v) const {
+     Vector_<T> * res = new Vector_<T>(*this);
+     *res -= v;
+     return *res;
+   }
+   
+   Vector_<T>& operator+=(const Vector_<T>& v) {
+     if (this->n != v.n) {
+       throw "Unmatched vector length for operator-";
+     }
+     for (int i = 0; i < this->n; ++i ) {
+       this->vec[i] += v.vec[i];
+     }
+     return *this;
+   }
+   
+   const Vector_<T>& operator+(const Vector_<T>& v) const {
+     Vector_<T> * res = new Vector_<T>(*this);
+     *res += v;
+     return *res;
+   }
+   
+   Vector_<T>& operator=(const Vector_<T>& v) {
+     if (this != &v) {
+       this->vec.clear();
+       this->n = v.n;
+       for ( int i = 0; i < n; ++i ) {
+         this->vec.push_back(v.vec[i]);
+       }
+     }
+     return *this;
+   }
+   
+   // Dot product
+   T& operator*=(const Vector_<T>& v) {
+     if ( this->n != v.n ) {
+       throw "Vector_ Length not match";
+     }
+     T res = this->vec[0] * v.vec[0];
+     for ( int i = 1 ; i < n ; ++ i) {
+       res += this->vec[i] * v.vec[i];
+     }
+     return res;
+   };
+   
+   const T& operator*(const Vector_<T>& v) const {
+     Vector_<T>* res = new Vector_<T>(*this);
+     return *res *= v;
+   }
+   
+   Vector_<T>& operator*=(const T& e) {
+     for (int i = 0; i < n; ++i) {
+       vec[i] *= e;
+     }
+     return *this;
+   }
+   
+   
+   // Cross product
+   Vector_<T>& operator%=(const Vector_<T>& v) {
+     if ( this->n != v.n || this->n != 3 ) {
+       throw "Illigle cross product";
+     }
+     T a1 = this->vec[0], a2 = this->vec[1], a3 = this->vec[2];
+     T b1 = v.vec[0], b2 = v.vec[1], b3 = v.vec[2];
+     this->vec.clear();
+     this->vec.push_back(a2 * b3 - a3 * b2);
+     this->vec.push_back( - (a1 * b3 - a3 * b1));
+     this->vec.push_back( a1 * b2 - a2 * b1 );
+     return *this;
+   }
+   
+   const Vector_<T>& operator%(const Vector_<T>& v) const {
+     Vector_<T> * res = new Vector_<T>(*this);
+     *res %= v;
+     return *res;
+   }
+ 
+   
+   
+   // do a element-wise mulitplication with v
+   const Vector_<T>& ele_mult(const Vector_<T>& v) const {
+     if ( this-> n != v.n ) {
+       throw "Unmatched vector length";
+     }
+     Vector_<T> * res = new Vector_<T>(*this);
+     for (int i = 0; i < n ; ++i) {
+       (*res)[i] *= v[i];
+     }
+     return *res;
+   }
+   
+   T& operator[](const int idx) {
+     if (idx < 0 || idx > vec.size() ) {
+       throw "Invalid idx";
+     }
+     return this->vec[idx];
+   }
+   
+   const T& operator[](const int idx) const {
+     if (idx < 0 || idx > vec.size() ) {
+       throw "Invalid idx";
+     }
+     return this->vec[idx];
+   }
+   
+   void ShowVector_() const {
+     for ( T& e : vec) {
+       cout<<e<<"\t";
+     }
+     cout<<endl;
+   }
+   
+   int size() const{
+     return n;
+   }
+   
+   
+   
+ protected:
+   vector<T> vec;
+   int n;
+ };
+ 
+ template <class T> bool operator==(const Vector_<T>& a, const Vector_<T>& b) {
+   
+   if (a.size() != b.size()) return false;
+   typename std::vector<T>::const_iterator ita = a.begin();
+   typename std::vector<T>::const_iterator itb = b.begin();
+   for ( ; ita != a.end(); ++ita, ++itb){
+     // a tricky wrapper
+     if ( !(*ita == *itb || *ita - *itb < 1e-9)) {
+       return false;
+     }
+   }
+   return true;
+ }
+ 
+ //======================Vector_ base==============================
+ // A 3d vector class with doulbe value as element type.
+ //  This is a good type to use when you want good accuracy
+ //  Can be initalized by Vec3d pt = {1, 3, 5};
+ // Methods:
+ //  Vec3d v = {1, 2, 3} // greate a vector with x == 1, y == 2
+ //    z == 3
+ //  Vec3d t(v)
+ //  t =  -v * 3;
+ //  t =  3 * -v;
+ //  t = t % v  // cross product 
+ //  t %= v     // t = t % v
+ //  t *= 3     // t = t * 3
+ //  t.Norm()   // get t's norm
+ //  t.Normalize() //return a copy of normalized t
+ //  t.x(), t.y(), t.z()  // get xyz component
+ //  t[0], t[1], t[2] // access xyz component
+ class Vec3d : public Vector_<double> {
+ public:
+   Vec3d(std::initializer_list<double> il);
+   Vec3d(const Vec3d& li);
+   Vec3d();
+   // create a Vec3d from vec
+   explicit Vec3d(Vector_<double> vec);
+   
+   Vec3d& operator-() const;
+   friend Vec3d& operator*(const double e, const Vec3d& v);
+   friend Vec3d& operator*(const Vec3d& v, const double e);
+   Vec3d& operator+=(const Vec3d& v);
+   Vec3d& operator-=(const Vec3d& v);
+   const Vec3d& operator+(const Vec3d& v) const;
+   const Vec3d& operator-(const Vec3d& v) const;
+   
+   // Auxillary getter
+   double x() const ;
+   double& x();
+   double y() const ;
+   double& y();
+   double z() const ;
+   double& z();
+   
+   //return the norm of this vector
+   double Norm() const;
+   //return the normalized version of this vector
+   Vec3d& Normalize();
+ };
+ 
+ 
+//==============================End of Vector_================================
 // A matrix which contains doulbe as its element type.
 class Matrixd {
 public:

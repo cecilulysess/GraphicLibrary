@@ -23,6 +23,7 @@
 #include "common_data_structure.h"
 #include "GraphicUtilities.h"
 #include "GraphicObject.h"
+#include "Camera.h"
 
 #ifdef MAIN_PROG
 //#define TESTING_
@@ -41,16 +42,12 @@ int AALevel = 4;
 bool WantToRedraw = false;
 double focus = 6.0;
 
-struct point {
-  float x, y, z;
-};
 
 Frustum* frustum;
 std::vector<GLuint> shaders;
 GLuint selected_shader_id = 0;
 
 void setup_the_viewvolume(){
-  struct point eye, view, up;
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
 //  gluPerspective(45, (float)WIDTH / (float)HEIGHT, 0.1 , 100.0);
@@ -60,9 +57,9 @@ void setup_the_viewvolume(){
 //  glFrustum(-0.2, 0.2, -0.15, 0.15, 0.1, 20);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  eye.x = 4.0, eye.y = 4.0, eye.z = 4.0;
+  /*eye.x = 4.0, eye.y = 4.0, eye.z = 4.0;
   view.x = 0.0, view.y = 0.0, view.z = 0.0;
-  up.x = 0.0, up.y = 1.0, up.z = 0.0;
+  up.x = 0.0, up.y = 1.0, up.z = 0.0;*/
   glRotated(0, 0, 0, 1);
   glRotated(0, 1, 0, 0);
   glRotated(-130, 0, 1, 0);

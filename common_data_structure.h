@@ -13,8 +13,8 @@
 #include "GraphicMath.h"
 
 //A alias for 3d point
-typedef Vec3d Point;
-typedef Vec3d Normal;
+//typedef Vec3d Point;
+//typedef Vec3d Normal;
 
 namespace GL_CONTROL_DEF {
   const unsigned int KAA_MARKER = 0x1;

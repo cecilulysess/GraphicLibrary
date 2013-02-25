@@ -64,7 +64,7 @@ public:
   static void DrawGrid(float size, float step);
 };
 
-class Camera {
+/*class Camera {
 public:
   float near_plane();
   float far_plane();
@@ -75,9 +75,7 @@ private:
   float _far_plane;
   float _fov;
   
-  
-  
-};
+};*/
 
 
 #endif /* defined(__Graphic__GraphicUtilities__) */

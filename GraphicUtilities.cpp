@@ -360,11 +360,11 @@ void GraphicUtilities::DrawGrid(float size, float step) {
   glEnable(GL_LIGHTING);
 }
 
-
+/*
 inline float Camera::near_plane() { return _near_plane; }
 
 inline float Camera::far_plane() { return  _far_plane; }
 
 inline float Camera::fov() { return _fov; }
 
-
+*/

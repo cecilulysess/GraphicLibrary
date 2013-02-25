@@ -52,7 +52,7 @@ GraphicObject.o: GraphicObject.${C} GraphicObject.${H}
 	${CC} $(CFLAGS) -c GraphicObject.${C}
 
 GraphicMath.o: GraphicMath.${C} GraphicMath.${H}
-	${CC} $(CFLAGS) -c GraphicMath.${C}
+	${CC} ${CFLAGS) -c GraphicMath.${C}
 
 debug:
 	make 'DFLAGS = /usr/lib/debug/malloc.o'
