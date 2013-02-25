@@ -81,7 +81,7 @@ public:
   float* getNormalPointer() { return array_normalization;}
   int getNormalLength() { return 3*element_face_num; }
   void test();
-
+  void PrintAll();
 private:
   int vertex_num;
   int element_face_num;

@@ -124,6 +124,7 @@ void load_object(){
   vertices = obj->getVertexPointer();
   vertices_normal = obj->getNormalPointer();
   normal_length = obj->getNormalLength();
+  obj->PrintAll();
 }
 
 void draw_stuff(){
@@ -135,7 +136,7 @@ void draw_stuff(){
   GraphicUtilities::DrawGrid(10, 1);
 //  frustum->DrawFrustum(50, 4.0/3.0, 0.1, 20);
   glUseProgram(selected_shader_id);
- 
+  
   /*glPushMatrix();
   glTranslatef(0.03,-0.1,0.0);
 

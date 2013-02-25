@@ -2,7 +2,10 @@
 #include <cstdio>
 #include <cmath>
 #include "GraphicObject.h"
+#include <stdio.h>
 using std::ifstream;
+using std::cout;
+using std::endl;
 
 GraphicObject::GraphicObject() : vertex_num(0), 
                                  element_face_num(0),
@@ -23,7 +26,7 @@ GraphicObject::~GraphicObject() {
 
 void GraphicObject::readFile() {
   ifstream myFile;
-  myFile.open("bunny.ply");
+  myFile.open("test.ply");
   float test_num;
   string ply, format, ascii, trash; float fl;
   myFile >> ply >> format >> ascii >> fl;
@@ -163,4 +166,12 @@ void GraphicObject::execute() {
 
 void GraphicObject::test() {
  
+}
+
+void GraphicObject::PrintAll() {
+  cout<<"Vertexs:"<<endl;
+  for (int i = 0; i < vertex_num; ++i) {
+    Property& p = properties[i];
+    printf("(%f, %f, %f)\n", p.x, p.y, p.z);
+  }
 }
