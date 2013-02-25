@@ -117,13 +117,14 @@ int normal_length;
 GLuint vertices_normal_length;
 GLfloat* vertices_normal;
 
-void load_object(){
+void load_object(const char* path){
   GraphicObject* obj = new GraphicObject();
-  obj->readFile();
+  obj->readFile(path);
   obj->execute();
   vertices = obj->getVertexPointer();
   vertices_normal = obj->getNormalPointer();
   normal_length = obj->getNormalLength();
+  faces_length = obj->getNormalLength()/3;
   obj->PrintAll();
 }
 
@@ -137,19 +138,13 @@ void draw_stuff(){
 //  frustum->DrawFrustum(50, 4.0/3.0, 0.1, 20);
   glUseProgram(selected_shader_id);
   
-  /*glPushMatrix();
-  glTranslatef(0.03,-0.1,0.0);
-
-  glEnableClientState(GL_VERTEX_ARRAY);
+  glEnableClientState(GL_VERTEX_ARRAY); 
   glEnableClientState(GL_NORMAL_ARRAY);
-  glVertexPointer(3, GL_FLOAT, 0, vertices);
+  glVertexPointer(3,GL_FLOAT, 0, vertices); 
   glNormalPointer(GL_FLOAT, 0, vertices_normal);
-  glDrawArrays(GL_TRIANGLES, 0, normal_length);
-  glDisableClientState(GL_VERTEX_ARRAY);
-  glDisableClientState(GL_NORMAL_ARRAY);
-
-  glPopMatrix();
-  glFlush();*/
+  glDrawArrays(GL_TRIANGLES, 0, 3 * faces_length); 
+  glDisableClientState(GL_VERTEX_ARRAY);    
+  glDisableClientState(GL_NORMAL_ARRAY); 
  // glPushMatrix();
  // glTranslated(2.5, 0, 2.5);
  // glRotated(45, 0, 1, 0);
@@ -280,12 +275,12 @@ void SetShadersOrDie(std::vector<GLuint>& shaders){
 }
 
 
-void init() {
+void init(const char* model_path) {
   setup_the_viewvolume();
   do_lights();
   do_material();
-  load_object();
-  glBindBuffer(GL_ARRAY_BUFFER, mybuf[0]);
+  load_object(model_path);
+  /*glBindBuffer(GL_ARRAY_BUFFER, mybuf[0]);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
   
   //final arg is bte offset, not address
@@ -295,7 +290,8 @@ void init() {
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mybuf[1]);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, faces_length * sizeof(GLfloat),
                faces,
-               GL_STATIC_DRAW);
+              GL_STATIC_DRAW);
+  */
 }
 
 
@@ -387,12 +383,12 @@ int main(int argc, char* argv[]){
   test_Vector();
   test_Matrix();
 #endif
-  //  if(argc != 2){
-  //    fprintf(stderr, "usage: bounce paramfile\n");
-  //    exit(1);
-  //  }
-  //  LoadParameters(argv[1]);
-  //  parafile = argv[1];
+  if(argc != 2){
+    fprintf(stderr, "usage: show_object object.ply\n");
+    exit(1);
+  }
+  //LoadParameters(argv[1]);
+  //parafile = argv[1];
   
   
   // start up the glut utilities
@@ -411,7 +407,7 @@ int main(int argc, char* argv[]){
   glutCreateWindow("New Animation");
   
   // initialize the camera and such
-  init();
+  init(argv[1]);
   
   // set up the callback routines to be called when glutMainLoop() detects
   // an event

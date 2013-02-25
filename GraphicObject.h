@@ -71,7 +71,7 @@ class GraphicObject {
 public:
   GraphicObject();
   ~GraphicObject();
-  void readFile();
+  void readFile(const char* path);
   void calculateVectorsStep1();
   void calculateVectorsStep2();
   void calculateVectorsStep3();

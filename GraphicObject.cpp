@@ -24,9 +24,9 @@ GraphicObject::~GraphicObject() {
   delete array_triangles;
 }
 
-void GraphicObject::readFile() {
+void GraphicObject::readFile(const char* path) {
   ifstream myFile;
-  myFile.open("test.ply");
+  myFile.open(path);
   float test_num;
   string ply, format, ascii, trash; float fl;
   myFile >> ply >> format >> ascii >> fl;
@@ -158,7 +158,7 @@ void GraphicObject::calculateVectorsStep3() {
 }
 
 void GraphicObject::execute() {
-  readFile();
+  //readFile();
   calculateVectorsStep1();
   calculateVectorsStep2();
   calculateVectorsStep3();
