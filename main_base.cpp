@@ -42,6 +42,7 @@ int AALevel = 4;
 bool WantToRedraw = false;
 double focus = 6.0;
 
+Camera *camera;
 
 Frustum* frustum;
 std::vector<GLuint> shaders;
@@ -141,7 +142,17 @@ void draw_stuff(){
   glNormalPointer(GL_FLOAT, 3 * sizeof(GLfloat), vertices_normal);
   glDrawArrays(GL_TRIANGLES, 0, faces_length / 3 ); 
   glDisableClientState(GL_VERTEX_ARRAY);    
-  glDisableClientState(GL_NORMAL_ARRAY); 
+  glDisableClientState(GL_NORMAL_ARRAY);  
+  // draw normal
+  glUseProgram(0);
+  float* v = vertices_normal;
+  glColor4f(0, 0, 1.0, 0.8);
+  for (int i = 0; i < faces_length / 3 - 2; i+=3) {
+    glBegin(GL_LINES);
+      glVertex3d(vertices[i], vertices[i + 1], vertices[i + 2]);
+      glVertex3d(vertices[i] + v[i] ,vertices[i + 1] + v[i], vertices[i + 2]+ v[i]);
+    glEnd();
+  }
  // glPushMatrix();
  // glTranslated(2.5, 0, 2.5);
  // glRotated(45, 0, 1, 0);
@@ -273,7 +284,10 @@ void SetShadersOrDie(std::vector<GLuint>& shaders){
 
 
 void init(const char* model_path) {
-  setup_the_viewvolume();
+  camera = new Camera(Vector3d(0, 32, 27), Vector3d(0, 0, 0), 
+            Vector3d(0, 1, 0));
+  camera->PerspectiveDisplay(WIDTH, HEIGHT);
+  //setup_the_viewvolume();
   do_lights();
   do_material();
   load_object(model_path);
@@ -354,7 +368,7 @@ void RenderScene(){
       GraphicUtilities::DoFScene(draw_stuff, frustum, focus, 8);
       break;
     default:
-     
+     camera->PerspectiveDisplay(WIDTH, HEIGHT);
       draw_stuff();
   }
   glFlush();
@@ -364,13 +378,21 @@ void RenderScene(){
 }
 
 void Redraw(){
-  if (WantToRedraw)
-    RenderScene();
-  
-//  glutPostRedisplay();
+  //if (WantToRedraw)
+   // RenderScene();
+  glutPostRedisplay();
 }
 
+void mouseEventHandler(int button, int state, int x, int y) {
+    // let the camera handle some specific mouse events (similar to maya)
+      camera->HandleMouseEvent(button, state, x, y);
+}
 
+void motionEventHandler(int x, int y) {
+    // let the camera handle some mouse motions if the camera is to be moved
+      camera->HandleMouseMotion(x, y);
+      glutPostRedisplay();
+}
 
 /*
  Main program to draw the square, change colors, and wait for quit
@@ -412,8 +434,8 @@ int main(int argc, char* argv[]){
   
   SetShadersOrDie(shaders); 
   glutDisplayFunc(RenderScene);
-//  glutMouseFunc(mouseEventHandler);
-//  glutMotionFunc(motionEventHandler);
+  glutMouseFunc(mouseEventHandler);
+  glutMotionFunc(motionEventHandler);
   glutKeyboardFunc(KeyBoardHandler);
   glutIdleFunc(Redraw);
   
