@@ -53,12 +53,12 @@ void GraphicObject::readFile(const char* path) {
 kPoint GraphicObject::getNormal(kPoint p1, kPoint p2, kPoint p3)
 {
    kPoint v1, v2, vp;
-   v1.x = p1.x-p2.x;
-   v1.y = p1.y-p2.y;
-   v1.z = p1.z-p2.z;
-   v2.x = p1.x-p3.x;
-   v2.y = p1.y-p3.y;
-   v2.z = p1.z-p3.z;
+   v1.x = p2.x- p1.x; 
+   v1.y = p2.y- p1.y;
+   v1.z = p2.z- p1.z;
+   v2.x = p3.x- p1.x;
+   v2.y = p3.y- p1.y;
+   v2.z = p3.z- p1.z;
 
    vp.x = v1.y*v2.z - v1.z*v2.y;
    vp.y = v1.z*v2.x - v1.x*v2.z;

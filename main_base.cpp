@@ -40,6 +40,7 @@ unsigned int RENDER_MODE = 0;
 
 int AALevel = 4;
 bool WantToRedraw = false;
+bool DrawNormal = false;
 double focus = 6.0;
 
 Camera *camera;
@@ -123,7 +124,7 @@ void load_object(const char* path){
   vertices_normal = obj->getNormalPointer();
   normal_length = obj->getNormalLength();
   faces_length = obj->getNormalLength();
-  obj->PrintAll();
+//  obj->PrintAll();
 }
 
 void draw_stuff(){
@@ -138,6 +139,7 @@ void draw_stuff(){
   
   glEnableClientState(GL_VERTEX_ARRAY); 
   glEnableClientState(GL_NORMAL_ARRAY);
+  //glScalef(10, 10, 10);
   glVertexPointer(3,GL_FLOAT, 3 * sizeof(GLfloat), vertices); 
   glNormalPointer(GL_FLOAT, 3 * sizeof(GLfloat), vertices_normal);
   glDrawArrays(GL_TRIANGLES, 0, faces_length / 3 ); 
@@ -147,11 +149,13 @@ void draw_stuff(){
   glUseProgram(0);
   float* v = vertices_normal;
   glColor4f(0, 0, 1.0, 0.8);
-  for (int i = 0; i < faces_length / 3 - 2; i+=3) {
-    glBegin(GL_LINES);
-      glVertex3d(vertices[i], vertices[i + 1], vertices[i + 2]);
-      glVertex3d(vertices[i] + v[i] ,vertices[i + 1] + v[i], vertices[i + 2]+ v[i]);
-    glEnd();
+  if ( DrawNormal ) {
+    for (int i = 0; i < faces_length / 3 - 2; i+=3) {
+      glBegin(GL_LINES);
+        glVertex3d(vertices[i], vertices[i + 1], vertices[i + 2]);
+        glVertex3d(vertices[i] + v[i] ,vertices[i + 1] + v[i+1], vertices[i + 2]+ v[i+2]);
+      glEnd();
+    }
   }
  // glPushMatrix();
  // glTranslated(2.5, 0, 2.5);
@@ -347,6 +351,9 @@ void KeyBoardHandler(unsigned char key, int x, int y){
       break;
     case 's':
       (++selected_shader_id) %= 2;
+      break;
+    case 'n':
+      DrawNormal = !DrawNormal;
       break;
     default:
       break;
