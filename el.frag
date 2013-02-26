@@ -34,4 +34,5 @@ void main() {
   diffuse_color = diff_c0 + diff_c1 + diff_c2;
   specular_color = spec_c0 + spec_c1 + spec_c2;
   gl_FragColor = diffuse_color + specular_color;
+  gl_FragColor = vec4(0.0, 0.1, 0.2, 0.8);
 }

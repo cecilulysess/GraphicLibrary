@@ -56,52 +56,16 @@ GLuint selected_shader_id = 0;
 void setup_the_viewvolume(){
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-//  gluPerspective(45, (float)WIDTH / (float)HEIGHT, 0.1 , 100.0);
   frustum = new Frustum(60, (float)WIDTH / (float)HEIGHT, 0.02, 20.0);
-//  frustum = new Frustum(-0.2, 0.2, -0.15, 0.15, 0.005, 20);
   glLoadMatrixd(frustum->GetMatrix().Transpose().GetPtr());
-//  glFrustum(-0.2, 0.2, -0.15, 0.15, 0.1, 20);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  /*eye.x = 4.0, eye.y = 4.0, eye.z = 4.0;
-  view.x = 0.0, view.y = 0.0, view.z = 0.0;
-  up.x = 0.0, up.y = 1.0, up.z = 0.0;*/
   glRotated(0, 0, 0, 1);
   glRotated(10, 1, 0, 0);
   glRotated(0, 0, 1, 0);
   glTranslated(0, -0.15, -0.4);
-//  gluLookAt(eye.x, eye.y, eye.z, view.x, view.y, view.z, up.x, up.y, up.z);
 }
 
-
-//GLfloat vertices[] = {
-//  0.0, 0.0, 0.0,
-//  0.0, 1.0, 0.0,
-//  1.0, 1.0, 0.0,
-//  1.0, 0.0, 0.0,
-//  0.0, 0.0, 1.0,
-//  0.0, 1.0, 1.0,
-//  1.0, 1.0, 1.0,
-//  1.0, 0.0, 1.0,
-//};
-//
-//GLubyte face[] = {
-//  4, 7, 6, 5, //front
-//  0, 3, 2, 1, //back
-//  3, 2, 6, 7, //right
-//  1, 0, 4, 5, //left
-//  5, 6, 2, 1, //top
-//  3, 7, 4, 0, //bottom
-//};
-//
-//GLfloat normal[6][3] = {
-//  0.0, 0.0, 1.0,
-//  0.0, 0.0, -1.0,
-//  1.0, 0.0, 0.0,
-//  -1.0, 0.0, 0.0,
-//  0.0, 1.0, 0.0,
-//  0.0, -1.0, 0.0,
-//};
 
 GLfloat* vertices;
 GLfloat vertices_number;
@@ -112,17 +76,6 @@ int normal_length;
 GLuint vertices_normal_length;
 GLfloat* vertices_normal;
 
-void validate_object(){
-  assert(faces_length * 3 == vertices_number );
-  for (int i = 0; i < vertices_number; ++i ) {
-    printf("V:(%.3f, %.3f, %.3f)\n", vertices[i * 3], vertices[i * 3 + 1], vertices[i * 3 + 2]);
-  }
-  cout<<"Normal:"<<normal_length <<endl;
-  float* n = normal;
-  for (int i = 0; i < normal_length; ++i) {
-    printf("N:(%.3f, %.3f, %.3f)\n", n[3*i], n[3*i+1], n[3*i+2]); 
-  }
-}
 void load_object(const char* path){
   GraphicObject* obj = new GraphicObject();
   obj->readFile(path);
@@ -154,6 +107,7 @@ void LightSwitch(){
     glDisable(GL_LIGHT2);
   }
 }
+
 void draw_stuff(){
   LightSwitch();
   int draw_nu = 6;
@@ -163,8 +117,6 @@ void draw_stuff(){
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
   if (IsDrawGrid)
     GraphicUtilities::DrawGrid(10, 1);
-  //glDisableClientState(GL_VERTEX_ARRAY);    
-  //glDisableClientState(GL_NORMAL_ARRAY);  
   // draw normal
   glUseProgram(0);
   glDisable(GL_LIGHTING);
@@ -184,6 +136,7 @@ void draw_stuff(){
   glEnable(GL_LIGHTING);
 //  frustum->DrawFrustum(50, 4.0/3.0, 0.1, 20);
   glUseProgram(selected_shader_id);
+  printf("Using shader %d\n", selected_shader_id);
   glEnableClientState(GL_VERTEX_ARRAY); 
   glEnableClientState(GL_NORMAL_ARRAY);
   //glScalef(10, 10, 10);
@@ -367,7 +320,8 @@ void SetShadersOrDie(std::vector<GLuint>& shaders){
   //assert(LinkSuccessful(bp));
   shaders.push_back(p);
   //shaders.push_back(bp);
-  //glUseProgram(p);
+  glUseProgram(p);
+  selected_shader_id = p;
   cout<<"Finished Set up of Shaders: "<<p<<endl;
   return ;
 }
