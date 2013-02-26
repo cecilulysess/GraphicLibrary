@@ -80,6 +80,7 @@ public:
   float* getVertexPointer() { return array_triangles; }
   float* getNormalPointer() { return array_normalization;}
   float* getFaceNormal() { return array_face_normal; }
+  int getVertexNumber() { return 3 * element_face_num; }
   int getNormalLength() { return 9*element_face_num; }
   int getFaceNumber() { return element_face_num; }
   void test();

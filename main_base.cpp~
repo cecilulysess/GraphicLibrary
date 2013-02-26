@@ -278,7 +278,7 @@ void do_lights(){
   glLightf(GL_LIGHT2, GL_SPOT_CUTOFF, 180.0);
   glLightf(GL_LIGHT2, GL_CONSTANT_ATTENUATION, 0.8 );
   glLightf(GL_LIGHT2, GL_LINEAR_ATTENUATION, 0.4 );
-  glLightf(GL_LIGHT2, GL_QUADRATIC_ATTENUATION, 0.23);
+  glLightf(GL_LIGHT2, GL_QUADRATIC_ATTENUATION, 0.25);
   
   glLightfv(GL_LIGHT2, GL_POSITION, light2_position);
   glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, light2_direction);
