@@ -45,7 +45,7 @@ bool IsDrawGrid = true;
 bool IsFillLight = true;
 bool IsKeyLight = true;
 bool IsBgLight = true;
-double focus = 6.0;
+double focus = 0.42;
 
 Camera *camera;
 
@@ -57,8 +57,8 @@ void setup_the_viewvolume(){
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
 //  gluPerspective(45, (float)WIDTH / (float)HEIGHT, 0.1 , 100.0);
-  frustum = new Frustum(60, (float)WIDTH / (float)HEIGHT, 1.0, 20.0);
-//  frustum = new Frustum(-0.2, 0.2, -0.15, 0.15, 0.02, 20);
+  frustum = new Frustum(60, (float)WIDTH / (float)HEIGHT, 0.02, 20.0);
+//  frustum = new Frustum(-0.2, 0.2, -0.15, 0.15, 0.005, 20);
   glLoadMatrixd(frustum->GetMatrix().Transpose().GetPtr());
 //  glFrustum(-0.2, 0.2, -0.15, 0.15, 0.1, 20);
   glMatrixMode(GL_MODELVIEW);
@@ -67,18 +67,10 @@ void setup_the_viewvolume(){
   view.x = 0.0, view.y = 0.0, view.z = 0.0;
   up.x = 0.0, up.y = 1.0, up.z = 0.0;*/
   glRotated(0, 0, 0, 1);
-  glRotated(0, 1, 0, 0);
-  glRotated(-130, 0, 1, 0);
-  glTranslated(-5, -0.5, 5);
+  glRotated(10, 1, 0, 0);
+  glRotated(0, 0, 1, 0);
+  glTranslated(0, -0.15, -0.4);
 //  gluLookAt(eye.x, eye.y, eye.z, view.x, view.y, view.z, up.x, up.y, up.z);
-}
-
-void set_uniform_parameters(unsigned int p){
-  int location;
-  location = glGetUniformLocation(p, "eye_position");
-  glUniform3f(location, -5, -0.5, 5);
-  location = glGetUniformLocation(p, "light_position");
-  glUniform3f(location, 4.0, 4.0, 4.0); 
 }
 
 
@@ -197,17 +189,18 @@ void draw_stuff(){
   //glScalef(10, 10, 10);
   glVertexPointer(3,GL_FLOAT, 3 * sizeof(GLfloat), vertices); 
   glNormalPointer(GL_FLOAT, 3 * sizeof(GLfloat), vertices_normal);
-  for (int i = 0; i < faces_length; ++i) {
+  //for (int i = 0; i < faces_length; ++i) {
     //glNormal3fv(&normal[i * 3]);    
-    glDrawArrays(GL_TRIANGLES, 3 * i, 3); 
-
-  } 
+  //  glDrawArrays(GL_TRIANGLES, 3 * i, 3); 
+  //} 
+  glDrawArrays(GL_TRIANGLES, 0, 3 * faces_length);
   
- // glPushMatrix();
- // glTranslated(2.5, 0, 2.5);
- // glRotated(45, 0, 1, 0);
+  glPushMatrix();
+  glTranslated(0.15, 0, -0.3);
+  glRotated(45, 0, 1, 0);
+  glDrawArrays(GL_TRIANGLES, 0, 3 * faces_length);
  // glutSolidTeapot (0.5);
- // glPopMatrix();
+  glPopMatrix();
   /*for (i = 0; i < faces_length; ++i) {
     glNormal3fv(&normal[i]);
     glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (void*)(3 * i) );
@@ -232,7 +225,7 @@ void do_lights(){
   glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 1.0);
   glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 180.0);
   glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0.5 );
-  glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.1 );
+  glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.2 );
   glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.015);
   
   glLightfv(GL_LIGHT0, GL_POSITION, light0_position);
@@ -254,7 +247,7 @@ void do_lights(){
   glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 1.0);
   glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 180.0);
   glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 0.8 );
-  glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0.2 );
+  glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0.5 );
   glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, 0.2);
   
   glLightfv(GL_LIGHT1, GL_POSITION, light1_position);
@@ -265,7 +258,7 @@ void do_lights(){
   float light2_ambient[] = { 0.0, 0.0, 0.0, 0.0 };
   float light2_diffuse[] = { 1.0, 1.0, 1.0, 0.0 };
   float light2_specular[] = { 1.0, 1.0, 1.0, 0.0 };
-  float light2_position[] = { 0, 4, -4, 1.0 };
+  float light2_position[] = { 0, 4, -5, 1.0 };
   float light2_direction[] = { -1.5, -2.0, -2.0, 1.0 };
   
   glLightModelfv(GL_LIGHT_MODEL_AMBIENT, light2_ambient);
@@ -278,18 +271,14 @@ void do_lights(){
   glLightf(GL_LIGHT2, GL_SPOT_CUTOFF, 180.0);
   glLightf(GL_LIGHT2, GL_CONSTANT_ATTENUATION, 0.8 );
   glLightf(GL_LIGHT2, GL_LINEAR_ATTENUATION, 0.4 );
-  glLightf(GL_LIGHT2, GL_QUADRATIC_ATTENUATION, 0.23);
+  glLightf(GL_LIGHT2, GL_QUADRATIC_ATTENUATION, 0.20);
   
   glLightfv(GL_LIGHT2, GL_POSITION, light2_position);
   glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, light2_direction);
 
 
   glEnable(GL_LIGHTING);
-  glEnable(GL_LIGHT0);
-  glEnable(GL_LIGHT1);
-  //glEnable(GL_LIGHT2);
-
-
+  
 }
 
 void do_material(){
@@ -385,10 +374,10 @@ void SetShadersOrDie(std::vector<GLuint>& shaders){
 
 
 void init(const char* model_path) {
-  camera = new Camera(Vector3d(0, 0.15, 0.4), Vector3d(0, 0, 0), 
-            Vector3d(0, 1 , 0.1));
-  camera->PerspectiveDisplay(WIDTH, HEIGHT);
-  //setup_the_viewvolume();
+  //camera = new Camera(Vector3d(0, 0.15, 0.4), Vector3d(0, 0, 0), 
+  //          Vector3d(0, 1 , 0.1));
+  //camera->PerspectiveDisplay(WIDTH, HEIGHT);
+  setup_the_viewvolume();
   do_lights();
   do_material();
   load_object(model_path);
@@ -439,11 +428,11 @@ void KeyBoardHandler(unsigned char key, int x, int y){
       WantToRedraw = true;
       break;
     case 'z':
-      if(focus > 3.0) focus -= 0.1;
+      if(focus > 0.2) focus -= 0.03;
       WantToRedraw = true;
       break;
     case 'x':
-      if(focus < 100.0) focus += 0.1;
+      if(focus < 100.0) focus += 0.03;
       WantToRedraw = true;
       break;
     case 's':
@@ -470,6 +459,7 @@ void KeyBoardHandler(unsigned char key, int x, int y){
     default:
       break;
   }
+  WantToRedraw = true;
 }
 
 /*
@@ -487,7 +477,7 @@ void RenderScene(){
       GraphicUtilities::DoFScene(draw_stuff, frustum, focus, 8);
       break;
     default:
-     camera->PerspectiveDisplay(WIDTH, HEIGHT);
+     //camera->PerspectiveDisplay(WIDTH, HEIGHT);
       draw_stuff();
   }
   glFlush();
@@ -497,9 +487,9 @@ void RenderScene(){
 }
 
 void Redraw(){
-  //if (WantToRedraw)
-   // RenderScene();
-  glutPostRedisplay();
+  if (WantToRedraw)
+    RenderScene();
+  //glutPostRedisplay();
 }
 
 void mouseEventHandler(int button, int state, int x, int y) {
@@ -553,8 +543,8 @@ int main(int argc, char* argv[]){
   
   SetShadersOrDie(shaders); 
   glutDisplayFunc(RenderScene);
-  glutMouseFunc(mouseEventHandler);
-  glutMotionFunc(motionEventHandler);
+  //glutMouseFunc(mouseEventHandler);
+  //glutMotionFunc(motionEventHandler);
   glutKeyboardFunc(KeyBoardHandler);
   glutIdleFunc(Redraw);
   

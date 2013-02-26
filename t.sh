@@ -1,4 +1,4 @@
 #!/bin/bash
 
 make 
-./main_base test.ply
+./main_base bunny.ply

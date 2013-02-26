@@ -106,8 +106,8 @@ void GraphicUtilities::DoFScene(render_callback render_frame, Frustum* fru,
   for (int xt = -blur_level/2; xt < blur_level/2; xt ++) {
     for (int yt = -blur_level/2; yt < blur_level/2; yt ++) {
       JitterCamera(0.0, 0.0,
-                   (float)xt / (1000 * blur_level / 4),
-                   (float)yt / (1000 * blur_level / 4),//yt,
+                   (float)xt / (1600 * blur_level / 4),
+                   (float)yt / (1600 * blur_level / 4),//yt,
                    focus,
                    fru);
       render_frame();
