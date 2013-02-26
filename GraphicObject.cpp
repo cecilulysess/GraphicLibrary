@@ -13,7 +13,8 @@ GraphicObject::GraphicObject() : vertex_num(0),
                                  faces(),
                                  array_normalization(),
                                  sum_normalization(),
-                                 array_triangles()
+                                 array_triangles(),
+                                 array_face_normal()
 { }
 
 GraphicObject::~GraphicObject() {
@@ -22,6 +23,7 @@ GraphicObject::~GraphicObject() {
   delete array_normalization;
   delete sum_normalization;
   delete array_triangles;
+  delete array_face_normal;
 }
 
 void GraphicObject::readFile(const char* path) {
@@ -77,6 +79,7 @@ void GraphicObject::calculateVectorsStep1() {
   // create normalization array
   array_normalization = new float[9*element_face_num];
   array_triangles = new float[9*element_face_num];
+  array_face_normal = new float[3*element_face_num];
   kPoint p1, p2, p3, vp;
   for (int i=0; i<element_face_num; i++) {
     array_triangles[9*i]   = properties[faces[i].p1].x;
@@ -108,6 +111,10 @@ void GraphicObject::calculateVectorsStep1() {
     array_normalization[9*i+6] = vp.x;
     array_normalization[9*i+7] = vp.y;
     array_normalization[9*i+8] = vp.z;
+    // get face normal
+    array_face_normal[3*i] = vp.x;
+    array_face_normal[3*i+1] = vp.y;
+    array_face_normal[3*i+2] = vp.z;
   }
 }
 
