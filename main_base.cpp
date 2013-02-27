@@ -152,7 +152,11 @@ void draw_stuff(){
   glTranslated(0.15, 0, -0.3);
   glRotated(45, 0, 1, 0);
   glDrawArrays(GL_TRIANGLES, 0, 3 * faces_length);
- // glutSolidTeapot (0.5);
+  glPopMatrix();
+  glPushMatrix();
+  glTranslated(-0.3, 0, -0.3);
+  glScalef(0.1,0.1,0.1);
+  glutSolidTeapot (0.5);
   glPopMatrix();
   /*for (i = 0; i < faces_length; ++i) {
     glNormal3fv(&normal[i]);
@@ -236,7 +240,7 @@ void do_lights(){
 
 void do_material(){
   float mat_ambient[] = {0.0, 0.0, 0.0, 1.0};
-  float mat_diffuse[] = {0.9, 0.9, 0.1, 1.0};
+  float mat_diffuse[] = {241.0/255.0, 140.0/255.0, 212.0/255.0, 1.0};
   float mat_specular[] = {1.0, 1.0, 1.0, 1.0};
   float mat_shininess[] = {2.0};
   
