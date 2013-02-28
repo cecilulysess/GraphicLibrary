@@ -46,6 +46,8 @@ bool IsFillLight = true;
 bool IsKeyLight = true;
 bool IsBgLight = true;
 double focus = 0.42;
+float shininess = 2.0;
+float l0brightness = 1.5;
 
 Camera *camera;
 
@@ -168,8 +170,8 @@ void draw_stuff(){
 void do_lights(){
   // Light0 as key light
   float light0_ambient[] = { 0.0, 0.0, 0.0, 0.0 };
-  float light0_diffuse[] = { 1.0, 1.0, 1.0, 0.0 };
-  float light0_specular[] = { 1.0, 1.0, 1.0, 0.0 };
+  float light0_diffuse[] = { l0brightness,l0brightness,l0brightness,0.0};
+  float light0_specular[] = { l0brightness,l0brightness,l0brightness,0.0};
   float light0_position[] = { 3, 4, 3, 1.0 };
   float light0_direction[] = { -1.5, -2.0, -2.0, 1.0 };
   
@@ -239,10 +241,11 @@ void do_lights(){
 }
 
 void do_material(){
-  float mat_ambient[] = {0.0, 0.0, 0.0, 1.0};
-  float mat_diffuse[] = {241.0/255.0, 140.0/255.0, 212.0/255.0, 1.0};
-  float mat_specular[] = {1.0, 1.0, 1.0, 1.0};
-  float mat_shininess[] = {2.0};
+
+  float mat_ambient[] = {1.0, 1.0, 1.0, 1.0};
+  float mat_diffuse[] = {255.0/255, 200.0/255, 100.0/255, 1.0};
+  float mat_specular[] = {255.0/255, 240.0/255, 215.0/255, 1};
+  float mat_shininess[] = {shininess};
   
   glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
   glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
@@ -414,9 +417,26 @@ void KeyBoardHandler(unsigned char key, int x, int y){
     case '3':
       IsBgLight = !IsBgLight;
       break;
+    case 'i':
+      shininess += 0.1f;
+      do_material();
+      break;
+    case 'o':
+      shininess -= 0.1f;
+      do_material();
+      break;
+    case 'k':
+      l0brightness +=0.1f;
+      do_lights();
+      break;
+    case 'l':
+      l0brightness -=0.1f;
+      do_lights();
+      break;
     default:
       break;
   }
+  printf("Shininess: %f\n", shininess);
   WantToRedraw = true;
 }
 
