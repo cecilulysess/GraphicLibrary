@@ -46,8 +46,8 @@ bool IsFillLight = true;
 bool IsKeyLight = true;
 bool IsBgLight = true;
 double focus = 0.42;
-float shininess = 2.0;
-float l0brightness = 1.5;
+float shininess = 10.0;
+float l0brightness = 1.3;
 
 Camera *camera;
 
@@ -115,7 +115,7 @@ void draw_stuff(){
   int draw_nu = 6;
   glEnable(GL_DEPTH_TEST);
   glUseProgram(0);
-  glClearColor(0.35, 0.35, 0.35, 0.0);
+  glClearColor(0.15, 0.15, 0.15, 0);
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
   if (IsDrawGrid)
     GraphicUtilities::DrawGrid(10, 1);
@@ -138,7 +138,7 @@ void draw_stuff(){
   glEnable(GL_LIGHTING);
 //  frustum->DrawFrustum(50, 4.0/3.0, 0.1, 20);
   glUseProgram(selected_shader_id);
-  printf("Using shader %d\n", selected_shader_id);
+  //printf("Using shader %d\n", selected_shader_id);
   glEnableClientState(GL_VERTEX_ARRAY); 
   glEnableClientState(GL_NORMAL_ARRAY);
   //glScalef(10, 10, 10);
@@ -183,17 +183,17 @@ void do_lights(){
   glLightfv(GL_LIGHT0, GL_SPECULAR, light0_specular);
   glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 1.0);
   glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 180.0);
-  glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0.5 );
+  glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0 );
   glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.2 );
-  glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.015);
+  glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.01);
   
   glLightfv(GL_LIGHT0, GL_POSITION, light0_position);
   glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, light0_direction);
   
 // Light1 as fill light
   float light1_ambient[] = { 0.0, 0.0, 0.0, 0.0 };
-  float light1_diffuse[] = { 1.0, 1.0, 1.0, 0.0 };
-  float light1_specular[] = { 1.0, 1.0, 1.0, 0.0 };
+  float light1_diffuse[] = { l0brightness, l0brightness, l0brightness, 0.0 };
+  float light1_specular[] = { l0brightness, l0brightness, l0brightness, 0.0 };
   float light1_position[] = { -3, 2.5, 4, 1.0 };
   float light1_direction[] = { -1.5, -2.0, -2.0, 1.0 };
   
@@ -215,8 +215,8 @@ void do_lights(){
 
 // Light2 as background light
   float light2_ambient[] = { 0.0, 0.0, 0.0, 0.0 };
-  float light2_diffuse[] = { 1.0, 1.0, 1.0, 0.0 };
-  float light2_specular[] = { 1.0, 1.0, 1.0, 0.0 };
+  float light2_diffuse[] = { 2.0, 2.0, 2.0, 0.0 };
+  float light2_specular[] = { 2.0, 2.0, 2.0, 0.0 };
   float light2_position[] = { 0, 4, -5, 1.0 };
   float light2_direction[] = { -1.5, -2.0, -2.0, 1.0 };
   
