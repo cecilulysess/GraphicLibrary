@@ -296,7 +296,7 @@ double&  Matrix4d::operator[](const int idx){
 
 int Matrix4d::Size() { return 4; }
 
-const double* Matrix4d::GetPtr() {
+double* Matrix4d::GetPtr() {
   return &mat[0];
 }
 

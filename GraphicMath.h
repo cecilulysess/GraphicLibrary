@@ -315,7 +315,7 @@ public:
   int Size();
   
   // get a point to the data field
-  const double* GetPtr();
+  double* GetPtr();
   
   // get a transpose of the matrix
   Matrix4d& Transpose();

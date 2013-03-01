@@ -13,7 +13,7 @@
 #ifndef __Graphic__GraphicCamera__
 #define __Graphic__GraphicCamera__
 
-#include <GraphicMath.h>
+#include "GraphicMath.h"
 
 // This is a Camera that mimic the common mouse interaction with screen
 //   in 3D modeling program.
@@ -26,6 +26,8 @@ public:
   //  clipping plane and view angle (FoV)
   GraphicCamera(const Vec3d& pos, const Vec3d& aim, const Vec3d up,
                 float near, float far, float ViewAngle);
+  // Set up OpenGL perspective matrix and MV matrix with this camera 
+  void PerspectiveDisplay(int width, int height); 
 
   // set the clipping planes
   void SetClippingPlanes(float near, float far);
@@ -55,10 +57,16 @@ public:
   
 private:
   void GetCoordinate(const Vec3d& pos, const Vec3d& aim, const Vec3d& up);
+  void Init();
   Vec3d default_position;
   Vec3d default_aim;
   Vec3d default_up;
-  
+ 
+  double default_azim;
+  double default_elev;
+  double current_azim;
+  double current_elev;
+
   Vec3d pos_, aim_, up_;
   float near_, far_, fov_, focus_;  
 
