@@ -131,28 +131,6 @@ using std::equal;
    }
    
    
-   // Cross product
-   Vector_<T>& operator%=(const Vector_<T>& v) {
-     if ( this->n != v.n || this->n != 3 ) {
-       throw "Illigle cross product";
-     }
-     T a1 = this->vec[0], a2 = this->vec[1], a3 = this->vec[2];
-     T b1 = v.vec[0], b2 = v.vec[1], b3 = v.vec[2];
-     this->vec.clear();
-     this->vec.push_back(a2 * b3 - a3 * b2);
-     this->vec.push_back( - (a1 * b3 - a3 * b1));
-     this->vec.push_back( a1 * b2 - a2 * b1 );
-     return *this;
-   }
-   
-   const Vector_<T>& operator%(const Vector_<T>& v) const {
-     Vector_<T> * res = new Vector_<T>(*this);
-     *res %= v;
-     return *res;
-   }
- 
-   
-   
    // do a element-wise mulitplication with v
    const Vector_<T>& ele_mult(const Vector_<T>& v) const {
      if ( this-> n != v.n ) {
@@ -243,6 +221,8 @@ using std::equal;
    Vec3d& operator-=(const Vec3d& v);
    const Vec3d& operator+(const Vec3d& v) const;
    const Vec3d& operator-(const Vec3d& v) const;
+   Vec3d& operator%=(const Vec3d& v);
+   const Vec3d& operator%(const Vec3d& v) const;
    
    // Auxillary getter
    double x() const ;
@@ -254,8 +234,10 @@ using std::equal;
    
    //return the norm of this vector
    double Norm() const;
-   //return the normalized version of this vector
+   //return the normalized version of this vector, this will change self
    Vec3d& Normalize();
+   // return a copy ot normalized version of this vector
+   Vec3d& Normalization() const;
  };
  
  

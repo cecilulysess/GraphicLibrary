@@ -80,7 +80,30 @@ const Vec3d& Vec3d::operator-(const Vec3d& v) const {
 }
 
 
-Vec3d& Vec3d::Normalize(){
+// Cross product
+Vec3d& Vec3d::operator%=(const Vec3d& v) {
+  double a1 = this->vec[0], a2 = this->vec[1], a3 = this->vec[2];
+  double b1 = v.vec[0], b2 = v.vec[1], b3 = v.vec[2];
+  this->vec.clear();
+  this->vec.push_back(a2 * b3 - a3 * b2);
+  this->vec.push_back( - (a1 * b3 - a3 * b1));
+  this->vec.push_back( a1 * b2 - a2 * b1 );
+  return *this;
+}   
+   
+const Vec3d& Vec3d::operator%(const Vec3d& v) const {
+  Vec3d * res = new Vec3d(*this);
+  *res %= v;
+  return *res;
+}   
+
+
+Vec3d& Vec3d::Normalize() {
+  *this *= (1/Norm());
+  return *this;
+}
+
+Vec3d& Vec3d::Normalization() const{
   Vec3d* res = new Vec3d(*this);
   *res *= (1/Norm());
   return *res;

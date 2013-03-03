@@ -19,6 +19,7 @@
 //   in 3D modeling program.
 class GraphicCamera {
 public:
+  GraphicCamera();
   // Constructor with position, aim, and up vector
   GraphicCamera(const Vec3d& pos, const Vec3d& aim, const Vec3d up);
 
@@ -37,9 +38,9 @@ public:
   void MouseEventHandler(int button, int state, int x, int y);
   void MouseMotionEventHandler(int x, int y);
 
-  const Camera& operator=(const Camera& cam);
+  const GraphicCamera& operator=(const GraphicCamera& cam);
 
-  const Vec3d& position() const { return position_; } 
+  const Vec3d& position() const { return pos_; } 
   const Vec3d& aim() const { return aim_; } 
   const Vec3d& up() const { return up_; } 
   float fov() const {return fov_; }
@@ -47,7 +48,7 @@ public:
   float far() const {return far_;}
   float focus() const {return focus_;}
 
-  Vec3d& position() { return position_; } 
+  Vec3d& position() { return pos_; } 
   Vec3d& aim() { return aim_; } 
   Vec3d& up() { return up_; } 
   float& near() {return near_;}
@@ -70,6 +71,6 @@ private:
   Vec3d pos_, aim_, up_;
   float near_, far_, fov_, focus_;  
 
-}
+};
 
 #endif // __Graphic__GraphicCamera__
