@@ -335,9 +335,9 @@ void SetShadersOrDie(std::vector<GLuint>& shaders){
 
 
 void init(const char* model_path) {
-  //camera = new Camera(Vector3d(0, 0.15, 0.4), Vector3d(0, 0, 0), 
-  //          Vector3d(0, 1 , 0.1));
-  //camera->PerspectiveDisplay(WIDTH, HEIGHT);
+  camera = new GraphicCamera(Vec3d(0, 0.15, 0.4), Vec3d(0, 0, 0),
+            Vec3d(0, 1 , 0.1));
+  camera->PerspectiveDisplay(WIDTH, HEIGHT);
   setup_the_viewvolume();
   do_lights();
   do_material();
@@ -455,7 +455,7 @@ void RenderScene(){
       GraphicUtilities::DoFScene(draw_stuff, frustum, focus, 8);
       break;
     default:
-     //camera->PerspectiveDisplay(WIDTH, HEIGHT);
+     camera->PerspectiveDisplay(WIDTH, HEIGHT);
       draw_stuff();
   }
   glFlush();
@@ -521,8 +521,8 @@ int main(int argc, char* argv[]){
   
   //SetShadersOrDie(shaders);
   glutDisplayFunc(RenderScene);
-  //glutMouseFunc(mouseEventHandler);
-  //glutMotionFunc(motionEventHandler);
+  glutMouseFunc(mouseEventHandler);
+  glutMotionFunc(motionEventHandler);
   glutKeyboardFunc(KeyBoardHandler);
   glutIdleFunc(Redraw);
   

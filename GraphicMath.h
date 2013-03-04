@@ -28,7 +28,7 @@ using std::equal;
  public:
    explicit Vector_(int n) {
      this->n = n;
-     this->vec = vector<T>();
+     this->vec = vector<T>(n);
    }
    
    Vector_(const Vector_<T>& li){

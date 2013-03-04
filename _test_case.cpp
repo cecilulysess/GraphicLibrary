@@ -17,33 +17,33 @@
 bool test_Vector() {
   clock_t ss = clock();
   
-  Vector<double> a = { 1.99, 2.02, 6.7 };
-  Vector<double> b = { -0.1, 7.0, 2.22 };
-  Vector<double> c = { 3.3, -3.3, 0.0 };
-  Vector<double> cmpa = { 1.990, 2.02000, 6.700000};
-  Vector<double> a_b = {2.090, -4.980, 4.4800};
+  Vector_<double> a = { 1.99, 2.02, 6.7 };
+  Vector_<double> b = { -0.1, 7.0, 2.22 };
+  Vector_<double> c = { 3.3, -3.3, 0.0 };
+  Vector_<double> cmpa = { 1.990, 2.02000, 6.700000};
+  Vector_<double> a_b = {2.090, -4.980, 4.4800};
   
   // answer
-  Vector<double> a_mult_b = {-0.1990,  14.1400,  14.8740};
-  Vector<double> a_mult_c = {6.5670, -6.6660,     0};
-  Vector<double> b_mult_c = {-0.3300,  -23.1000,  0};
+  Vector_<double> a_mult_b = {-0.1990,  14.1400,  14.8740};
+  Vector_<double> a_mult_c = {6.5670, -6.6660,     0};
+  Vector_<double> b_mult_c = {-0.3300,  -23.1000,  0};
   
   double a_dot_b = 28.815;
   double a_dot_c = -0.099;
   double b_dot_c = -23.43;
   
-  Vector<double> a_dot2_99 = {5.9501,  6.0398, 20.0330};
+  Vector_<double> a_dot2_99 = {5.9501,  6.0398, 20.0330};
   
-  Vector<double> a_cro_b = {-42.4156, -5.0878, 14.1320};
-  Vector<double> b_cro_a = {42.4156, 5.0878, -14.1320};
-  Vector<double> a_cro_c = {22.1100, 22.1100, -13.2330};
-  Vector<double> c_cro_a = {-22.1100, -22.1100, 13.2330};
-  Vector<double> b_cro_c = {7.3260, 7.3260, -22.7700};
-  Vector<double> c_cro_b = {-7.3260, -7.3260, 22.7700};
+  Vector_<double> a_cro_b = {-42.4156, -5.0878, 14.1320};
+  Vector_<double> b_cro_a = {42.4156, 5.0878, -14.1320};
+  Vector_<double> a_cro_c = {22.1100, 22.1100, -13.2330};
+  Vector_<double> c_cro_a = {-22.1100, -22.1100, 13.2330};
+  Vector_<double> b_cro_c = {7.3260, 7.3260, -22.7700};
+  Vector_<double> c_cro_b = {-7.3260, -7.3260, 22.7700};
   
-  Vector<double> na = {0.2735, 0.2777, 0.9209};
-  Vector<double> nb = {-0.0136, 0.9531, 0.3023};
-  Vector<double> nc = {0.7071, -0.7071,  0};
+  Vector_<double> na = {0.2735, 0.2777, 0.9209};
+  Vector_<double> nb = {-0.0136, 0.9531, 0.3023};
+  Vector_<double> nc = {0.7071, -0.7071,  0};
   
   
   assert(fabs(a[0] - 1.99) < 0.0000001);
@@ -68,7 +68,7 @@ bool test_Vector() {
   assert(b * c - b_dot_c < 1e-9);
   
   assert((a - b) == a_b);
-  std::cout<<"Vector passed Test!"<<std::endl;
+  std::cout<<"Vector_ passed Test!"<<std::endl;
   
   
   Vec3d zero = { 0.0, 0.0, 0.0 };
@@ -85,8 +85,8 @@ bool test_Vector() {
 //  std::cout<<v1.Norm() - n1<<std::endl;
   assert(v1.Norm() - n1 < 1e-6);
   assert(v2.Norm() - n2 < 1e-6);
-  assert(v1.Normalize() == nv1);
-  assert(v2.Normalize() == nv2);
+  assert(v1.Normalization() == nv1);
+  assert(v2.Normalization() == nv2);
   
   assert(va * 2.99 == a_dot2_99);
   assert(va * 0.0 == zero );
@@ -101,7 +101,7 @@ bool test_Vector() {
   std::cout<<"Vec3d passed Test!"<<std::endl;
   
   clock_t  ed = clock();
-  std::cout<<"Vector Test Running time: "<<
+  std::cout<<"Vector_ Test Running time: "<<
     (double) (ed - ss) / (double) CLOCKS_PER_SEC <<"s"<<std::endl;
   return true;
 }

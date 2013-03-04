@@ -151,7 +151,7 @@ void GraphicCamera::MouseEventHandler(int button, int state, int x, int y){
   // if ALT key used
   int mode = glutGetModifiers();  
   
-  if (state = GLUT_UP && CameraMode != kINACTIVE) {
+  if (state == GLUT_UP && CameraMode != kINACTIVE) {
     current_elev += dt_elev;
     current_azim += dt_azim;
     //reset change in elevation and roll of the camera;
@@ -293,6 +293,7 @@ void GraphicCamera::MouseMotionEventHandler(int x, int y) {
         WndX = {1.0, 0.0, 0.0};
         WndY = {0.0, 1.0, 0.0};
 
+        printf("%f\n", current_elev);
         RotateX(WndX, current_elev + dt_elev);
         RotateY(WndY, current_azim + dt_azim);
         WndX.z() *= -1;
@@ -306,21 +307,23 @@ void GraphicCamera::MouseMotionEventHandler(int x, int y) {
         ArbitraryRotate(WndX, WndY, WndZ, loc_dt_elev, 0, pos_, aim_);
         ArbitraryRotate(Vec3d(1, 0, 0), Vec3d(0, 1, 0), Vec3d(0, 0, 1), 0,
                         -loc_dt_azim, pos_, aim_);
-        RotateX(WndX, current_azim + dt_elev);
-        RotateY(WndY, current_azim + dt_azim);
+//        RotateX(WndX, current_azim + dt_elev);
+//        RotateY(WndY, current_azim + dt_azim);
         WndX.z() *= -1;
-        up_ = WndY.Normalize();
+        up_ = WndY.Normalization();
 
         break;
       case kTRANSLATE:
 
       realy = ViewPort[3] - y - 1;
-//      gluProject(aim_.x(), aim_.y(), aim.z(), MvMat, ProjMat, ViewPOrt,
-//                 &wx, &wy, &wz);
-//
-//      gluUnProject((GLdouble) x, (GLdouble) realy, wz, MvMat, ProjMat, 
-//                   ViewPort, &mouse_pos.x(), &mouse_pos.y(), 
-//                   &mouse_pos.z());
+      gluProject(aim_.x(), aim_.y(), aim_.z(), MvMat.GetPtr(),
+                 ProjMat.GetPtr(), ViewPort,
+                 &wx, &wy, &wz);
+
+      gluUnProject((GLdouble) x, (GLdouble) realy, wz, MvMat.GetPtr(),
+                   ProjMat.GetPtr(),
+                   ViewPort, &mouse_pos.x(), &mouse_pos.y(), 
+                   &mouse_pos.z());
       
       // move both the camera position and its aim coordinate
       dir = mouse_pos - PrevMousePos;
