@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include <math.h>
 
+namespace GraphicUtilities{
 
 char* GraphicUtilities::read_shader_program(const char *filename){
   FILE *fp;
@@ -203,6 +204,7 @@ inline double Frustum::Left() {
 inline double Frustum::Right() {
   return this->right;
 }
+  
 
 inline double Frustum::Top(){
   return this->top;
@@ -368,3 +370,5 @@ inline float Camera::far_plane() { return  _far_plane; }
 inline float Camera::fov() { return _fov; }
 
 */
+  
+}//GraphicUtilities

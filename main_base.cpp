@@ -49,24 +49,24 @@ double focus = 0.42;
 float shininess = 10.0;
 float l0brightness = 1.3;
 
-GraphicCamera *camera;
+GraphicCamera::GraphicCamera *camera;
 
-Frustum* frustum;
+//Frustum* frustum;
 std::vector<GLuint> shaders;
 GLuint selected_shader_id = 0;
 
-void setup_the_viewvolume(){
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  frustum = new Frustum(60, (float)WIDTH / (float)HEIGHT, 0.02, 20.0);
-  glLoadMatrixd(frustum->GetMatrix().Transpose().GetPtr());
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-  glRotated(0, 0, 0, 1);
-  glRotated(10, 1, 0, 0);
-  glRotated(0, 0, 1, 0);
-  glTranslated(0, -0.15, -0.4);
-}
+//void setup_the_viewvolume(){
+//  glMatrixMode(GL_PROJECTION);
+//  glLoadIdentity();
+////  frustum = new Frustum(60, (float)WIDTH / (float)HEIGHT, 0.02, 20.0);
+//  glLoadMatrixd(frustum->GetMatrix().Transpose().GetPtr());
+//  glMatrixMode(GL_MODELVIEW);
+//  glLoadIdentity();
+//  glRotated(0, 0, 0, 1);
+//  glRotated(10, 1, 0, 0);
+//  glRotated(0, 0, 1, 0);
+//  glTranslated(0, -0.15, -0.4);
+//}
 
 
 GLfloat* vertices;
@@ -115,7 +115,7 @@ void draw_stuff(){
   glClearColor(0.15, 0.15, 0.15, 0);
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
   if (IsDrawGrid)
-    GraphicUtilities::DrawGrid(10, 1);
+    GraphicUtilities::GraphicUtilities::DrawGrid(10, 1);
   // draw normal
   glUseProgram(0);
   glDisable(GL_LIGHTING);
@@ -291,11 +291,12 @@ void SetShadersOrDie(std::vector<GLuint>& shaders){
   
   pv = glCreateShader(GL_VERTEX_SHADER);
   pf = glCreateShader(GL_FRAGMENT_SHADER);
-  vs = GraphicUtilities::read_shader_program(VERT_SHADER_FILE_DIR);
-  fs = GraphicUtilities::read_shader_program(
-    BLINN_PHONG_FRAG_SHADER_FILE_DIR);
-  bpfs = GraphicUtilities::read_shader_program(
-    BLINN_PHONG_FRAG_SHADER_FILE_DIR);
+  vs = GraphicUtilities::GraphicUtilities::
+        read_shader_program(VERT_SHADER_FILE_DIR);
+  fs = GraphicUtilities::GraphicUtilities::
+        read_shader_program(BLINN_PHONG_FRAG_SHADER_FILE_DIR);
+  bpfs = GraphicUtilities::GraphicUtilities::
+        read_shader_program(BLINN_PHONG_FRAG_SHADER_FILE_DIR);
   // shader, # of string, array of string and array of tring length
   glShaderSource(pv, 1, (const char**)&vs, NULL);
   glShaderSource(pf, 1, (const char**)&fs, NULL);
@@ -332,8 +333,9 @@ void SetShadersOrDie(std::vector<GLuint>& shaders){
 
 
 void init(const char* model_path) {
-  camera = new GraphicCamera(Vec3d(0, 0.2, 0.4), Vec3d(0, 0.1, 0),
-            Vec3d(0, 1 , 0), 0.02, 20, 60);
+  camera = new GraphicCamera::GraphicCamera(Vec3d(0, 0.2, 0.4),
+                                            Vec3d(0, 0.1, 0),
+            Vec3d(0, 1 , 0), 0.02, 20, 60, focus);
   camera->PerspectiveDisplay(WIDTH, HEIGHT);
   //setup_the_viewvolume();
   do_lights();
@@ -375,7 +377,7 @@ void KeyBoardHandler(unsigned char key, int x, int y){
       WantToRedraw = true;
       break;
     case 't':
-      GraphicUtilities::JitterCamera(0.0, 0.0, 0.1 ,0.0 , 5.0, frustum);
+//      GraphicUtilities::JitterCamera(0.0, 0.0, 0.1 ,0.0 , 5.0, frustum);
       WantToRedraw = true;
       break;
     case 'b':
@@ -386,11 +388,11 @@ void KeyBoardHandler(unsigned char key, int x, int y){
       WantToRedraw = true;
       break;
     case 'z':
-      if(focus > 0.2) focus -= 0.03;
+      if(camera->focus() > 0.2) camera->focus() -= 0.03;
       WantToRedraw = true;
       break;
     case 'x':
-      if(focus < 100.0) focus += 0.03;
+      if(camera->focus() < 100.0) camera->focus() += 0.03;
       WantToRedraw = true;
       break;
     case 's':
@@ -444,12 +446,13 @@ void RenderScene(){
   switch (RENDER_MODE) {
     case GL_CONTROL_DEF::KRM_AAONLY:
       cout<<"AA only"<<endl;
-      GraphicUtilities::AntiAlias(AALevel, draw_stuff, frustum);
+      camera->AAPerspectiveDisplay(WIDTH, HEIGHT, AALevel, draw_stuff);
       break;
     case GL_CONTROL_DEF::KRM_DOF_ONLY:
-      cout<<"DoF at focus:"<<focus<<endl;
+      cout<<"DoF at focus:"<<camera->focus()<<endl;
       glEnable(GL_MULTISAMPLE);
-      GraphicUtilities::DoFScene(draw_stuff, frustum, focus, 8);
+//      GraphicUtilities::DoFScene(draw_stuff, frustum, focus, 8);
+      camera->DoFPerspectiveDisplay(WIDTH, HEIGHT, 8, draw_stuff);
       break;
     default:
       camera->PerspectiveDisplay(WIDTH, HEIGHT);

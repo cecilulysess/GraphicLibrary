@@ -13,6 +13,8 @@
 #include "GraphicCamera.h"
 #include <math.h>
 
+namespace GraphicCamera {
+  
 static const int kINACTIVE = 0;
 static const int kTRANSLATE = 1;
 static const int kROTATE = 2;
@@ -34,7 +36,8 @@ Vec3d PrevMousePos;
 double dt_elev, dt_azim, loc_dt_elev, loc_dt_azim;
 
 // set camera position, aim, up. Verify, and make up the true up direction
-void GraphicCamera::GetCoordinate(const Vec3d& pos, const Vec3d& aim, const Vec3d& up){
+void GraphicCamera::GetCoordinate(const Vec3d& pos, const Vec3d& aim,
+                                  const Vec3d& up){
   Vec3d zaixs = pos - aim;
   if (zaixs.Norm() < kEPSILON) {
     throw "Camera position and aim are the same. Problematic";
@@ -88,25 +91,22 @@ void GraphicCamera::Init(){
   default_elev = current_elev;
 }
 
-GraphicCamera::GraphicCamera() { 
+GraphicCamera::GraphicCamera() :
+                             fru_(60, 1.333,0.02, 100){
   pos_ = {0.0, 1.0, 2.0};
   aim_ = {0.0, 0.0, 0.0};
   up_  = {0.0, 1.0, 0.0};
 
-  near_ = 0.1;
-  far_  = 100;
-  fov_  = 60;
-
+  this->focus_ = 1;
   Init();
 }
 
 // Constructor with position, aim, and up vector
 GraphicCamera::GraphicCamera(const Vec3d& pos, 
-   const Vec3d& aim, const Vec3d up) {
+                             const Vec3d& aim, const Vec3d up, double focus) :
+                             fru_(60, 1.333, 0.02, 100){
   this->GetCoordinate(pos, aim, up);
-  near_ = 0.1;
-  far_ = 100;
-  fov_ = 60.0;
+  this->focus_ = focus;
 
   Init();
 }
@@ -115,19 +115,17 @@ GraphicCamera::GraphicCamera(const Vec3d& pos,
 //  clipping plane and view angle (FoV)
 GraphicCamera::GraphicCamera::GraphicCamera(const Vec3d& pos, 
     const Vec3d& aim, const Vec3d up, float near, float far, 
-    float ViewAngle) {
+                                            float ViewAngle,
+                                            double focus) :
+    fru_(ViewAngle, 1.333, near, far){
   this->GetCoordinate(pos, aim, up);
-
-  near_ = near;
-  far_  = far;
-  fov_  = ViewAngle;
-
+  this->focus_ = focus;
   Init();
 }
 
 void GraphicCamera::SetClippingPlanes(float near, float far) {
-  near_ = near;
-  far_  = far;
+  fru_.Near() = near;
+  fru_.Far() = far;
 }
 
 void GraphicCamera::SetCenterOfFocus(const Vec3d& new_center) {
@@ -140,7 +138,8 @@ void GraphicCamera::PerspectiveDisplay(int width, int height) {
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   
-  gluPerspective(fov_, (float) width/ (float) height, near_, far_);
+  gluPerspective(fru_.FoV(), (float) width/ (float) height,
+                 fru_.Near(), fru_.Far());
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   gluLookAt(pos_.x(), pos_.y(), pos_.z(),
@@ -305,7 +304,6 @@ void GraphicCamera::MouseMotionEventHandler(int x, int y) {
         WndX = {1.0, 0.0, 0.0};
         WndY = {0.0, 1.0, 0.0};
 
-        printf("%f\n", current_elev);
         RotateX(WndX, current_elev + dt_elev);
         RotateY(WndY, current_azim + dt_azim);
         WndX.z() *= -1;
@@ -357,3 +355,318 @@ const GraphicCamera& GraphicCamera::operator=(const GraphicCamera& cam) {
 
   return *this;
 }
+
+  
+
+  
+
+//=====================Below is the implementation of AA and DoF===============
+// These data comes from OpenGL Programming Guide
+// http://www.glprogramming.com/red/chapter10.html
+Matrixd jitterTable4 = {
+  {0.375, 0.25}, {0.125, 0.75}, {0.875, 0.25}, {0.625, 0.75}
+};
+
+Matrixd jitterTable8 = {
+  {0.5625, 0.4375},
+  {0.0625, 0.9375},
+  {0.3125, 0.6875},
+  {0.6875, 0.8124},
+  {0.8125, 0.1875},
+  {0.9375, 0.5625},
+  {0.4375, 0.0625},
+  {0.1875, 0.3125}
+};
+
+Matrixd jitterTable12 = {
+  {0.4166666666, 0.625}, {0.9166666666, 0.875}, {0.25, 0.375},
+  
+  {0.4166666666, 0.125}, {0.75, 0.125}, {0.0833333333, 0.125}, {0.75, 0.625},
+  
+  {0.25, 0.875}, {0.5833333333, 0.375}, {0.9166666666, 0.375},
+  
+  {0.0833333333, 0.625}, {0.583333333, 0.875}
+};
+
+Matrixd jitterTable16 = {
+  {0.375, 0.4375}, {0.625, 0.0625}, {0.875, 0.1875}, {0.125, 0.0625},
+  
+  {0.375, 0.6875}, {0.875, 0.4375}, {0.625, 0.5625}, {0.375, 0.9375},
+  
+  {0.625, 0.3125}, {0.125, 0.5625}, {0.125, 0.8125}, {0.375, 0.1875},
+  
+  {0.875, 0.9375}, {0.875, 0.6875}, {0.125, 0.3125}, {0.625, 0.8125}
+};
+
+static inline Matrixd& GetJitterTable(int level) {
+  if (level == 4) return jitterTable4;
+  if (level == 8) return jitterTable8;
+  if (level == 12)
+    return jitterTable12;
+  else
+    return jitterTable16;
+}
+  
+void GraphicCamera::AAPerspectiveDisplay(int width, int height,
+                                         int level,
+                                         render_callback render_frame) {
+  float time_factor = 1.0;
+//  cout<<"Do AA at level:"<<level<<endl;
+  Matrixd& jitterTable = GetJitterTable(level);
+  glClearAccum(0, 0, 0, 0);
+  glClear(GL_ACCUM_BUFFER_BIT);
+  for (int i = 0 ; i < level; ++i) {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    JitterCamera(jitterTable.get(i, 0) * time_factor,
+                 jitterTable.get(i, 1) * time_factor);
+    render_frame();
+    glAccum(GL_ACCUM, 1.0/(float)level);
+  }
+  glAccum(GL_RETURN, 1.0);
+  
+}
+  
+void GraphicCamera::DoFPerspectiveDisplay(int width, int height,
+                                            int blur_level,
+                                            render_callback render_frame) {
+    glClearAccum(0, 0, 0, 0);
+    glClear(GL_ACCUM_BUFFER_BIT);
+    float accu_times = blur_level * blur_level;
+    for (int xt = -blur_level/2; xt < blur_level/2; xt ++) {
+      for (int yt = -blur_level/2; yt < blur_level/2; yt ++) {
+        JitterCamera(0.0, 0.0,
+                     (float)xt / (1000 * blur_level / 4),
+                     (float)yt / (1000 * blur_level / 4),//yt,
+                     this->focus()
+                     );
+        render_frame();
+        glAccum(GL_ACCUM, 1.0/accu_times);
+      }
+    }
+    
+    glAccum(GL_RETURN, 1.0);
+    //  glFlush();
+  }
+
+void GraphicCamera::JitterCamera(GLfloat pix_x, GLfloat pix_y,
+                                    GLfloat eye_x, GLfloat eye_y,
+                                    GLdouble focus){
+  GLint viewport_params[4];
+  // from OpenGL doc: When used with non-indexed variants of glGet
+  //  (such as glGetIntegerv), params returns four values: the x
+  //  and y window coordinates of the viewport, followed by its
+  //  width and height. Initially the  x and y window coordinates
+  //  are both set to 0, and the width and height are set to the
+  //  width and height of the window into which the GL will do its rendering
+  glGetIntegerv(GL_VIEWPORT, viewport_params);
+  GLfloat wndWidth=viewport_params[2];
+  GLfloat WndHeight=viewport_params[3];
+  GLfloat frustumWidth= fru_.Right() - fru_.Left();
+  GLfloat frustumHeight= fru_.Top() - fru_.Bottom();
+  
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  
+  GLfloat dx, dy;
+  dx = - (pix_x * frustumWidth/wndWidth + eye_x * fru_.Near() / focus);
+  //  dx = (eye_x - fru->Near()/focus * eye_x);
+  dy = - (pix_y * frustumHeight/WndHeight + eye_y * fru_.Near() / focus);
+  //  printf("world delta = %f %f\n",dx,dy);q
+  glFrustum(fru_.Left() + dx, fru_.Right() + dx, fru_.Bottom() + dy,
+            fru_.Top() + dy, fru_.Near(), fru_.Far() );
+  glMatrixMode(GL_MODELVIEW);
+//  //  glPushMatrix();
+//  //Problematic to do a view translation here, it will remove the materials.
+//  glLoadIdentity();
+//  glRotated(0, 0, 0, 1);
+//  glRotated(10, 1, 0, 0);
+//  glRotated(0, 0, 1, 0);
+//  glTranslated(0, -0.15, -0.4);
+//  //  cout<<"Translate Eye:"<<eye_x <<", "<<eye_y<<endl;
+//  glTranslatef(-eye_x, -eye_y, 0.0);
+//  //  glPopMatrix();
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  gluLookAt(pos_.x(), pos_.y(), pos_.z(),
+            aim_.x(), aim_.y(), aim_.z(),
+            up_.x(),  up_.y(),  up_.z());
+  glTranslated(-eye_x, -eye_x, 0.0);
+
+//  glTranslated(-pos_.x(), -pos_.y(), -pos_.z());
+}
+
+// jitter a camera by pixels in x and y
+void GraphicCamera::JitterCamera(GLfloat pix_x, GLfloat pix_y) {
+  JitterCamera(pix_x, pix_y, 0.0f, 0.0f, 1.0f);
+}
+
+  
+//============================Frustrum=====================================
+  Frustum::Frustum(float left, float right, float bottom, float top,
+                   float near, float far){
+    this->near = near;
+    this->far = far;
+    this->left = left;
+    this->right = right;
+    this->top = top;
+    this->bottom = bottom;
+    matrix[0] = 2.0 * near / (right - left);
+    matrix[2] = (right + left) / (right - left);
+    matrix[5] = 2.0 * near / ( top - bottom);
+    matrix[6] = (top + bottom) / (top - bottom);
+    matrix[10] = - (far + near) / ( far - near);
+    matrix[11] = - 2.0 * (far * near) / (far - near);
+    matrix[14] = -1.0;
+    
+    this->fov = Rad2Deg(atan((top - bottom) / 2.0 / near) ) * 2;
+  }
+  
+  Frustum::Frustum(float fovy, float aspect, float near, float far){
+    double f = tan(Deg2Rad(fovy / 2));
+    this->top = near * f;
+    this->right = top * aspect;
+    this->left = - right;
+    this->bottom = - top;
+    this->near = near;
+    this->far = far;
+    matrix[0] = near / right;
+    matrix[5] = near / top;
+    matrix[10] = - (far + near) / (far - near);
+    matrix[11] = -2.0 * (far * near) / (far - near);
+    matrix[14] = -1.0;
+    this->fov = fovy;
+  }
+  
+  
+  inline double& Frustum::Left() {
+    return this->left;
+  }
+  
+  inline double& Frustum::Right() {
+    return this->right;
+  }
+  
+  
+  inline double& Frustum::Top(){
+    return this->top;
+  }
+  
+  inline double& Frustum::Bottom(){
+    return this->bottom;
+  }
+  
+  inline double& Frustum::Near(){
+    return this->near;
+  }
+  
+  inline double& Frustum::Far(){
+    return this->far;
+  }
+  
+  inline double& Frustum::FoV() {
+    return  this->fov;
+  }
+  
+  Matrix4d& Frustum::GetMatrix(){
+    return this->matrix;
+  }
+  
+  
+  
+  
+  // This function comes from the code of Songho's works:
+  //    http://www.songho.ca/opengl/gl_transform.html#modelview
+  // I use this as debug helper functions that help me better understand
+  // about the OpenGL frustum works.
+  // It should not be used in the assignment
+  void Frustum::DrawFrustum(float fovY, float aspectRatio, float nearPlane, float farPlane){
+    float tangent = tanf(fovY/2 * 3.141593f / 180.0);
+    float nearHeight = nearPlane * tangent;
+    float nearWidth = nearHeight * aspectRatio;
+    float farHeight = farPlane * tangent;
+    float farWidth = farHeight * aspectRatio;
+    
+    // compute 8 vertices of the frustum
+    float vertices[8][3];
+    // near top right
+    vertices[0][0] = nearWidth;     vertices[0][1] = nearHeight;    vertices[0][2] = -nearPlane;
+    // near top left
+    vertices[1][0] = -nearWidth;    vertices[1][1] = nearHeight;    vertices[1][2] = -nearPlane;
+    // near bottom left
+    vertices[2][0] = -nearWidth;    vertices[2][1] = -nearHeight;   vertices[2][2] = -nearPlane;
+    // near bottom right
+    vertices[3][0] = nearWidth;     vertices[3][1] = -nearHeight;   vertices[3][2] = -nearPlane;
+    // far top right
+    vertices[4][0] = farWidth;      vertices[4][1] = farHeight;     vertices[4][2] = -farPlane;
+    // far top left
+    vertices[5][0] = -farWidth;     vertices[5][1] = farHeight;     vertices[5][2] = -farPlane;
+    // far bottom left
+    vertices[6][0] = -farWidth;     vertices[6][1] = -farHeight;    vertices[6][2] = -farPlane;
+    // far bottom right
+    vertices[7][0] = farWidth;      vertices[7][1] = -farHeight;    vertices[7][2] = -farPlane;
+    
+    float colorLine1[4] = { 0.7f, 0.7f, 0.7f, 0.7f };
+    float colorLine2[4] = { 0.2f, 0.2f, 0.2f, 0.7f };
+    float colorPlane[4] = { 0.5f, 0.5f, 0.5f, 0.5f };
+    
+    glDisable(GL_LIGHTING);
+    glDisable(GL_CULL_FACE);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
+    // draw the edges around frustum
+    glBegin(GL_LINES);
+    glColor4fv(colorLine2);
+    glVertex3f(0, 0, 0);
+    glColor4fv(colorLine1);
+    glVertex3fv(vertices[4]);
+    
+    glColor4fv(colorLine2);
+    glVertex3f(0, 0, 0);
+    glColor4fv(colorLine1);
+    glVertex3fv(vertices[5]);
+    
+    glColor4fv(colorLine2);
+    glVertex3f(0, 0, 0);
+    glColor4fv(colorLine1);
+    glVertex3fv(vertices[6]);
+    
+    glColor4fv(colorLine2);
+    glVertex3f(0, 0, 0);
+    glColor4fv(colorLine1);
+    glVertex3fv(vertices[7]);
+    glEnd();
+    
+    glColor4fv(colorLine1);
+    glBegin(GL_LINE_LOOP);
+    glVertex3fv(vertices[4]);
+    glVertex3fv(vertices[5]);
+    glVertex3fv(vertices[6]);
+    glVertex3fv(vertices[7]);
+    glEnd();
+    
+    glColor4fv(colorLine1);
+    glBegin(GL_LINE_LOOP);
+    glVertex3fv(vertices[0]);
+    glVertex3fv(vertices[1]);
+    glVertex3fv(vertices[2]);
+    glVertex3fv(vertices[3]);
+    glEnd();
+    
+    // draw near and far plane
+    glColor4fv(colorPlane);
+    glBegin(GL_QUADS);
+    glVertex3fv(vertices[0]);
+    glVertex3fv(vertices[1]);
+    glVertex3fv(vertices[2]);
+    glVertex3fv(vertices[3]);
+    glVertex3fv(vertices[4]);
+    glVertex3fv(vertices[5]);
+    glVertex3fv(vertices[6]);
+    glVertex3fv(vertices[7]);
+    glEnd();
+    
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_LIGHTING);
+  }
+ 
+} //ns GraphicCamera

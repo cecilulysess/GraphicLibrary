@@ -16,6 +16,8 @@
 
 #include "GraphicMath.h"
 
+namespace GraphicUtilities{
+  
 typedef void (*render_callback)();
 class Frustum {
 public:
@@ -76,6 +78,6 @@ private:
   float _fov;
   
 };*/
-
+}// ns GraphicUtilities
 
 #endif /* defined(__Graphic__GraphicUtilities__) */
