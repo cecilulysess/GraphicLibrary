@@ -88,8 +88,6 @@ void load_object(const char* path){
   normal_length = obj->getFaceNumber();
   faces_length = obj->getFaceNumber();
   normal = obj->getFaceNormal();
-//  obj->PrintAll();
-  //validate_object();
 }
 
 void LightSwitch(){
@@ -112,7 +110,6 @@ void LightSwitch(){
 
 void draw_stuff(){
   LightSwitch();
-  int draw_nu = 6;
   glEnable(GL_DEPTH_TEST);
   glUseProgram(0);
   glClearColor(0.15, 0.15, 0.15, 0);
@@ -123,7 +120,7 @@ void draw_stuff(){
   glUseProgram(0);
   glDisable(GL_LIGHTING);
   glClearColor(0,0,0,0);
-  float* v = normal;
+//  float* v = normal;
   float* vn = vertices_normal;
   glColor4f(0, 0, 1.0, 1.0);
   if ( DrawNormal ) {
@@ -286,11 +283,11 @@ bool LinkSuccessful(int obj) {
   glGetProgramiv(obj, GL_LINK_STATUS, &status);
   return status == GL_TRUE;
 }
-// set up shaders for using GLSL
+// set up shaders for using GLSL. This version only load one shader
 void SetShadersOrDie(std::vector<GLuint>& shaders){
-  GLint vertCompiled, fragCompiled;
+  //GLint vertCompiled, fragCompiled;
   char *vs, *fs, *bpfs;
-  GLuint pv, pf, p, bpv, bpf, bp;
+  GLuint pv, pf, p;//, bpv, bpf, bp;
   
   pv = glCreateShader(GL_VERTEX_SHADER);
   pf = glCreateShader(GL_FRAGMENT_SHADER);
@@ -302,8 +299,8 @@ void SetShadersOrDie(std::vector<GLuint>& shaders){
   // shader, # of string, array of string and array of tring length
   glShaderSource(pv, 1, (const char**)&vs, NULL);
   glShaderSource(pf, 1, (const char**)&fs, NULL);
-  glShaderSource(bpv, 1, (const char**)&vs, NULL);
-  glShaderSource(bpf, 1, (const char**)&bpfs, NULL);
+//  glShaderSource(bpv, 1, (const char**)&vs, NULL);
+//  glShaderSource(bpf, 1, (const char**)&bpfs, NULL);
   free(vs);
   free(fs);
   free(bpfs);
@@ -335,10 +332,10 @@ void SetShadersOrDie(std::vector<GLuint>& shaders){
 
 
 void init(const char* model_path) {
-  camera = new GraphicCamera(Vec3d(0, 0.15, 0.4), Vec3d(0, 0, 0),
-            Vec3d(0, 1 , 0.1));
+  camera = new GraphicCamera(Vec3d(0, 0.2, 0.4), Vec3d(0, 0.1, 0),
+            Vec3d(0, 1 , 0), 0.02, 20, 60);
   camera->PerspectiveDisplay(WIDTH, HEIGHT);
-  setup_the_viewvolume();
+  //setup_the_viewvolume();
   do_lights();
   do_material();
   load_object(model_path);
@@ -455,7 +452,7 @@ void RenderScene(){
       GraphicUtilities::DoFScene(draw_stuff, frustum, focus, 8);
       break;
     default:
-     camera->PerspectiveDisplay(WIDTH, HEIGHT);
+      camera->PerspectiveDisplay(WIDTH, HEIGHT);
       draw_stuff();
   }
   glFlush();

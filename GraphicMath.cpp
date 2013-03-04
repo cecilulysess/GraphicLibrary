@@ -142,7 +142,7 @@ Matrixd::Matrixd(std::initializer_list<std::initializer_list<double>> il){
       col = (int)it->size();
     }
   }
-  row = il.size();
+  row = (int) il.size();
   for (std::initializer_list<std::initializer_list<double>>::iterator it =
        il.begin(); it != il.end(); ++it ) {
     for (std::initializer_list<double>::iterator nt = (*it).begin();

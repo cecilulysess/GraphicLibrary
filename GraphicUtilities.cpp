@@ -22,11 +22,11 @@ char* GraphicUtilities::read_shader_program(const char *filename){
   char *content = NULL;
   int fd, count;
   fd = open(filename, O_RDONLY);
-  count = lseek(fd, 0, SEEK_END);
+  count = (int) lseek(fd, 0, SEEK_END);
   close(fd);
   content = (char *) calloc(1, (count + 1));
   fp = fopen(filename, "r");
-  count = fread(content, sizeof(char), count, fp);
+  count = (int) fread(content, sizeof(char), count, fp);
   content[count] = '\0';
   fclose(fp);
   return content;

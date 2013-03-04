@@ -139,17 +139,29 @@ void GraphicCamera::SetCenterOfFocus(const Vec3d& new_center) {
 void GraphicCamera::PerspectiveDisplay(int width, int height) {
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-
+  
   gluPerspective(fov_, (float) width/ (float) height, near_, far_);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
   gluLookAt(pos_.x(), pos_.y(), pos_.z(),
             aim_.x(), aim_.y(), aim_.z(),
             up_.x(),  up_.y(),  up_.z());
+//  glMatrixMode(GL_PROJECTION);
+//  glLoadIdentity();
+//  frustum = new Frustum(60, (float)WIDTH / (float)HEIGHT, 0.02, 20.0);
+//  glLoadMatrixd(frustum->GetMatrix().Transpose().GetPtr());
+//  glMatrixMode(GL_MODELVIEW);
+//  glLoadIdentity();
+//  glRotated(0, 0, 0, 1);
+//  glRotated(10, 1, 0, 0);
+//  glRotated(0, 0, 1, 0);
+//  glTranslated(0, -0.15, -0.4);
 }
 
 void GraphicCamera::MouseEventHandler(int button, int state, int x, int y){ 
   double realy, wx, wy, wz;
   // if ALT key used
-  int mode = glutGetModifiers();  
+//  int mode = glutGetModifiers();  
   
   if (state == GLUT_UP && CameraMode != kINACTIVE) {
     current_elev += dt_elev;
