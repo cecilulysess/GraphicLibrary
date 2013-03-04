@@ -22,8 +22,8 @@ else
 endif
 
 
-HFILES 	= Matrix.${H} Vector.${H} Utility.${H} Camera.${H} GraphicUtilities.${H} GLCommonHeader.${H} GraphicObject.${H} GraphicMath.${H} GraphicCamera.${H}
-OFILES 	= Matrix.o Vector.o Utility.o Camera.o GraphicUtilities.o GraphicMath.o GraphicObject.o GraphicCamera.o
+HFILES 	= GraphicUtilities.${H} GLCommonHeader.${H} GraphicObject.${H} GraphicMath.${H} GraphicCamera.${H}
+OFILES 	= GraphicUtilities.o GraphicMath.o GraphicObject.o GraphicCamera.o
 	
 PROJECT = main_base
 
@@ -32,18 +32,6 @@ ${PROJECT}:	${PROJECT}.o $(OFILES)
 
 ${PROJECT}.o: ${PROJECT}.${C} $(HFILES)
 	${CC} $(CFLAGS) -c ${PROJECT}.${C}
-
-Camera.o: Camera.${C} Camera.${H} Matrix.${H} Vector.${H} Utility.${H} 
-	${CC} $(CFLAGS) -c Camera.${C}
-
-Matrix.o: Matrix.${C} Matrix.${H} Vector.${H} Utility.${H} 
-	${CC} $(CFLAGS) -c Matrix.${C}
-
-Vector.o: Vector.${C} Vector.${H} Utility.${H} 
-	${CC} $(CFLAGS) -c Vector.${C}
-
-Utility.o: Utility.${C} Utility.${H}
-	${CC} $(CFLAGS) -c Utility.${C}
 
 GraphicUtilities.o: GraphicUtilities.${C} GraphicUtilities.${H} 
 	${CC} $(CFLAGS) -c GraphicUtilities.${C}

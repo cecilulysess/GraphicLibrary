@@ -487,10 +487,10 @@ void GraphicCamera::JitterCamera(GLfloat pix_x, GLfloat pix_y,
 //  //  glPopMatrix();
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  gluLookAt(pos_.x(), pos_.y(), pos_.z(),
+  gluLookAt(pos_.x() + eye_x, pos_.y() + eye_y, pos_.z(),
             aim_.x(), aim_.y(), aim_.z(),
             up_.x(),  up_.y(),  up_.z());
-  glTranslated(-eye_x, -eye_x, 0.0);
+//  glTranslated(-eye_x, -eye_x, 0.0);
 
 //  glTranslated(-pos_.x(), -pos_.y(), -pos_.z());
 }

@@ -45,9 +45,9 @@ bool IsDrawGrid = true;
 bool IsFillLight = true;
 bool IsKeyLight = true;
 bool IsBgLight = true;
-double focus = 0.42;
+double focus = 1.2;
 float shininess = 10.0;
-float l0brightness = 1.3;
+float l0brightness = 1.2;
 
 GraphicCamera::GraphicCamera *camera;
 
@@ -452,7 +452,7 @@ void RenderScene(){
       cout<<"DoF at focus:"<<camera->focus()<<endl;
       glEnable(GL_MULTISAMPLE);
 //      GraphicUtilities::DoFScene(draw_stuff, frustum, focus, 8);
-      camera->DoFPerspectiveDisplay(WIDTH, HEIGHT, 8, draw_stuff);
+      camera->DoFPerspectiveDisplay(WIDTH, HEIGHT, 12, draw_stuff);
       break;
     default:
       camera->PerspectiveDisplay(WIDTH, HEIGHT);

@@ -103,10 +103,10 @@ private:
   Vec3d default_aim;
   Vec3d default_up;
  
-  double default_azim = 0.0;
-  double default_elev = 0.0;
-  double current_azim = 0.0;
-  double current_elev = 0.0;
+  double default_azim;
+  double default_elev;
+  double current_azim;
+  double current_elev;
 
   Vec3d pos_, aim_, up_;
   float focus_;
