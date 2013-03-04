@@ -22,7 +22,7 @@
 #include "common_data_structure.h"
 #include "GraphicUtilities.h"
 #include "GraphicObject.h"
-#include "Camera.h"
+#include "GraphicCamera.h"
 
 #ifdef MAIN_PROG
 //#define TESTING_
@@ -49,7 +49,7 @@ double focus = 0.42;
 float shininess = 10.0;
 float l0brightness = 1.3;
 
-Camera *camera;
+GraphicCamera *camera;
 
 Frustum* frustum;
 std::vector<GLuint> shaders;
@@ -472,12 +472,12 @@ void Redraw(){
 
 void mouseEventHandler(int button, int state, int x, int y) {
     // let the camera handle some specific mouse events (similar to maya)
-      camera->HandleMouseEvent(button, state, x, y);
+      camera->MouseEventHandler(button, state, x, y);
 }
 
 void motionEventHandler(int x, int y) {
     // let the camera handle some mouse motions if the camera is to be moved
-      camera->HandleMouseMotion(x, y);
+      camera->MouseMotionEventHandler(x, y);
       glutPostRedisplay();
 }
 

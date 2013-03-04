@@ -207,11 +207,13 @@ void RotateY(Vec3d &v, double degree){
             v[0] = v0; v[2] = v2; 
 }
 
-void ArbitraryRotate(Vec3d U, Vec3d V, Vec3d W, double degreeX, double degreeY, Vector3d& point, Vector3d aim) {
-  double cx = cos(DegToRad(degreeX));
-  double sx = sin(DegToRad(degreeX));
-  double cy = cos(DegToRad(degreeY));
-  double sy = sin(DegToRad(degreeY)); 
+void ArbitraryRotate(Vec3d U, Vec3d V, Vec3d W,
+                     double degreeX, double degreeY,
+                     Vec3d& point, Vec3d aim) {
+  double cx = cos(Deg2Rad(degreeX));
+  double sx = sin(Deg2Rad(degreeX));
+  double cy = cos(Deg2Rad(degreeY));
+  double sy = sin(Deg2Rad(degreeY));
   
   Matrixd trans = { {1, 0, 0, -aim[0]},
     {0, 1, 0, -aim[1]},
@@ -223,10 +225,10 @@ void ArbitraryRotate(Vec3d U, Vec3d V, Vec3d W, double degreeX, double degreeY, 
     {W[0], W[1], W[2], 0},
     {0, 0, 0, 1}};
   
-  Matrixd rot;
-  Matrixd pso =  {{point[0]}, {point[1]}, {point[2]}, {1}};
+  Matrixd rot(4, 4);
+  Matrixd pos =  {{point[0]}, {point[1]}, {point[2]}, {1}};
   
-  pos = trans*pos;
+  pos = trans * pos;
   
   pos = mat*pos;
   
@@ -248,7 +250,7 @@ void ArbitraryRotate(Vec3d U, Vec3d V, Vec3d W, double degreeX, double degreeY, 
   
   pos = trans.inv()*pos;
   
-  point.set(pos[0], pos[1], pos[2]);
+  point = {pos.get(0, 0), pos.get(1, 0), pos.get(2, 0)};
 }
 
 
@@ -303,9 +305,9 @@ void GraphicCamera::MouseMotionEventHandler(int x, int y) {
 
         ArbitraryRotate(WndX, WndY, WndZ, loc_dt_elev, 0, pos_, aim_);
         ArbitraryRotate(Vec3d(1, 0, 0), Vec3d(0, 1, 0), Vec3d(0, 0, 1), 0,
-                        -loc_det_azim, pos_, aim_);
-        RotateX(WndX, CurrentElev + dt_elev);
-        RotateY(WndY, CurrentAzim + dt_azim);
+                        -loc_dt_azim, pos_, aim_);
+        RotateX(WndX, current_azim + dt_elev);
+        RotateY(WndY, current_azim + dt_azim);
         WndX.z() *= -1;
         up_ = WndY.Normalize();
 
@@ -313,24 +315,24 @@ void GraphicCamera::MouseMotionEventHandler(int x, int y) {
       case kTRANSLATE:
 
       realy = ViewPort[3] - y - 1;
-      gluProject(aim_.x(), aim_.y(), aim.z(), MvMat, ProjMat, ViewPOrt, 
-                 &wx, &wy, &wz);
-
-      gluUnProject((GLdouble) x, (GLdouble) realy, wz, MvMat, ProjMat, 
-                   ViewPort, &mouse_pos.x(), &mouse_pos.y(), 
-                   &mouse_pos.z());
+//      gluProject(aim_.x(), aim_.y(), aim.z(), MvMat, ProjMat, ViewPOrt,
+//                 &wx, &wy, &wz);
+//
+//      gluUnProject((GLdouble) x, (GLdouble) realy, wz, MvMat, ProjMat, 
+//                   ViewPort, &mouse_pos.x(), &mouse_pos.y(), 
+//                   &mouse_pos.z());
       
       // move both the camera position and its aim coordinate
-      dir = mouse_pos - prev_mouse_pos;
+      dir = mouse_pos - PrevMousePos;
       pos_ = pos_ - dir;
       aim_ = aim_ - dir;
 
-      prev_mouse_pos = mouse_pos;
+      PrevMousePos = mouse_pos;
       break;
     }
     MousePrevX = x;
     MousePrevY = y;
-
+  }
 }
 
 const GraphicCamera& GraphicCamera::operator=(const GraphicCamera& cam) {

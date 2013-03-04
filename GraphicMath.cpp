@@ -43,6 +43,12 @@ Vec3d::Vec3d() : Vector_<double>(3){
   this->z() = 0.0;
 }
 
+Vec3d::Vec3d(double x, double y, double z) :Vector_<double>(3) {
+  this->x() = x;
+  this->y() = y;
+  this->z() = z;
+}
+
 Vec3d& Vec3d::operator-() const {
   return (*this * -1.0);
 }

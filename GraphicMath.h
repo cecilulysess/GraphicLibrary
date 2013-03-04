@@ -211,6 +211,7 @@ using std::equal;
    Vec3d(std::initializer_list<double> il);
    Vec3d(const Vec3d& li);
    Vec3d();
+   Vec3d(double x, double y, double z);
    // create a Vec3d from vec
    explicit Vec3d(Vector_<double> vec);
    
