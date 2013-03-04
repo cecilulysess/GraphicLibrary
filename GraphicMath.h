@@ -255,6 +255,10 @@ public:
   Matrixd& operator*=(const double e);
   Matrixd& operator-() const;
   
+  double Determinant() const;
+  //get inversion of matrix
+  Matrixd inv() const;
+  
   friend Matrixd& operator*(const Matrixd& mat, const double e);
   friend Matrixd& operator*(const double e, const Matrixd& mat);
   
@@ -283,7 +287,9 @@ protected:
   
 private:
   int _row, _col;
-
+  Matrixd LU_Decompose(const Matrixd& M, int *idx) const;
+  void LU_back_substitution(const Matrixd& M, int *indx, double col[]) const;
+  
 };
 
 bool operator==(const Matrixd& a, const Matrixd& b) ;

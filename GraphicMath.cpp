@@ -284,6 +284,138 @@ bool operator==(const Matrixd& a, const Matrixd& b) {
   return true;
 }
 
+double Matrixd::Determinant() const {
+  if (this->row() != this->col()) {
+    throw "Error, only square matrix have determinant";
+  }
+  
+  if (this->row() == 2) {
+    return mat[0] * mat[3] - mat[1] * mat[2];
+  }
+  if (this->row() == 3) {
+    return mat[0] * mat[4] * mat[8] + mat[1] * mat[5] * mat[6] +
+           mat[2] * mat[3] * mat[7] - mat[2] * mat[4] * mat[6] -
+           mat[1] * mat[3] * mat[8] - mat[0] * mat[5] * mat[7];
+  }
+  if (this->row() == 4) {
+    
+  }
+  throw "Not implemented";
+}
+
+Matrixd Matrixd::inv() const {
+	if(row() != col()){
+		throw "Can not invert non square matrix";
+		
+	}
+	
+	Matrixd LU_M(row(), row());
+	Matrixd invM(row(), row());
+	int i, j;
+	int *indx = new int[row()];
+	double *col = new double[row()];
+
+	LU_M = this->LU_Decompose(*this, indx);
+	
+	for(j = 0; j < row(); j++){
+		for(i = 0; i < row(); i++)
+			col[i] = 0.0;
+		col[j] = 1.0;
+		LU_back_substitution(LU_M, indx, col);
+		for(i = 0; i < row(); i++)
+			invM.set(i, j, col[i]);
+	}
+	
+	delete indx;
+	delete col;
+	return invM;
+}
+
+
+
+Matrixd Matrixd::LU_Decompose(const Matrixd& M, int *indx) const
+{
+	int  i, imax, j, k;
+	double big, dum, sum, temp;
+	double *vv = new double[M.row()];
+	Matrixd LU_M(M);
+	int N = M.row();
+	
+	for(i = 0; i < N; i++){
+		big = 0.0;
+		for(j = 0; j < N; j++)
+			if((temp = fabs(M.get(i, j))) > big)
+				big = temp;
+		if(big == 0.0)
+			throw "inverse of singular Matrix";
+		
+		vv[i] = 1.0 / big;
+	}
+	
+	for(j = 0; j < N; j++){
+		for(i = 0; i < j; i++){
+			sum = LU_M.get(i, j);
+			for(k = 0; k < i; k++)
+				sum -= LU_M.get(i, k) * LU_M.get(k, j);
+			LU_M.set(i, j, sum);
+		}
+		big = 0.0;
+		for(i = j; i < N; i++){
+			sum = LU_M.get(i, j);
+			for(k = 0; k < j; k++)
+				sum -= LU_M.get(i, k) * LU_M.get(k, j);
+			LU_M.set(i, j, sum);
+			if((dum = vv[i]*fabs(sum)) >= big){
+				big = dum;
+				imax = i;
+			}
+		}
+		if(j != imax){
+			for(k = 0; k < N; k++){
+				dum = LU_M.get(imax, k);
+				LU_M.set(imax, k, LU_M.get(j, k));
+				LU_M.set(j, k, dum);
+			}
+			vv[imax] = vv[j];
+		}
+		indx[j] = imax;
+		if(j < N - 1){
+			dum = 1.0 / LU_M.get(j, j);
+			for(i = j + 1; i < N; i++)
+				LU_M.set(i, j, LU_M.get(i, j) * dum);
+		}
+	}
+	
+	delete vv;
+	return LU_M;
+}
+
+
+void Matrixd::LU_back_substitution(const Matrixd& M, int *indx, double col[]) const {
+	int i, ii = -1, ip,j;
+	double sum;
+	int N = M.row();
+	
+	for(i = 0; i < N; i++){
+		ip = indx[i];
+		sum = col[ip];
+		col[ip] = col[i];
+		if(ii >= 0)
+			for(j = ii; j < i; j++)
+				sum -= M.get(i, j) * col[j];
+		else if(sum)
+			ii = i;
+		col[i] = sum;
+	}
+	
+	for(i = N - 1; i >= 0; i--){
+		sum = col[i];
+		for(j = i + 1; j < N; j++)
+			sum -= M.get(i, j) * col[j];
+		col[i] = sum / M.get(i, i);
+	}
+}
+
 Matrixd& Matrixd::Identity(int size){
   Matrixd* mat = new Matrixd(size);
   for (int i = 0; i < size; ++i) {

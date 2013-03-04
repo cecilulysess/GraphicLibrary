@@ -207,42 +207,42 @@ void RotateY(Vec3d &v, double degree){
             v[0] = v0; v[2] = v2; 
 }
 
-void ArbitraryRotate(Vector3d U, Vector3d V, Vector3d W, double degreeX, double degreeY, Vector3d& point, Vector3d aim) {
+void ArbitraryRotate(Vec3d U, Vec3d V, Vec3d W, double degreeX, double degreeY, Vector3d& point, Vector3d aim) {
   double cx = cos(DegToRad(degreeX));
   double sx = sin(DegToRad(degreeX));
   double cy = cos(DegToRad(degreeY));
   double sy = sin(DegToRad(degreeY)); 
   
-  Matrixd trans = {1, 0, 0, -aim[0],
-                    0, 1, 0, -aim[1],
-                    0, 0, 1, -aim[2],
-                    0, 0, 0, 1}; 
+  Matrixd trans = { {1, 0, 0, -aim[0]},
+    {0, 1, 0, -aim[1]},
+    {0, 0, 1, -aim[2]},
+    {0, 0, 0, 1}};
   
-  Matrixd mat = { U[0], U[1], U[2], 0,
-                   V[0], V[1], V[2], 0,
-                   W[0], W[1], W[2], 0,
-                   0, 0, 0, 1}; 
+  Matrixd mat = { {U[0], U[1], U[2], 0},
+    {V[0], V[1], V[2], 0},
+    {W[0], W[1], W[2], 0},
+    {0, 0, 0, 1}};
   
   Matrixd rot;
-  Vector_<double> =  {point[0], point[1], point[2], 1}; 
+  Matrixd pso =  {{point[0]}, {point[1]}, {point[2]}, {1}};
   
   pos = trans*pos;
   
   pos = mat*pos;
   
-  rot.set(1,   0,  0, 0,
-          0,  cx, sx, 0,
-          0, -sx, cx, 0,
-          0,   0,  0, 1); 
+  rot = {{1,   0,  0, 0},
+    {0,  cx, sx, 0},
+    {0, -sx, cx, 0},
+    {0,   0,  0, 1}};
   
   pos = rot*pos;
   
-  rot.set( cy, 0, sy, 0,
-           0, 1,  0, 0,
-          -sy, 0, cy, 0,
-           0, 0,  0, 1); 
+  rot = {{ cy, 0, sy, 0},
+    {0, 1,  0, 0},
+    {-sy, 0, cy, 0},
+    {0, 0,  0, 1}};
   
-  pos = rot*pos;
+  pos = rot * pos;
   
   pos = mat.inv()*pos;
   

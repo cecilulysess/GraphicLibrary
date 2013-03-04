@@ -829,6 +829,7 @@ void LU_back_substitution(const Matrix& M, int *indx, double col[])
 			sum -= M.row[i][j] * col[j];
 		col[i] = sum / M.row[i][i];
 	}
+  
 }
 
 Matrix Matrix::inv() const

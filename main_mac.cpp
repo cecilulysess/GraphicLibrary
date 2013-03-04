@@ -22,14 +22,6 @@
 #include "common_data_structure.h"
 #include "GraphicUtilities.h"
 #include "GraphicObject.h"
-#include "Camera.h"
-
-#ifdef MAIN_PROG
-//#define TESTING_
-
-#ifdef TESTING_
-#include "_test_case.h"
-#endif
 
 #define WIDTH 1024
 #define HEIGHT 768
@@ -37,7 +29,7 @@
 
 unsigned int RENDER_MODE = 0;
 
-int AALevel = 4;
+int  AALevel = 4;
 bool WantToRedraw = false;
 bool DrawNormal = false;
 bool IsDrawFrame = false;
@@ -46,10 +38,6 @@ bool IsFillLight = true;
 bool IsKeyLight = true;
 bool IsBgLight = true;
 double focus = 0.42;
-float shininess = 10.0;
-float l0brightness = 1.3;
-
-Camera *camera;
 
 Frustum* frustum;
 std::vector<GLuint> shaders;
@@ -88,8 +76,6 @@ void load_object(const char* path){
   normal_length = obj->getFaceNumber();
   faces_length = obj->getFaceNumber();
   normal = obj->getFaceNormal();
-//  obj->PrintAll();
-  //validate_object();
 }
 
 void LightSwitch(){
@@ -115,7 +101,7 @@ void draw_stuff(){
   int draw_nu = 6;
   glEnable(GL_DEPTH_TEST);
   glUseProgram(0);
-  glClearColor(0.15, 0.15, 0.15, 0);
+  glClearColor(0.35, 0.35, 0.35, 0.0);
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
   if (IsDrawGrid)
     GraphicUtilities::DrawGrid(10, 1);
@@ -130,7 +116,6 @@ void draw_stuff(){
     for (int i = 0; i < faces_length * 3; i++) {
       glBegin(GL_LINES);
         glVertex3fv(&vertices[i*3]);
-        //glVertex3f(vertices[i*3] + v[i/3 * 3] ,vertices[i*3 + 1] + v[i/3* 3+1], vertices[i*3 + 2]+ v[i/3 * 3+2]);
 	glVertex3f(vertices[i*3] + vn[i*3] ,vertices[i*3 + 1] + vn[i* 3+1], vertices[i*3 + 2]+ vn[i * 3+2]);
       glEnd();
     }
@@ -138,40 +123,27 @@ void draw_stuff(){
   glEnable(GL_LIGHTING);
 //  frustum->DrawFrustum(50, 4.0/3.0, 0.1, 20);
   glUseProgram(selected_shader_id);
-  //printf("Using shader %d\n", selected_shader_id);
   glEnableClientState(GL_VERTEX_ARRAY); 
   glEnableClientState(GL_NORMAL_ARRAY);
   //glScalef(10, 10, 10);
   glVertexPointer(3,GL_FLOAT, 3 * sizeof(GLfloat), vertices); 
   glNormalPointer(GL_FLOAT, 3 * sizeof(GLfloat), vertices_normal);
-  //for (int i = 0; i < faces_length; ++i) {
-    //glNormal3fv(&normal[i * 3]);    
-  //  glDrawArrays(GL_TRIANGLES, 3 * i, 3); 
-  //} 
   glDrawArrays(GL_TRIANGLES, 0, 3 * faces_length);
   
   glPushMatrix();
   glTranslated(0.15, 0, -0.3);
   glRotated(45, 0, 1, 0);
   glDrawArrays(GL_TRIANGLES, 0, 3 * faces_length);
+ // glutSolidTeapot (0.5);
   glPopMatrix();
-  glPushMatrix();
-  glTranslated(-0.3, 0, -0.3);
-  glScalef(0.1,0.1,0.1);
-  glutSolidTeapot (0.5);
-  glPopMatrix();
-  /*for (i = 0; i < faces_length; ++i) {
-    glNormal3fv(&normal[i]);
-    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (void*)(3 * i) );
-  }
   glFlush();*/
 }
 
 void do_lights(){
   // Light0 as key light
   float light0_ambient[] = { 0.0, 0.0, 0.0, 0.0 };
-  float light0_diffuse[] = { l0brightness,l0brightness,l0brightness,0.0};
-  float light0_specular[] = { l0brightness,l0brightness,l0brightness,0.0};
+  float light0_diffuse[] = { 1.0, 1.0, 1.0, 0.0 };
+  float light0_specular[] = { 1.0, 1.0, 1.0, 0.0 };
   float light0_position[] = { 3, 4, 3, 1.0 };
   float light0_direction[] = { -1.5, -2.0, -2.0, 1.0 };
   
@@ -183,17 +155,17 @@ void do_lights(){
   glLightfv(GL_LIGHT0, GL_SPECULAR, light0_specular);
   glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 1.0);
   glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 180.0);
-  glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0 );
+  glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0.5 );
   glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.2 );
-  glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.01);
+  glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.015);
   
   glLightfv(GL_LIGHT0, GL_POSITION, light0_position);
   glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, light0_direction);
   
 // Light1 as fill light
   float light1_ambient[] = { 0.0, 0.0, 0.0, 0.0 };
-  float light1_diffuse[] = { l0brightness, l0brightness, l0brightness, 0.0 };
-  float light1_specular[] = { l0brightness, l0brightness, l0brightness, 0.0 };
+  float light1_diffuse[] = { 1.0, 1.0, 1.0, 0.0 };
+  float light1_specular[] = { 1.0, 1.0, 1.0, 0.0 };
   float light1_position[] = { -3, 2.5, 4, 1.0 };
   float light1_direction[] = { -1.5, -2.0, -2.0, 1.0 };
   
@@ -215,8 +187,8 @@ void do_lights(){
 
 // Light2 as background light
   float light2_ambient[] = { 0.0, 0.0, 0.0, 0.0 };
-  float light2_diffuse[] = { 2.0, 2.0, 2.0, 0.0 };
-  float light2_specular[] = { 2.0, 2.0, 2.0, 0.0 };
+  float light2_diffuse[] = { 1.0, 1.0, 1.0, 0.0 };
+  float light2_specular[] = { 1.0, 1.0, 1.0, 0.0 };
   float light2_position[] = { 0, 4, -5, 1.0 };
   float light2_direction[] = { -1.5, -2.0, -2.0, 1.0 };
   
@@ -241,11 +213,10 @@ void do_lights(){
 }
 
 void do_material(){
-
-  float mat_ambient[] = {1.0, 1.0, 1.0, 1.0};
-  float mat_diffuse[] = {255.0/255, 200.0/255, 100.0/255, 1.0};
-  float mat_specular[] = {255.0/255, 240.0/255, 215.0/255, 1};
-  float mat_shininess[] = {shininess};
+  float mat_ambient[] = {0.0, 0.0, 0.0, 1.0};
+  float mat_diffuse[] = {0.9, 0.9, 0.1, 1.0};
+  float mat_specular[] = {1.0, 1.0, 1.0, 1.0};
+  float mat_shininess[] = {2.0};
   
   glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
   glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
@@ -327,8 +298,7 @@ void SetShadersOrDie(std::vector<GLuint>& shaders){
   //assert(LinkSuccessful(bp));
   shaders.push_back(p);
   //shaders.push_back(bp);
-  glUseProgram(p);
-  selected_shader_id = p;
+  //glUseProgram(p);
   cout<<"Finished Set up of Shaders: "<<p<<endl;
   return ;
 }
@@ -417,26 +387,9 @@ void KeyBoardHandler(unsigned char key, int x, int y){
     case '3':
       IsBgLight = !IsBgLight;
       break;
-    case 'i':
-      shininess += 0.1f;
-      do_material();
-      break;
-    case 'o':
-      shininess -= 0.1f;
-      do_material();
-      break;
-    case 'k':
-      l0brightness +=0.1f;
-      do_lights();
-      break;
-    case 'l':
-      l0brightness -=0.1f;
-      do_lights();
-      break;
     default:
       break;
   }
-  printf("Shininess: %f\n", shininess);
   WantToRedraw = true;
 }
 
@@ -460,7 +413,6 @@ void RenderScene(){
   }
   glFlush();
   glutSwapBuffers();
-//  printf("\tDraw\n");
   WantToRedraw = false;
 }
 
@@ -485,16 +437,10 @@ void motionEventHandler(int x, int y) {
  Main program to draw the square, change colors, and wait for quit
  */
 int main(int argc, char* argv[]){
-#ifdef TESTING_
-  test_Vector();
-  test_Matrix();
-#endif
   if(argc != 2){
     fprintf(stderr, "usage: show_object object.ply\n");
     exit(1);
   }
-  //LoadParameters(argv[1]);
-  //parafile = argv[1];
   
   
   // start up the glut utilities
@@ -505,9 +451,8 @@ int main(int argc, char* argv[]){
   // Julian: Add GLUT_DEPTH when in 3D program so that 3D objects drawed
   // correctly regardless the order they draw
   glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH |
-                       GLUT_DOUBLE |GLUT_ACCUM ); // | GLUT_ACCUM |
+                       GLUT_DOUBLE |GLUT_ACCUM ); 
                        //GLUT_MULTISAMPLE );
-  // glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH );
   glutInitWindowSize(WIDTH, HEIGHT);
   //  glutInitWindowPosition(50, 50);
   glutCreateWindow("New Animation");
@@ -519,7 +464,7 @@ int main(int argc, char* argv[]){
   // an event
   //  glutReshapeFunc(doReshape);
   
-  //SetShadersOrDie(shaders);
+  SetShadersOrDie(shaders); 
   glutDisplayFunc(RenderScene);
   //glutMouseFunc(mouseEventHandler);
   //glutMotionFunc(motionEventHandler);
