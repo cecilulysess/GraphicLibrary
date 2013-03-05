@@ -82,7 +82,7 @@ const Vec3d& Vec3d::operator+(const Vec3d& v) const {
 }
 
 const Vec3d& Vec3d::operator-(const Vec3d& v) const {
-  return -((*this) + v);
+  return (*this) + -v;
 }
 
 
@@ -130,6 +130,13 @@ inline double& Vec3d::x() { return vec[0]; };
 inline double& Vec3d::y() { return vec[1]; };
 
 inline double& Vec3d::z() { return vec[2]; };
+
+float* Vec3d::GetGLPtr() {
+  this->copy[0] = vec[0];
+  this->copy[1] = vec[1];
+  this->copy[2] = vec[2];
+  return copy;
+}
 //============================Matrix======================================
 Matrixd::Matrixd(std::initializer_list<std::initializer_list<double>> il){
   int col = 0;

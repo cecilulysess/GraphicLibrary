@@ -127,14 +127,23 @@ void draw_stuff(){
     for (int i = 0; i < faces_length * 3; i++) {
       glBegin(GL_LINES);
         glVertex3fv(&vertices[i*3]);
-        //glVertex3f(vertices[i*3] + v[i/3 * 3] ,vertices[i*3 + 1] + v[i/3* 3+1], vertices[i*3 + 2]+ v[i/3 * 3+2]);
-	glVertex3f(vertices[i*3] + vn[i*3] ,vertices[i*3 + 1] + vn[i* 3+1], vertices[i*3 + 2]+ vn[i * 3+2]);
+	glVertex3f(vertices[i*3] + vn[i*3] / 100 ,
+             vertices[i*3 + 1] + vn[i* 3+1] / 100, 
+             vertices[i*3 + 2] + vn[i * 3+2] / 100);
       glEnd();
     }
   }
+  fprintf(stderr, "I am\n");
   glEnable(GL_LIGHTING);
-//  frustum->DrawFrustum(50, 4.0/3.0, 0.1, 20);
   glUseProgram(selected_shader_id);
+  if (selected_shader_id) {
+    // if not using fixed shading
+    GLint eye_p_loc = glGetUniformLocation(
+                          selected_shader_id, "eye_pos");
+    float *pp = camera->position().GetGLPtr();
+    fprintf(stderr, "Pos: (%f, %f, %f)\n", pp[0], pp[1], pp[2]);
+    glUniform3fv(eye_p_loc, 1, camera->position().GetGLPtr());
+  }
   //printf("Using shader %d\n", selected_shader_id);
   glEnableClientState(GL_VERTEX_ARRAY); 
   glEnableClientState(GL_NORMAL_ARRAY);
@@ -519,7 +528,7 @@ int main(int argc, char* argv[]){
   // an event
   //  glutReshapeFunc(doReshape);
   
-  //SetShadersOrDie(shaders);
+  SetShadersOrDie(shaders);
   glutDisplayFunc(RenderScene);
   glutMouseFunc(mouseEventHandler);
   glutMotionFunc(motionEventHandler);

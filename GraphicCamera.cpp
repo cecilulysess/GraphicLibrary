@@ -145,16 +145,6 @@ void GraphicCamera::PerspectiveDisplay(int width, int height) {
   gluLookAt(pos_.x(), pos_.y(), pos_.z(),
             aim_.x(), aim_.y(), aim_.z(),
             up_.x(),  up_.y(),  up_.z());
-//  glMatrixMode(GL_PROJECTION);
-//  glLoadIdentity();
-//  frustum = new Frustum(60, (float)WIDTH / (float)HEIGHT, 0.02, 20.0);
-//  glLoadMatrixd(frustum->GetMatrix().Transpose().GetPtr());
-//  glMatrixMode(GL_MODELVIEW);
-//  glLoadIdentity();
-//  glRotated(0, 0, 0, 1);
-//  glRotated(10, 1, 0, 0);
-//  glRotated(0, 0, 1, 0);
-//  glTranslated(0, -0.15, -0.4);
 }
 
 void GraphicCamera::MouseEventHandler(int button, int state, int x, int y){ 
@@ -305,43 +295,40 @@ void GraphicCamera::MouseMotionEventHandler(int x, int y) {
         WndY = {0.0, 1.0, 0.0};
 
         RotateX(WndX, current_elev + dt_elev);
-        RotateY(WndY, current_azim + dt_azim);
+        RotateY(WndX, current_azim + dt_azim);
         WndX.z() *= -1;
         
-        RotateX(WndX, current_elev + dt_elev);
+        RotateX(WndY, current_elev + dt_elev);
         RotateY(WndY, current_azim + dt_azim);
-        WndX.z() *= -1;
+        WndY.z() *= -1;
 
         WndZ = (WndX % WndY).Normalization();
 
         ArbitraryRotate(WndX, WndY, WndZ, loc_dt_elev, 0, pos_, aim_);
         ArbitraryRotate(Vec3d(1, 0, 0), Vec3d(0, 1, 0), Vec3d(0, 0, 1), 0,
                         -loc_dt_azim, pos_, aim_);
-//        RotateX(WndX, current_azim + dt_elev);
-//        RotateY(WndY, current_azim + dt_azim);
-        WndX.z() *= -1;
         up_ = WndY.Normalization();
 
         break;
       case kTRANSLATE:
 
-      realy = ViewPort[3] - y - 1;
-      gluProject(aim_.x(), aim_.y(), aim_.z(), MvMat.GetPtr(),
-                 ProjMat.GetPtr(), ViewPort,
-                 &wx, &wy, &wz);
+        realy = ViewPort[3] - y - 1;
+        gluProject(aim_.x(), aim_.y(), aim_.z(), MvMat.GetPtr(),
+                   ProjMat.GetPtr(), ViewPort,
+                   &wx, &wy, &wz);
 
-      gluUnProject((GLdouble) x, (GLdouble) realy, wz, MvMat.GetPtr(),
-                   ProjMat.GetPtr(),
-                   ViewPort, &mouse_pos.x(), &mouse_pos.y(), 
-                   &mouse_pos.z());
-      
-      // move both the camera position and its aim coordinate
-      dir = mouse_pos - PrevMousePos;
-      pos_ = pos_ - dir;
-      aim_ = aim_ - dir;
+        gluUnProject((GLdouble) x, (GLdouble) realy, wz, MvMat.GetPtr(),
+                     ProjMat.GetPtr(),
+                     ViewPort, &mouse_pos.x(), &mouse_pos.y(), 
+                     &mouse_pos.z());
+        
+        // move both the camera position and its aim coordinate
+        dir = mouse_pos - PrevMousePos;
+        pos_ = pos_ - dir;
+        aim_ = aim_ - dir;
 
-      PrevMousePos = mouse_pos;
-      break;
+        PrevMousePos = mouse_pos;
+        break;
     }
     MousePrevX = x;
     MousePrevY = y;

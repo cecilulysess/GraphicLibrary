@@ -157,8 +157,8 @@ using std::equal;
      return this->vec[idx];
    }
    
-   void ShowVector_() const {
-     for ( T& e : vec) {
+   void Print() const {
+     for (const T& e : vec) {
        cout<<e<<"\t";
      }
      cout<<endl;
@@ -224,6 +224,9 @@ using std::equal;
    const Vec3d& operator-(const Vec3d& v) const;
    Vec3d& operator%=(const Vec3d& v);
    const Vec3d& operator%(const Vec3d& v) const;
+
+   // return a GLfloat pointer that can be used by glxxx3fv
+   float* GetGLPtr(); 
    
    // Auxillary getter
    double x() const ;
@@ -239,6 +242,8 @@ using std::equal;
    Vec3d& Normalize();
    // return a copy ot normalized version of this vector
    Vec3d& Normalization() const;
+ private:
+   float copy[3];
  };
  
  
