@@ -40,15 +40,15 @@ void main() {
   spec_c2 *= pow(max(dot(H2, N), 0.0), shininess)  / 8 / 3.14159 * (shininess + 2.0)* attent2 * 
     gl_LightSource[2].specular;
 
-  if ( LtSwitch & 0x1 ) {
+  if (! (LtSwitch & 0x1) ) {
     diff_c0 *= 0.0;
     spec_c0 *= 0.0; 
   }
-  if ( LtSwitch & 0x2 ) {
+  if (! (LtSwitch & 0x2) ) {
     diff_c1 *= 0.0;
     spec_c1 *= 0.0;
   }
-  if ( LtSwitch & 0x4 ) {
+  if (! (LtSwitch & 0x4) ) {
     diff_c2 *= 0.0;
     spec_c2 *= 0.0;
   }

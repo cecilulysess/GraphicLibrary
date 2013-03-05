@@ -299,7 +299,7 @@ bool LinkSuccessful(int obj) {
 // set up shaders for using GLSL. This version only load one shader
 void SetShadersOrDie(std::vector<GLuint>& shaders, const char* vshader,
                      const char* fshader){
-  printf("Loading Vertex Shader: %s\nLoading Fragment Shader: %s",
+  printf("Loading Vertex Shader: %s\nLoading Fragment Shader: %s\n",
           vshader, fshader);
   //GLint vertCompiled, fragCompiled;
   char *vs, *fs, *bpfs;
