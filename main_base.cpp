@@ -48,6 +48,7 @@ bool IsBgLight = true;
 double focus = 1.2;
 float shininess = 10.0;
 float l0brightness = 1.2;
+GLuint LightSwitch = 0x7;
 
 GraphicCamera::GraphicCamera *camera;
 
@@ -90,26 +91,32 @@ void load_object(const char* path){
   normal = obj->getFaceNormal();
 }
 
-void LightSwitch(){
+void SwitchLight(){
   if (IsFillLight) {
     glEnable(GL_LIGHT1);
+    LightSwitch |= 0x2;
   } else {
     glDisable(GL_LIGHT1);
+    LightSwitch &= (~0x2);
   }
   if (IsKeyLight) {
     glEnable(GL_LIGHT0);
+    LightSwitch |= 0x1;
   } else {
     glDisable(GL_LIGHT0);
+    LightSwitch &= (~0x1);
   }
   if (IsBgLight) {
     glEnable(GL_LIGHT2);
+    LightSwitch |= 0x4;
   } else {
     glDisable(GL_LIGHT2);
+    LightSwitch &= (~0x4);
   }
 }
 
 void draw_stuff(){
-  LightSwitch();
+  SwitchLight();
   glEnable(GL_DEPTH_TEST);
   glUseProgram(0);
   glClearColor(0.15, 0.15, 0.15, 0);
@@ -133,16 +140,13 @@ void draw_stuff(){
       glEnd();
     }
   }
-  fprintf(stderr, "I am\n");
   glEnable(GL_LIGHTING);
   glUseProgram(selected_shader_id);
   if (selected_shader_id) {
     // if not using fixed shading
-    GLint eye_p_loc = glGetUniformLocation(
-                          selected_shader_id, "eye_pos");
-    float *pp = camera->position().GetGLPtr();
-    fprintf(stderr, "Pos: (%f, %f, %f)\n", pp[0], pp[1], pp[2]);
-    glUniform3fv(eye_p_loc, 1, camera->position().GetGLPtr());
+    GLint light_switch_loc = glGetUniformLocation(
+                          selected_shader_id, "LtSwitch");
+    glUniform1i(light_switch_loc, LightSwitch); 
   }
   //printf("Using shader %d\n", selected_shader_id);
   glEnableClientState(GL_VERTEX_ARRAY); 
@@ -293,7 +297,10 @@ bool LinkSuccessful(int obj) {
   return status == GL_TRUE;
 }
 // set up shaders for using GLSL. This version only load one shader
-void SetShadersOrDie(std::vector<GLuint>& shaders){
+void SetShadersOrDie(std::vector<GLuint>& shaders, const char* vshader,
+                     const char* fshader){
+  printf("Loading Vertex Shader: %s\nLoading Fragment Shader: %s",
+          vshader, fshader);
   //GLint vertCompiled, fragCompiled;
   char *vs, *fs, *bpfs;
   GLuint pv, pf, p;//, bpv, bpf, bp;
@@ -301,11 +308,11 @@ void SetShadersOrDie(std::vector<GLuint>& shaders){
   pv = glCreateShader(GL_VERTEX_SHADER);
   pf = glCreateShader(GL_FRAGMENT_SHADER);
   vs = GraphicUtilities::GraphicUtilities::
-        read_shader_program(VERT_SHADER_FILE_DIR);
+        read_shader_program(vshader);
   fs = GraphicUtilities::GraphicUtilities::
-        read_shader_program(BLINN_PHONG_FRAG_SHADER_FILE_DIR);
+        read_shader_program(fshader);
   bpfs = GraphicUtilities::GraphicUtilities::
-        read_shader_program(BLINN_PHONG_FRAG_SHADER_FILE_DIR);
+        read_shader_program(fshader);
   // shader, # of string, array of string and array of tring length
   glShaderSource(pv, 1, (const char**)&vs, NULL);
   glShaderSource(pf, 1, (const char**)&fs, NULL);
@@ -341,7 +348,8 @@ void SetShadersOrDie(std::vector<GLuint>& shaders){
 }
 
 
-void init(const char* model_path) {
+void init(const char* model_path, const char* vshader_path, 
+    const char* fshader_path) {
   camera = new GraphicCamera::GraphicCamera(Vec3d(0, 0.2, 0.4),
                                             Vec3d(0, 0.1, 0),
             Vec3d(0, 1 , 0), 0.02, 20, 60, focus);
@@ -350,6 +358,8 @@ void init(const char* model_path) {
   do_lights();
   do_material();
   load_object(model_path);
+  SetShadersOrDie(shaders, vshader_path, fshader_path);
+  
   /*glBindBuffer(GL_ARRAY_BUFFER, mybuf[0]);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
   
@@ -383,10 +393,6 @@ void KeyBoardHandler(unsigned char key, int x, int y){
       if (AALevel == 0) {
         AALevel = 16;
       }
-      WantToRedraw = true;
-      break;
-    case 't':
-//      GraphicUtilities::JitterCamera(0.0, 0.0, 0.1 ,0.0 , 5.0, frustum);
       WantToRedraw = true;
       break;
     case 'b':
@@ -444,7 +450,7 @@ void KeyBoardHandler(unsigned char key, int x, int y){
     default:
       break;
   }
-  printf("Shininess: %f\n", shininess);
+//  printf("Shininess: %f\n", shininess);
   WantToRedraw = true;
 }
 
@@ -460,7 +466,6 @@ void RenderScene(){
     case GL_CONTROL_DEF::KRM_DOF_ONLY:
       cout<<"DoF at focus:"<<camera->focus()<<endl;
       glEnable(GL_MULTISAMPLE);
-//      GraphicUtilities::DoFScene(draw_stuff, frustum, focus, 8);
       camera->DoFPerspectiveDisplay(WIDTH, HEIGHT, 12, draw_stuff);
       break;
     default:
@@ -469,14 +474,12 @@ void RenderScene(){
   }
   glFlush();
   glutSwapBuffers();
-//  printf("\tDraw\n");
   WantToRedraw = false;
 }
 
 void Redraw(){
   if (WantToRedraw)
     RenderScene();
-  //glutPostRedisplay();
 }
 
 void mouseEventHandler(int button, int state, int x, int y) {
@@ -498,8 +501,8 @@ int main(int argc, char* argv[]){
   test_Vector();
   test_Matrix();
 #endif
-  if(argc != 2){
-    fprintf(stderr, "usage: show_object object.ply\n");
+  if(argc != 4){
+    fprintf(stderr, "usage: show_bunny vertex_shader frag_shader object.ply\n");
     exit(1);
   }
   //LoadParameters(argv[1]);
@@ -522,13 +525,12 @@ int main(int argc, char* argv[]){
   glutCreateWindow("New Animation");
   
   // initialize the camera and such
-  init(argv[1]);
+  init(argv[3], argv[1], argv[2]);
   
   // set up the callback routines to be called when glutMainLoop() detects
   // an event
   //  glutReshapeFunc(doReshape);
   
-  SetShadersOrDie(shaders);
   glutDisplayFunc(RenderScene);
   glutMouseFunc(mouseEventHandler);
   glutMotionFunc(motionEventHandler);
