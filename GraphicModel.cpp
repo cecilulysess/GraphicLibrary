@@ -13,6 +13,7 @@
 
 #include "GraphicModel.h"
 #include <stdio.h>
+#include <assert.h>
 
 bool GraphicModel::LoadObject(char *file) {
   if (file == NULL) {
@@ -39,10 +40,12 @@ bool GraphicModel::LoadObject(char *file) {
     }
     
     if (strstr(buff, "v ") == buff) {
-      int cnt = sscanf(buff, "v %f %f %f %f", vert, vert+1, vert+2, vert+3);
+      this->vertice_size = sscanf(buff, "v %f %f %f %f",
+                                  vert, vert+1, vert+2, vert+3);
+      assert(vertice_size >= 3);
 //      printf("Read %d float: %f %f %f %f\n", cnt, vert[0],
 //      vert[1], vert[2], vert[3]);
-      for (int i = 0; i < cnt; ++i) {
+      for (int i = 0; i < vertice_size; ++i) {
         this->vertices.push_back(vert[i]);
       }
       continue;
@@ -84,5 +87,26 @@ bool GraphicModel::LoadObject(char *file) {
     // otherwise
     // ignore
     //
+  }
+  return true;
+}
+GraphicModel::GraphicModel(){
+  glGenBuffers(2, GL_draw_buffer_id);
+}
+
+void GraphicModel::InitModelData() {
+  glBindBuffer(GL_ARRAY_BUFFER, GL_draw_buffer_id[0]);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * this->vertices.capacity(),
+               &this->vertices, GL_STATIC_DRAW);
+  glVertexPointer(vertice_size, GL_FLOAT, 3 * sizeof(float), (void*)0);
+  glEnableClientState(GL_VERTEX_ARRAY);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_draw_buffer_id[1]);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int) * this->faces.capacity(),
+               &this->faces, GL_STATIC_DRAW);
+}
+
+void GraphicModel::DrawModel() {
+  for (int i = 0; i < this->faces_size(); ++i) {
+    glDrawElements(GL_QUADS, 4, GL_UNSIGNED_INT, 0);
   }
 }

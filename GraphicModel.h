@@ -23,8 +23,11 @@ using std::vector;
 
 class GraphicModel{
 public:
+  GraphicModel();
+  
   // Load model from .obj file
   bool LoadObject(char* file);
+  void InitModelData();
   //draw this model in OpenGL
   void DrawModel();
   
@@ -34,6 +37,9 @@ public:
   
 private:
   int face_size = 4;
+  int vertice_size = 3;
+  unsigned int GL_draw_buffer_id[2];
+  
   vector<float> vertices;
   vector<int>  faces;
   vector<float> vnormal;

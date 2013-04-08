@@ -51,6 +51,8 @@ float shininess = 10.0;
 float l0brightness = 1.2;
 GLuint LightSwitch = 0x7;
 
+
+GraphicModel model = GraphicModel();
 GraphicCamera::GraphicCamera *camera;
 
 //Frustum* frustum;
@@ -124,54 +126,55 @@ void draw_stuff(){
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
   if (IsDrawGrid)
     GraphicUtilities::GraphicUtilities::DrawGrid(10, 1);
-  // draw normal
-  glUseProgram(0);
-  glDisable(GL_LIGHTING);
-  glClearColor(0,0,0,0);
-//  float* v = normal;
-  float* vn = vertices_normal;
-  glColor4f(0, 0, 1.0, 1.0);
-  if ( DrawNormal ) {
-    for (int i = 0; i < faces_length * 3; i++) {
-      glBegin(GL_LINES);
-        glVertex3fv(&vertices[i*3]);
-	glVertex3f(vertices[i*3] + vn[i*3] / 100 ,
-             vertices[i*3 + 1] + vn[i* 3+1] / 100, 
-             vertices[i*3 + 2] + vn[i * 3+2] / 100);
-      glEnd();
-    }
-  }
-  glEnable(GL_LIGHTING);
-  glUseProgram(selected_shader_id);
-  if (selected_shader_id) {
-    // if not using fixed shading
-    GLint light_switch_loc = glGetUniformLocation(
-                          selected_shader_id, "LtSwitch");
-    glUniform1i(light_switch_loc, LightSwitch); 
-  }
-  //printf("Using shader %d\n", selected_shader_id);
-  glUseProgram(0);
-  glEnableClientState(GL_VERTEX_ARRAY); 
-  glEnableClientState(GL_NORMAL_ARRAY);
-  //glScalef(10, 10, 10);
-  glVertexPointer(3,GL_FLOAT, 3 * sizeof(GLfloat), vertices); 
-  glNormalPointer(GL_FLOAT, 3 * sizeof(GLfloat), vertices_normal);
-  //for (int i = 0; i < faces_length; ++i) {
-    //glNormal3fv(&normal[i * 3]);    
-  //  glDrawArrays(GL_TRIANGLES, 3 * i, 3); 
-  //} 
-  glDrawArrays(GL_TRIANGLES, 0, 3 * faces_length);
-  
-  glPushMatrix();
-  glTranslated(0.15, 0, -0.3);
-  glRotated(45, 0, 1, 0);
-  glDrawArrays(GL_TRIANGLES, 0, 3 * faces_length);
-  glPopMatrix();
-  glPushMatrix();
-  glTranslated(-0.3, 0, -0.3);
-  glScalef(0.1,0.1,0.1);
-  glutSolidTeapot (0.5);
-  glPopMatrix();
+  model.DrawModel();
+//  // draw normal
+//  glUseProgram(0);
+//  glDisable(GL_LIGHTING);
+//  glClearColor(0,0,0,0);
+////  float* v = normal;
+//  float* vn = vertices_normal;
+//  glColor4f(0, 0, 1.0, 1.0);
+//  if ( DrawNormal ) {
+//    for (int i = 0; i < faces_length * 3; i++) {
+//      glBegin(GL_LINES);
+//        glVertex3fv(&vertices[i*3]);
+//	glVertex3f(vertices[i*3] + vn[i*3] / 100 ,
+//             vertices[i*3 + 1] + vn[i* 3+1] / 100, 
+//             vertices[i*3 + 2] + vn[i * 3+2] / 100);
+//      glEnd();
+//    }
+//  }
+//  glEnable(GL_LIGHTING);
+//  glUseProgram(selected_shader_id);
+//  if (selected_shader_id) {
+//    // if not using fixed shading
+//    GLint light_switch_loc = glGetUniformLocation(
+//                          selected_shader_id, "LtSwitch");
+//    glUniform1i(light_switch_loc, LightSwitch); 
+//  }
+//  //printf("Using shader %d\n", selected_shader_id);
+//  glUseProgram(0);
+//  glEnableClientState(GL_VERTEX_ARRAY); 
+//  glEnableClientState(GL_NORMAL_ARRAY);
+//  //glScalef(10, 10, 10);
+//  glVertexPointer(3,GL_FLOAT, 3 * sizeof(GLfloat), vertices); 
+//  glNormalPointer(GL_FLOAT, 3 * sizeof(GLfloat), vertices_normal);
+//  //for (int i = 0; i < faces_length; ++i) {
+//    //glNormal3fv(&normal[i * 3]);    
+//  //  glDrawArrays(GL_TRIANGLES, 3 * i, 3); 
+//  //} 
+//  glDrawArrays(GL_TRIANGLES, 0, 3 * faces_length);
+//  
+//  glPushMatrix();
+//  glTranslated(0.15, 0, -0.3);
+//  glRotated(45, 0, 1, 0);
+//  glDrawArrays(GL_TRIANGLES, 0, 3 * faces_length);
+//  glPopMatrix();
+//  glPushMatrix();
+//  glTranslated(-0.3, 0, -0.3);
+//  glScalef(0.1,0.1,0.1);
+//  glutSolidTeapot (0.5);
+//  glPopMatrix();
   /*for (i = 0; i < faces_length; ++i) {
     glNormal3fv(&normal[i]);
     glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (void*)(3 * i) );
@@ -515,10 +518,14 @@ int main(int argc, char* argv[]){
     fprintf(stderr, "usage: show_bunny vertex_shader frag_shader object.ply\n");
     exit(1);
   }
-  
-  GraphicModel model = GraphicModel();
-  model.LoadObject("/Users/julian/Programming/CS605/Graphic/Graphic/test.obj");
+  uint test[3];
+  glGenBuffers(3, test);
   return 0;
+  
+  
+  model.LoadObject("/Users/julian/Programming/CS605/Graphic/Graphic/test.obj");
+  model.InitModelData();
+//  return 0;
   //LoadParameters(argv[1]);
 //  //parafile = argv[1];
 //  const GLubyte* glslv = glGetString(GL_VENDOR);

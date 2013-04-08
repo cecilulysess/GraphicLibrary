@@ -22,8 +22,8 @@ else
 endif
 
 
-HFILES 	= GraphicUtilities.${H} GLCommonHeader.${H} GraphicObject.${H} GraphicMath.${H} GraphicCamera.${H}
-OFILES 	= GraphicUtilities.o GraphicMath.o GraphicObject.o GraphicCamera.o
+HFILES 	= GraphicUtilities.${H} GLCommonHeader.${H} GraphicObject.${H} GraphicMath.${H} GraphicCamera.${H} GraphicModel.${H}
+OFILES 	= GraphicUtilities.o GraphicMath.o GraphicObject.o GraphicCamera.o GraphicModel.o
 	
 PROJECT = main_base
 
@@ -44,6 +44,9 @@ GraphicMath.o: GraphicMath.${C} GraphicMath.${H}
 
 GraphicCamera.o: GraphicCamera.${C} GraphicCamera.${H}
 	${CC} $(CFLAGS) -c GraphicCamera.${C}
+
+GraphicModel.o: GraphicModel.${C} GraphicModel.${H}
+	${CC} $(CFLAGS) -c GraphicModel.${C}
 
 debug:
 	make 'DFLAGS = /usr/lib/debug/malloc.o'
