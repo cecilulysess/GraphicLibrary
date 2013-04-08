@@ -23,6 +23,7 @@
 #include "GraphicUtilities.h"
 #include "GraphicObject.h"
 #include "GraphicCamera.h"
+#include "GraphicModel.h"
 
 #ifdef MAIN_PROG
 //#define TESTING_
@@ -149,6 +150,7 @@ void draw_stuff(){
     glUniform1i(light_switch_loc, LightSwitch); 
   }
   //printf("Using shader %d\n", selected_shader_id);
+  glUseProgram(0);
   glEnableClientState(GL_VERTEX_ARRAY); 
   glEnableClientState(GL_NORMAL_ARRAY);
   //glScalef(10, 10, 10);
@@ -358,7 +360,7 @@ void init(const char* model_path, const char* vshader_path,
   do_lights();
   do_material();
   load_object(model_path);
-  SetShadersOrDie(shaders, vshader_path, fshader_path);
+  //SetShadersOrDie(shaders, vshader_path, fshader_path);
   
   /*glBindBuffer(GL_ARRAY_BUFFER, mybuf[0]);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
@@ -372,6 +374,14 @@ void init(const char* model_path, const char* vshader_path,
                faces,
               GL_STATIC_DRAW);
   */
+//  
+//  glEnable(GL_FOG);
+//  glFogi(GL_FOG_MODE, GL_EXP);
+//  glFogf(GL_FOG_DENSITY, 3.0);
+//  glFogf(GL_FOG_START, 0.0);
+//  glFogf(GL_FOG_END, 100.0);
+//  float color[] = {0.5, 0.5, 0.5, 1.0 };
+//  glFogfv(GL_FOG_COLOR, color);
 }
 
 
@@ -460,13 +470,13 @@ void KeyBoardHandler(unsigned char key, int x, int y){
 void RenderScene(){
   switch (RENDER_MODE) {
     case GL_CONTROL_DEF::KRM_AAONLY:
-      cout<<"AA only"<<endl;
+      cout<<AALevel<<"x AA"<<endl;
       camera->AAPerspectiveDisplay(WIDTH, HEIGHT, AALevel, draw_stuff);
       break;
     case GL_CONTROL_DEF::KRM_DOF_ONLY:
       cout<<"DoF at focus:"<<camera->focus()<<endl;
       glEnable(GL_MULTISAMPLE);
-      camera->DoFPerspectiveDisplay(WIDTH, HEIGHT, 12, draw_stuff);
+      camera->DoFPerspectiveDisplay(WIDTH, HEIGHT, 10, draw_stuff);
       break;
     default:
       camera->PerspectiveDisplay(WIDTH, HEIGHT);
@@ -505,9 +515,14 @@ int main(int argc, char* argv[]){
     fprintf(stderr, "usage: show_bunny vertex_shader frag_shader object.ply\n");
     exit(1);
   }
-  //LoadParameters(argv[1]);
-  //parafile = argv[1];
   
+  GraphicModel model = GraphicModel();
+  model.LoadObject("/Users/julian/Programming/CS605/Graphic/Graphic/test.obj");
+  return 0;
+  //LoadParameters(argv[1]);
+//  //parafile = argv[1];
+//  const GLubyte* glslv = glGetString(GL_VENDOR);
+//  printf("GLSL Support:%s\n", (const char*)glslv);
   
   // start up the glut utilities
   glutInit(&argc, argv);
@@ -522,7 +537,7 @@ int main(int argc, char* argv[]){
   // glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH );
   glutInitWindowSize(WIDTH, HEIGHT);
   //  glutInitWindowPosition(50, 50);
-  glutCreateWindow("New Animation");
+  glutCreateWindow("Golden Bunny");
   
   // initialize the camera and such
   init(argv[3], argv[1], argv[2]);
