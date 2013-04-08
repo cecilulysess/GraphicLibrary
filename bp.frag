@@ -33,12 +33,12 @@ void main() {
   diff_c1 *= (max(dot(N, L1), 0.0) * gl_LightSource[1].diffuse * attent1);
   diff_c2 *= (max(dot(N, L2), 0.0) * gl_LightSource[2].diffuse * attent2);
 
-  spec_c0 *= (pow(max(dot(H0, N), 0.0), shininess) / 8 / 3.14159 * (shininess + 2.0) * attent0 * 
-    gl_LightSource[0].specular);
-  spec_c1 *= pow(max(dot(H1, N), 0.0), shininess)  / 8 / 3.14159 * (shininess + 2.0)* attent1 * 
-    gl_LightSource[1].specular;
-  spec_c2 *= pow(max(dot(H2, N), 0.0), shininess)  / 8 / 3.14159 * (shininess + 2.0)* attent2 * 
-    gl_LightSource[2].specular;
+  spec_c0 *= (pow(max(dot(H0, N), 0.0), shininess) / 8 / 3.14159 * 
+              (shininess + 2.0) * attent0 * gl_LightSource[0].specular);
+  spec_c1 *= pow(max(dot(H1, N), 0.0), shininess)  / 8 / 3.14159 * 
+              (shininess + 2.0)* attent1 * gl_LightSource[1].specular;
+  spec_c2 *= pow(max(dot(H2, N), 0.0), shininess)  / 8 / 3.14159 * 
+              (shininess + 2.0)* attent2 * gl_LightSource[2].specular;
 
   if (! (LtSwitch & 0x1) ) {
     diff_c0 *= 0.0;
@@ -46,15 +46,15 @@ void main() {
   }
   if (! (LtSwitch & 0x2) ) {
     diff_c1 *= 0.0;
-    spec_c1 *= 0.0;
+    spec_c1 *= 0.0;norm(sqrt(2), 1, 1)
   }
   if (! (LtSwitch & 0x4) ) {
     diff_c2 *= 0.0;
     spec_c2 *= 0.0;
   }
     
-  diffuse_color = diff_c0 + diff_c1 + diff_c2 ;//+ diff_c1 + diff_c2;
-  specular_color = spec_c0 + spec_c1 + spec_c2 ;// + spec_c1 + spec_c2;
+  diffuse_color = diff_c0 + diff_c1 + diff_c2 ;
+  specular_color = spec_c0 + spec_c1 + spec_c2 ;
   gl_FragColor =  diffuse_color;
   gl_FragColor += specular_color;
   gl_FragColor += ambient_color;

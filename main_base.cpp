@@ -362,7 +362,8 @@ void init(const char* model_path, const char* vshader_path,
   //setup_the_viewvolume();
   do_lights();
   do_material();
-  load_object(model_path);
+  
+  //load_object(model_path);
   //SetShadersOrDie(shaders, vshader_path, fshader_path);
   
   /*glBindBuffer(GL_ARRAY_BUFFER, mybuf[0]);
@@ -518,12 +519,8 @@ int main(int argc, char* argv[]){
     fprintf(stderr, "usage: show_bunny vertex_shader frag_shader object.ply\n");
     exit(1);
   }
-  uint test[3];
-  glGenBuffers(3, test);
-  return 0;
   
-  
-  model.LoadObject("/Users/julian/Programming/CS605/Graphic/Graphic/test.obj");
+  model.LoadObject(argv[3]);
   model.InitModelData();
 //  return 0;
   //LoadParameters(argv[1]);

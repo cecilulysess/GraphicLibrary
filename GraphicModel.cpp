@@ -14,6 +14,8 @@
 #include "GraphicModel.h"
 #include <stdio.h>
 #include <assert.h>
+#include <stdlib.h>
+#include <string.h>
 
 bool GraphicModel::LoadObject(char *file) {
   if (file == NULL) {
@@ -69,6 +71,10 @@ bool GraphicModel::LoadObject(char *file) {
                faceidx+1, nidx+1,
                faceidx+2, nidx+2,
                faceidx+3, nidx+3);
+        for(int i = 0; i < 4; ++i) {
+          this->faces.push_back(faceidx[i]);
+          this->vnormal.push_back(nidx[i]);
+        }
 //        printf("Read %d, fi: %d %d %d, ni: %d %d %d\n", cnt,
 //               faceidx[0], faceidx[1], faceidx[2],
 //               nidx[0], nidx[1], nidx[2]);
@@ -92,6 +98,8 @@ bool GraphicModel::LoadObject(char *file) {
 }
 GraphicModel::GraphicModel(){
   glGenBuffers(2, GL_draw_buffer_id);
+  this->face_size = 4;
+  this->vertice_size = 3;
 }
 
 void GraphicModel::InitModelData() {
@@ -103,10 +111,12 @@ void GraphicModel::InitModelData() {
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_draw_buffer_id[1]);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int) * this->faces.capacity(),
                &this->faces, GL_STATIC_DRAW);
+  fprintf(stderr, "model inited\n");
 }
 
 void GraphicModel::DrawModel() {
   for (int i = 0; i < this->faces_size(); ++i) {
     glDrawElements(GL_QUADS, 4, GL_UNSIGNED_INT, 0);
+    fprintf(stderr, "model drawed\n");
   }
 }

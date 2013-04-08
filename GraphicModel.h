@@ -36,8 +36,8 @@ public:
   long vert_normal_size() const { return this->vnormal.size() / 3; }
   
 private:
-  int face_size = 4;
-  int vertice_size = 3;
+  int face_size ;
+  int vertice_size;
   unsigned int GL_draw_buffer_id[2];
   
   vector<float> vertices;
