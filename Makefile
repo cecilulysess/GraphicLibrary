@@ -16,7 +16,7 @@ ifeq ("$(shell uname)", "Darwin")
   CFLAGS = -g -std=c++11 -stdlib=libc++ 
 else
   ifeq ("$(shell uname)", "Linux")
-    LDFLAGS     = -lglut -lGL -lGLU -lm
+    LDFLAGS     = -L/usr/lib64 -O2 -lX11 -lglut -lGL -lGLU -lm -lXmu
     CGLAGS	= -g -std=c++0x -w
   endif
 endif

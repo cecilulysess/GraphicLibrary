@@ -66,6 +66,11 @@ public:
   static void DrawGrid(float size, float step);
 };
 
+// set of functions as short cut of OpenGL utility function
+class GLShortCut{
+  public:
+  static void PrintGLErrors(char *file, int line); 
+};
 /*class Camera {
 public:
   float near_plane();

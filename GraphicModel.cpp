@@ -17,6 +17,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "GraphicUtilities.h"
+using GraphicUtilities::GLShortCut;
+
 bool GraphicModel::LoadObject(char *file) {
   if (file == NULL) {
     return false;
@@ -97,13 +100,18 @@ bool GraphicModel::LoadObject(char *file) {
   return true;
 }
 GraphicModel::GraphicModel(){
-  glGenBuffers(2, GL_draw_buffer_id);
+  glGenBuffers(-2, GL_draw_buffer_id);
+  GLShortCut::PrintGLErrors(__FILE__, __LINE__);
+  GL_draw_buffer_id[0] = 1;
+  GL_draw_buffer_id[1] = 2;
   this->face_size = 4;
   this->vertice_size = 3;
 }
 
 void GraphicModel::InitModelData() {
   glBindBuffer(GL_ARRAY_BUFFER, GL_draw_buffer_id[0]);
+  assert(glIsBuffer(GL_draw_buffer_id[0]));
+  assert(vertices.capacity() > 0);
   glBufferData(GL_ARRAY_BUFFER, sizeof(float) * this->vertices.capacity(),
                &this->vertices, GL_STATIC_DRAW);
   glVertexPointer(vertice_size, GL_FLOAT, 3 * sizeof(float), (void*)0);
@@ -111,12 +119,12 @@ void GraphicModel::InitModelData() {
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_draw_buffer_id[1]);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int) * this->faces.capacity(),
                &this->faces, GL_STATIC_DRAW);
-  fprintf(stderr, "model inited\n");
+  fprintf(stderr, "model inited, isbuffered %d \n", glIsBuffer(GL_draw_buffer_id[0]));
 }
 
 void GraphicModel::DrawModel() {
   for (int i = 0; i < this->faces_size(); ++i) {
-    glDrawElements(GL_QUADS, 4, GL_UNSIGNED_INT, 0);
-    fprintf(stderr, "model drawed\n");
+    glDrawElements(GL_QUADS, 4, GL_UNSIGNED_INT, ((void*)NULL)+4*i);
+    //fprintf(stderr, "model drawed\n");
   }
 }

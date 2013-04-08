@@ -362,6 +362,16 @@ void GraphicUtilities::DrawGrid(float size, float step) {
   glEnable(GL_LIGHTING);
 }
 
+void GLShortCut::PrintGLErrors(char *file, int line){
+  GLenum glErr;
+  glErr = glGetError();
+//  fprintf(stderr, "Detecting Error...\n");
+  if (glErr != GL_NO_ERROR) {
+    fprintf(stderr, "glError in file %s @ line %d: %s\n", 
+            file, line, gluErrorString(glErr));
+  }
+}
+
 /*
 inline float Camera::near_plane() { return _near_plane; }
 
