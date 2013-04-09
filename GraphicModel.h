@@ -41,7 +41,7 @@ private:
   unsigned int GL_draw_buffer_id[2];
   
   vector<float> vertices;
-  vector<int>  faces;
+  vector<unsigned int>  faces;
   vector<float> vnormal;
   
 };

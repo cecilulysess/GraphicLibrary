@@ -52,7 +52,7 @@ float l0brightness = 1.2;
 GLuint LightSwitch = 0x7;
 
 
-GraphicModel model = GraphicModel();
+GraphicModel *model;
 GraphicCamera::GraphicCamera *camera;
 
 //Frustum* frustum;
@@ -126,7 +126,7 @@ void draw_stuff(){
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
   if (IsDrawGrid)
     GraphicUtilities::GraphicUtilities::DrawGrid(10, 1);
-  model.DrawModel();
+  model->DrawModel();
 //  // draw normal
 //  glUseProgram(0);
 //  glDisable(GL_LIGHTING);
@@ -355,13 +355,15 @@ void SetShadersOrDie(std::vector<GLuint>& shaders, const char* vshader,
 
 void init(const char* model_path, const char* vshader_path, 
     const char* fshader_path) {
-  camera = new GraphicCamera::GraphicCamera(Vec3d(0, 0.2, 0.4),
-                                            Vec3d(0, 0.1, 0),
+  camera = new GraphicCamera::GraphicCamera(Vec3d(0, 2, 4),
+                                            Vec3d(0, 1, 0),
             Vec3d(0, 1 , 0), 0.02, 20, 60, focus);
   camera->PerspectiveDisplay(WIDTH, HEIGHT);
   //setup_the_viewvolume();
   do_lights();
   do_material();
+
+  model->InitModelData();
   
   //load_object(model_path);
   //SetShadersOrDie(shaders, vshader_path, fshader_path);
@@ -520,8 +522,6 @@ int main(int argc, char* argv[]){
     exit(1);
   }
   
-  model.LoadObject(argv[3]);
-  model.InitModelData();
 //  return 0;
   //LoadParameters(argv[1]);
 //  //parafile = argv[1];
@@ -543,6 +543,8 @@ int main(int argc, char* argv[]){
   //  glutInitWindowPosition(50, 50);
   glutCreateWindow("Golden Bunny");
   
+  model = new GraphicModel();
+  model->LoadObject(argv[3]);
   // initialize the camera and such
   init(argv[3], argv[1], argv[2]);
   
