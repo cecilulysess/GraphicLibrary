@@ -1,4 +1,4 @@
 #!/bin/bash
 
 make 
-./main_base bunny.ply
+./main_base el.vert bp.frag test.obj

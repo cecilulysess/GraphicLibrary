@@ -34,6 +34,9 @@ public:
   long vert_size() const { return this->vertices.size(); }
   long faces_size() const { return this->faces.size() / face_size; }
   long vert_normal_size() const { return this->vnormal.size() / 3; }
+
+  bool has_vnormal() const {return this->vnormal_idx.size() > 0; }
+  bool has_texture() const {return this->texture_idx.size() > 0; }
   
 private:
   int face_size ;
@@ -43,6 +46,9 @@ private:
   vector<float> vertices;
   vector<unsigned int>  faces;
   vector<float> vnormal;
+  vector<unsigned int> vnormal_idx;
+  vector<unsigned int> texture_idx;
+
   
 };
 

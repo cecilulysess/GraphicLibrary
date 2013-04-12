@@ -122,37 +122,21 @@ void draw_stuff(){
   SwitchLight();
   glEnable(GL_DEPTH_TEST);
   glUseProgram(0);
-  glClearColor(0.15, 0.15, 0.15, 0);
+  glClearColor(0.4, 0.4, 0.4, 0);
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
   if (IsDrawGrid)
     GraphicUtilities::GraphicUtilities::DrawGrid(10, 1);
-  model->DrawModel();
-//  // draw normal
-//  glUseProgram(0);
-//  glDisable(GL_LIGHTING);
-//  glClearColor(0,0,0,0);
-////  float* v = normal;
-//  float* vn = vertices_normal;
-//  glColor4f(0, 0, 1.0, 1.0);
-//  if ( DrawNormal ) {
-//    for (int i = 0; i < faces_length * 3; i++) {
-//      glBegin(GL_LINES);
-//        glVertex3fv(&vertices[i*3]);
-//	glVertex3f(vertices[i*3] + vn[i*3] / 100 ,
-//             vertices[i*3 + 1] + vn[i* 3+1] / 100, 
-//             vertices[i*3 + 2] + vn[i * 3+2] / 100);
-//      glEnd();
-//    }
-//  }
-//  glEnable(GL_LIGHTING);
-//  glUseProgram(selected_shader_id);
-//  if (selected_shader_id) {
-//    // if not using fixed shading
-//    GLint light_switch_loc = glGetUniformLocation(
-//                          selected_shader_id, "LtSwitch");
-//    glUniform1i(light_switch_loc, LightSwitch); 
-//  }
-//  //printf("Using shader %d\n", selected_shader_id);
+  
+
+ glUseProgram(selected_shader_id);
+ if (selected_shader_id) {
+   // if not using fixed shading
+   GLint light_switch_loc = glGetUniformLocation(
+                         selected_shader_id, "LtSwitch");
+   glUniform1i(light_switch_loc, LightSwitch); 
+ }
+ model->DrawModel();
+ printf("Using shader %d\n", selected_shader_id);
 //  glUseProgram(0);
 //  glEnableClientState(GL_VERTEX_ARRAY); 
 //  glEnableClientState(GL_NORMAL_ARRAY);
