@@ -16,10 +16,25 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include<iostream>
+using namespace std;
 #include "GraphicUtilities.h"
 using GraphicUtilities::GLShortCut;
 
+// validate that every normal was used
+bool validate_vnormal(vector<unsigned int> vn, int upper) {
+  bool *tab = new bool[upper];
+  for (int i = 0; i < upper; ++i) {
+    tab[i] = false;
+  }
+  for (int i = 0; i < vn.size(); ++i) {
+    tab[vn[i]] = true;
+  }
+  for (int i = 0; i < upper; ++i) {
+    if(tab[i] == false) return false;
+  }
+  return true;
+}
 bool GraphicModel::LoadObject(char *file) {
   if (file == NULL) {
     return false;
@@ -35,9 +50,10 @@ bool GraphicModel::LoadObject(char *file) {
   unsigned int faceidx[4];
   unsigned int nidx[4];
   unsigned int textidx[4];
+  vector<float> vert_norm;
   while (fgets(buff, 255, f) != NULL) {
     if (strstr(buff, "#") == buff) {
-      printf("This is common\n");
+      printf("This is comment\n");
       continue;
     }
     if (strstr(buff, "mtllib") == buff) {
@@ -48,22 +64,17 @@ bool GraphicModel::LoadObject(char *file) {
     if (strstr(buff, "v ") == buff) {
       int cnt = sscanf(buff, "v %f %f %f %f",
                                   vert, vert+1, vert+2, vert+3);
-      // printf("Read %d vert: %f %f %f %f\n", cnt, vert[0], vert[1], vert[2], vert[3]);
       this->vertice_size = cnt;
       assert(vertice_size >= 3 && vertice_size <=4);
-//      printf("Read %d float: %f %f %f %f\n", cnt, vert[0],
-//      vert[1], vert[2], vert[3]);
       for (int i = 0; i < vertice_size; ++i) {
         this->vertices.push_back(vert[i]);
-        // printf("Push %dth vertex\n", this->vertices.size()-1);
       }
       continue;
     }
-//    printf("vn : %d\n", (strstr(buff, "vn") == NULL));
     if (strstr(buff, "vn") == buff) {
       sscanf(buff, "vn %f %f %f", normal, normal+1, normal+2);
       for (int i = 0 ; i < 3; ++i) {
-        this->vnormal.push_back(normal[i]);
+        vert_norm.push_back(normal[i]);
       }
       continue;
     }
@@ -73,7 +84,6 @@ bool GraphicModel::LoadObject(char *file) {
     if (strstr(buff, "f ") == buff) {
       // if use v//vn fashion
       if (strstr(buff, "//") != NULL){
-//        printf("Process: %s", buff);
         int cnt = sscanf(buff, "f %d//%d %d//%d %d//%d %d//%d", 
                faceidx, nidx,
                faceidx+1, nidx+1,
@@ -85,23 +95,27 @@ bool GraphicModel::LoadObject(char *file) {
           //this->vnormal.push_back(nidx[i] - 1);
           this->vnormal_idx.push_back(nidx[i] - 1);
         }
-       // printf("Read %d, fi: %d %d %d %d, ni: %d %d %d %d\n", cnt,
-       //        faceidx[0], faceidx[1], faceidx[2], faceidx[3],
-       //        nidx[0], nidx[1], nidx[2], nidx[3]);
+       
       } else {
         // use either v/vt or v/vt/vn
         if (strstr(buff, "/") != NULL) {
           int cnt = sscanf(buff, "f %d/%d/%d %d/%d/%d %d/%d/%d %d/%d/%d", 
-               faceidx, nidx, textidx,
+               faceidx, textidx, nidx,
                faceidx+1, textidx + 1, nidx+1, 
                faceidx+2, textidx + 2, nidx+2, 
-               faceidx+3, textidx + 3, nidx+3 ); 
+               faceidx+3, textidx + 3, nidx+3 );
+          
           for(int i = 0; i < 4; ++i) {
+            
             this->faces.push_back(faceidx[i] - 1);
             this->texture_idx.push_back(textidx[i] - 1);
             if (cnt > 8) {
               this->vnormal_idx.push_back(nidx[i] - 1);
             }
+            
+//            if (faces[faces.size()-1] == 13000) {
+//              printf("f/vn : %d %d\n", faceidx[i], nidx[i]);
+//            }
           }
         } else {
           // use only v v v fashion
@@ -115,8 +129,35 @@ bool GraphicModel::LoadObject(char *file) {
     // ignore
     //
   }
-
-
+  float* vnorm = new float[vertices.size()];
+  // Change the vertice normal index according to the vertice index,
+  // OpenGL doesn't support specifying vert normal seperactly.
+  for (int i = 0; i < faces.size(); ++i) {
+//    if (faces[i] == 13000) {
+//      printf("VN: i:%d %d:%d: %f %f %f\n", i, faces[i], vnormal_idx[i],
+//                                      vert_norm[vnormal_idx[i] * 3],
+//                                      vert_norm[vnormal_idx[i] * 3 + 1],
+//             vert_norm[vnormal_idx[i]* 3 + 2]);
+//    }
+    vnorm[this->faces[i] * 3] = vert_norm[vnormal_idx[i] * 3 ];
+    vnorm[this->faces[i] * 3 + 1] = vert_norm[vnormal_idx[i] * 3 + 1];
+    vnorm[this->faces[i] * 3 + 2] = vert_norm[vnormal_idx[i] * 3 + 2];
+//    if (faces[i] == 13000) {
+//      printf("vnorm: %f %f %f\n", vnorm[this->faces[i] * 3],
+//             vnorm[this->faces[i] * 3 + 1],
+//             vnorm[this->faces[i] * 3 + 2]);
+//    }
+  }
+  for (int i = 0; i < vertices.size(); ++i ) {
+    this->vnormal.push_back(vnorm[i]);
+  }
+  delete[] vnorm;
+  assert(validate_vnormal(vnormal_idx, vnormal.size() / 3));
+  if (! (this->vertices.size() == this->vnormal.size()) ) {
+    printf("Vert size: %d, VNormal size: %d \n", (int) vertices.size(),
+           (int)vnormal.size());
+    assert(this->vertices.size() == this->vnormal.size());
+  }
   return true;
 }
 GraphicModel::GraphicModel(){
@@ -150,13 +191,15 @@ void GraphicModel::InitModelData() {
   //   if ((i + 1) % 3 == 0) fprintf(stderr, "\n");
   // }
   fprintf(stderr, "\n");
+  fprintf(stderr, "vertices#:%d\n", vertices.size());
+  fprintf(stderr, "Vnormal#:%d\n", vnormal.size());
   // for (int i = 0; i < faces.size(); ++i)
   // {
   //   // fprintf(stderr, "%d, ", this->faces[i]);
   //   if ((i + 1) % 4 == 0) fprintf(stderr, "\n");
   // }
   glBindBuffer(GL_ARRAY_BUFFER, GL_draw_buffer_id[0]);
-  fprintf(stderr, "vertices#:%d\n", vertices.size());
+  
   glBufferData(GL_ARRAY_BUFFER, sizeof(float) * this->vertices.size(),
                &this->vertices[0], GL_STATIC_DRAW);
   GLShortCut::PrintGLErrors(__FILE__, __LINE__);
@@ -177,9 +220,9 @@ void GraphicModel::DrawModel() {
   glEnable(GL_DEPTH_TEST);
   glClearColor(0,0,0,0);
   //this->faces_size()
-  for (int i = 0; i < this->faces_size(); ++i) {
-    // glNormal3fv(&vnormal[this->vnormal_idx[i * 3]]);
-    glDrawElements(GL_QUADS, 4, GL_UNSIGNED_INT, (void*)(i * 4 * 4) );
+  for (int i = 0; i < 1; i ++) {
+//    glNormal3fv(&vnormal[this->vnormal_idx[i * 3]]);
+    glDrawElements(GL_QUADS, (int) this->faces_size() * 4, GL_UNSIGNED_INT, (void*)(i * 4 * 4) );
     //fprintf(stderr, "model drawed\n");
   }
 
@@ -188,15 +231,17 @@ void GraphicModel::DrawModel() {
 //  glClearColor(0,0,0,0);
 // //  float* v = normal;
 //  float* vn = &vnormal[0];
+//  float div = 10.0;
 //  glColor4f(0, 0, 1.0, 1.0);
 //  for (int i = 0; i < vnormal.size() / 3 ; i++) { //
 //    glBegin(GL_LINES);
 //      glVertex3fv(&vertices[i * 3]);
-//      glVertex3f(vertices[i * 3] + vn[i * 3] / 10.0 ,
-//           vertices[i * 3 + 1] + vn[i * 3 + 1] / 10.0, 
-//           vertices[i * 3 + 2] + vn[i * 3 + 2] / 10.0);
+//      glVertex3f(vertices[i * 3] + vn[i * 3] / div ,
+//           vertices[i * 3 + 1] + vn[i * 3 + 1] / div,
+//           vertices[i * 3 + 2] + vn[i * 3 + 2] / div);
 //    glEnd();
 //  }
- 
+//  
+// 
 //  glEnable(GL_LIGHTING);
 }

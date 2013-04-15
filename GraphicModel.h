@@ -41,7 +41,7 @@ public:
 private:
   int face_size ;
   int vertice_size;
-  unsigned int GL_draw_buffer_id[2];
+  unsigned int GL_draw_buffer_id[3];
   
   vector<float> vertices;
   vector<unsigned int>  faces;
