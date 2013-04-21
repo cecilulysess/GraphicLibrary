@@ -67,6 +67,37 @@ int normal_length;
 GLuint vertices_normal_length;
 GLfloat* vertices_normal;
 
+void load_texture(char *filename) {
+  FILE *fptr;
+  char buf[512], *parse;
+  int im_size, im_width, im_height, max_color;
+  unsigned char *texture_bytes;
+
+  fptr = fopen(filename, "r");
+  fgets(buf, 512, fptr);
+
+  do {
+    fgets(buf, 512, fptr);
+  } while(buf[0] == '#' || buf[0] == '\n');
+  sscanf(buf, "%d %d", &im_width, &im_height);
+  fgets(buf, 512, fptr);
+  im_size = im_width * im_height;
+  texture_bytes = (unsigned char *) calloc(3, im_size);
+  fread(texture_bytes, 3, im_size, fptr);
+  fclose(fptr);
+
+  glBindTexture(GL_TEXTURE_2D, 1 /*SetCurrentTexture id*/);
+  glTexImage2D(GL_TEXTURE_2D, 
+    0, // Mipmap level
+    GL_RGB, im_width, im_height, 0/* border size */, GL_RGB,
+    GL_UNSIGNED_BYTE, texture_bytes);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+  free(texture_bytes);
+  printf("Finished load texture: %s\n", filename);
+}
+
 void load_object(const char* path){
   GraphicObject* obj = new GraphicObject();
   obj->readFile(path);
@@ -226,9 +257,9 @@ void do_lights(){
 
 void do_material(){
 
-  float mat_ambient[] = {1.0, 1.0, 1.0, 1.0};
-  float mat_diffuse[] = {255.0/255, 200.0/255, 100.0/255, 1.0};
-  float mat_specular[] = {255.0/255, 240.0/255, 215.0/255, 1};
+  float mat_ambient[] = {0.0, 0.0, 0.0, 0.0};
+  float mat_diffuse[] = {1.0, 0.8, 0.7, 1.0};
+  float mat_specular[] = {0.15, 0.15, 0.15, 1};
   float mat_shininess[] = {shininess};
   
   glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
@@ -514,6 +545,7 @@ int main(int argc, char* argv[]){
   
   model = new GraphicModel();
   model->LoadObject(argv[3]);
+  load_texture("sign2.ppm");
   // initialize the camera and such
   init(argv[3], argv[1], argv[2]);
   

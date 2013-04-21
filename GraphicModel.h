@@ -32,11 +32,14 @@ public:
   // draw_parameter control draw model specific info such as normal
   void DrawModel(int draw_parameter);
   
+  // vertices size (in terms of # of float)
   long vert_size() const { return this->vertices.size(); }
-  long faces_size() const { return this->faces.size() / face_size; }
+  // texture mapping uv size ( in terms of # of float)
+  long texture_mapping_size() const {return this->texture_mapping.size(); }
   // return the faces index that used for glDrawElements
   long faces_draw_size() const {return this->faces.size();}
   long vert_normal_size() const { return this->vnormal.size() / 3; }
+  long faces_size() const { return this->faces.size() / face_size; }
 
   bool has_vnormal() const {return this->vnormal_idx.size() > 0; }
   bool has_texture() const {return this->texture_idx.size() > 0; }

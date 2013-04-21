@@ -63,10 +63,15 @@ bool GraphicModel::LoadObject(char *file) {
       continue;
     }
     if (strstr(buff, "mtllib") == buff) {
-      printf("Object start\n");
+      char data[100], data2[100];
+      sscanf(buff, "%s %s", data, data2);
+      printf("Load mtllib: %s\n", data, data2);
       continue;
     }
-    
+    if (strstr(buff, "o ") == buff) {
+      printf("New Object start\n");
+      continue;
+    }
     if (strstr(buff, "v ") == buff) {
       int cnt = sscanf(buff, "v %f %f %f %f",
                                   vert, vert+1, vert+2, vert+3);
@@ -167,13 +172,21 @@ bool GraphicModel::LoadObject(char *file) {
     vnorm[this->faces[i] * 3 + 2] = vert_norm[vnormal_idx[i] * 3 + 2];
 
     // Reordering the texture mapping idx
-    tmidx[this->faces[i] * 3] = vert_norm[texture_idx[i] * 3];
-    tmidx[this->faces[i] * 3 + 1] = vert_norm[texture_idx[i] * 3 + 1];
-    tmidx[this->faces[i] * 3 + 2] = vert_norm[texture_idx[i] * 3 + 2];
+    tmidx[this->faces[i] * 2] = text_map_ori[texture_idx[i] * 2];
+    tmidx[this->faces[i] * 2 + 1] = text_map_ori[texture_idx[i] * 2 + 1];
   }
+  // for (int i = 0; i < text_map_ori.size(); ++i)
+  // {
+  //   printf("\t%f %f\n", text_map_ori[])
+  // }
   for (int i = 0; i < vertices.size(); ++i ) {
     this->vnormal.push_back(vnorm[i]);
     this->texture_mapping.push_back(tmidx[i]);
+  }
+  for (int i = 0; i < 4; ++i)
+  {
+    printf("\t%f %f\n", this->texture_mapping[2*i], 
+      this->texture_mapping[2*i+1]);
   }
   delete[] vnorm;
   delete[] tmidx;
@@ -189,7 +202,7 @@ bool GraphicModel::LoadObject(char *file) {
   return true;
 }
 GraphicModel::GraphicModel(){
-  glGenBuffers(3, GL_draw_buffer_id);
+  glGenBuffers(4, GL_draw_buffer_id);
   this->face_size = 4;
   this->vertice_size = 3;
 }
@@ -201,34 +214,67 @@ void GraphicModel::InitModelData() {
   //   fprintf(stderr, "%f, ", vertices[i]);
   //   if ((i + 1) % 3 == 0) fprintf(stderr, "\n");
   // }
+
+  //bind vertex array
   glBindBuffer(GL_ARRAY_BUFFER, GL_draw_buffer_id[0]);
   
   glBufferData(GL_ARRAY_BUFFER, sizeof(float) * this->vertices.size(),
                &this->vertices[0], GL_STATIC_DRAW);
   GLShortCut::PrintGLErrors(__FILE__, __LINE__);
+  
   glVertexPointer(vertice_size, GL_FLOAT, 3 * sizeof(float), (void*)0);
-  glEnableClientState(GL_VERTEX_ARRAY);
+  // bind face index array
+  
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_draw_buffer_id[1]);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * this->faces.size(),
                &this->faces[0], GL_STATIC_DRAW);
-
-  glEnableClientState(GL_NORMAL_ARRAY);
+  // bind vertex normal array
+  
   glBindBuffer(GL_ARRAY_BUFFER, GL_draw_buffer_id[2]);
   glBufferData(GL_ARRAY_BUFFER, sizeof(float) * this->vnormal.size(),
               &this->vnormal[0], GL_STATIC_DRAW);
   glNormalPointer( GL_FLOAT, 3 * sizeof(float), (void*)0);
+
+  // bind textrue mapping array
+  
+  glBindBuffer(GL_ARRAY_BUFFER, GL_draw_buffer_id[3]);
+  glBufferData(GL_ARRAY_BUFFER, 
+               sizeof(float) * this->texture_mapping_size(),
+               &this->texture_mapping[0], GL_STATIC_DRAW);
+  glTexCoordPointer(2, GL_FLOAT, 0, (void*)0);
 }
 
 void GraphicModel::DrawModel(int draw_parameter) {
   glEnable(GL_DEPTH_TEST);
   glClearColor(0,0,0,0);
+  // ============ Enable states=================
+  // glClientActiveTexture(GL_TEXTURE0);
+  glEnableClientState(GL_VERTEX_ARRAY);
+  glEnableClientState(GL_NORMAL_ARRAY);
+  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+  glEnable(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, 1);
+  // ==========================================
+  // 
+  
+  
   //this->faces_size()
   for (int i = 0; i < 1; i ++) {
-//    glNormal3fv(&vnormal[this->vnormal_idx[i * 3]]);
-    glDrawElements(GL_QUADS, (int) this->faces_draw_size(), GL_UNSIGNED_INT, (void*)(i * 4 * 4) );
+//    glNormal3fv(&vnormal[this->vnormal_idx[i * 3]]);\
+    //(int) this->faces_draw_size()
+    glDrawElements(GL_QUADS, 4, GL_UNSIGNED_INT, (void*)(i * 4 * 4) );
     //fprintf(stderr, "model drawed\n");
   }
- if (draw_parameter){
+
+
+ // ==============Disable States===============
+  glDisableClientState(GL_VERTEX_ARRAY);
+  glDisableClientState(GL_NORMAL_ARRAY);
+  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+  glDisable(GL_TEXTURE_2D);
+ // ===========================================
+
+   if (draw_parameter){
    glUseProgram(0);
    glDisable(GL_LIGHTING);
    glClearColor(0,0,0,0);
