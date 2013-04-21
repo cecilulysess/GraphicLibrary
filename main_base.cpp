@@ -1,7 +1,7 @@
 
 //
 //  main.cpp
-//  PhysicalAnimation
+//  
 //
 //  Created by Julian Wu on 1/22/2013
 //  Copyright (c) 2013 Julian Wu. All rights reserved.
@@ -55,23 +55,8 @@ GLuint LightSwitch = 0x7;
 GraphicModel *model;
 GraphicCamera::GraphicCamera *camera;
 
-//Frustum* frustum;
 std::vector<GLuint> shaders;
 GLuint selected_shader_id = 0;
-
-//void setup_the_viewvolume(){
-//  glMatrixMode(GL_PROJECTION);
-//  glLoadIdentity();
-////  frustum = new Frustum(60, (float)WIDTH / (float)HEIGHT, 0.02, 20.0);
-//  glLoadMatrixd(frustum->GetMatrix().Transpose().GetPtr());
-//  glMatrixMode(GL_MODELVIEW);
-//  glLoadIdentity();
-//  glRotated(0, 0, 0, 1);
-//  glRotated(10, 1, 0, 0);
-//  glRotated(0, 0, 1, 0);
-//  glTranslated(0, -0.15, -0.4);
-//}
-
 
 GLfloat* vertices;
 GLfloat vertices_number;
@@ -339,15 +324,15 @@ void SetShadersOrDie(std::vector<GLuint>& shaders, const char* vshader,
 
 void init(const char* model_path, const char* vshader_path, 
     const char* fshader_path) {
+  
+  model->InitModelData();
   camera = new GraphicCamera::GraphicCamera(Vec3d(0, 2, 4),
                                             Vec3d(0, 1, 0),
             Vec3d(0, 1 , 0), 0.02, 20, 60, focus);
   camera->PerspectiveDisplay(WIDTH, HEIGHT);
-  //setup_the_viewvolume();
   do_lights();
   do_material();
 
-  model->InitModelData();
   
   //load_object(model_path);
   //SetShadersOrDie(shaders, vshader_path, fshader_path);

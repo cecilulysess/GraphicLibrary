@@ -166,23 +166,6 @@ GraphicModel::GraphicModel(){
   this->vertice_size = 3;
 }
 
-float fvv[] = {
-  1.000000,-1.000000,-2.000000,
-1.000000,-1.000000,2.000000,
--1.000000,-1.000000,2.000000,
--1.000000,-1.000000,-2.000000,
-1.000000,1.000000,-1.999999,
-0.999999,1.000000,2.000001,
--1.000000,1.000000,2.000000,
--1.000000,1.000000,-2.000000};
-
-int ffa[] = {1, 2, 3, 4,
-5, 8, 7, 6,
-1, 5, 6, 2,
-2, 6, 7, 3,
-3, 7, 8, 4,
-5, 1, 4, 8};
-
 
 void GraphicModel::InitModelData() {
   // for (int i = 0; i < vertices.size(); ++i)
@@ -193,11 +176,6 @@ void GraphicModel::InitModelData() {
   fprintf(stderr, "\n");
   fprintf(stderr, "vertices#:%d\n", vertices.size());
   fprintf(stderr, "Vnormal#:%d\n", vnormal.size());
-  // for (int i = 0; i < faces.size(); ++i)
-  // {
-  //   // fprintf(stderr, "%d, ", this->faces[i]);
-  //   if ((i + 1) % 4 == 0) fprintf(stderr, "\n");
-  // }
   glBindBuffer(GL_ARRAY_BUFFER, GL_draw_buffer_id[0]);
   
   glBufferData(GL_ARRAY_BUFFER, sizeof(float) * this->vertices.size(),
