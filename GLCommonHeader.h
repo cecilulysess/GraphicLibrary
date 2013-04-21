@@ -30,15 +30,4 @@
 #define kPI 3.141592653
 #define MAIN_PROG
 //#define TESTING_
-//
-//static const char* VERT_SHADER_FILE_DIR =
-// // "/Users/julian/Programming/CS605/Graphic/Graphic/el.vert";
-//  "/home/yanxiaw/Programming/cs605/GraphicLibrary/el.vert";
-//
-//static const char* PHONG_FRAG_SHADER_FILE_DIR =
-// // "/Users/julian/Programming/CS605/Graphic/Graphic/el.frag";
-//  "/home/yanxiaw/Programming/cs605/GraphicLibrary/el.frag";
-//
-//static const char* BLINN_PHONG_FRAG_SHADER_FILE_DIR = 
-//  "/home/yanxiaw/Programming/cs605/GraphicLibrary/bp.frag";
 #endif

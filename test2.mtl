@@ -1,11 +1,12 @@
-# Blender MTL File: 'None'
+# Blender MTL File: ''
 # Material Count: 1
-newmtl 
+newmtl _RustDetail0014_1_M.jpg
 Ns 0
 Ka 0.000000 0.000000 0.000000
 Kd 0.8 0.8 0.8
 Ks 0.8 0.8 0.8
 d 1
 illum 2
+map_Kd /home/yanxiaw/Downloads/RustDetail0014_1_M.jpg
 
 

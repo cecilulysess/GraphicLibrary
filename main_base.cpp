@@ -335,7 +335,7 @@ void init(const char* model_path, const char* vshader_path,
 
   
   //load_object(model_path);
-  //SetShadersOrDie(shaders, vshader_path, fshader_path);
+  SetShadersOrDie(shaders, vshader_path, fshader_path);
   
   /*glBindBuffer(GL_ARRAY_BUFFER, mybuf[0]);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
