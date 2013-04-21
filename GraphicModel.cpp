@@ -51,10 +51,12 @@ bool GraphicModel::LoadObject(char *file) {
   int vn_cnt = 0, v_cnt = 0, vt_cnt = 0;
   float vert[4];
   float normal[3];
+  float text_map[2];
   unsigned int faceidx[4];
   unsigned int nidx[4];
   unsigned int textidx[4];
   vector<float> vert_norm;
+  vector<float> text_map_ori;
   while (fgets(buff, 255, f) != NULL) {
     if (strstr(buff, "#") == buff) {
       //skip comment.
@@ -85,10 +87,10 @@ bool GraphicModel::LoadObject(char *file) {
       continue;
     }
     if (strstr(buff, "vt") == buff) {
-      // sscanf(buff, "vt %f %f", normal, normal+1, normal+2);
-      // for (int i = 0 ; i < 3; ++i) {
-      //   vert_norm.push_back(normal[i]);
-      // }
+      sscanf(buff, "vt %f %f", text_map, text_map + 1);
+      for (int i = 0 ; i < 2; ++i) {
+        text_map_ori.push_back(text_map[i]);
+      }
       vt_cnt ++;
       continue;
     }
@@ -151,9 +153,10 @@ bool GraphicModel::LoadObject(char *file) {
   printf("Load raw data completed\n\tLoad vertex: %d, texture map: %d, vertex normal: %d\n",
           v_cnt, vt_cnt, vn_cnt);
   printf("\tFaces: %d, Vertex Normal Index: %d\n", 
-          faces.size(), vnormal_idx.size());
+          this->faces_size(), vnormal_idx.size());
   assert(vt_cnt > 0);
   float* vnorm = new float[vertices.size()];
+  float* tmidx = new float[vertices.size()];
   // Change the vertice normal index according to the vertice index,
   // OpenGL doesn't support specifying vert normal seperactly.
   for (int i = 0; i < faces.size(); ++i) {
@@ -163,11 +166,17 @@ bool GraphicModel::LoadObject(char *file) {
     vnorm[this->faces[i] * 3 + 1] = vert_norm[vnormal_idx[i] * 3 + 1];
     vnorm[this->faces[i] * 3 + 2] = vert_norm[vnormal_idx[i] * 3 + 2];
 
+    // Reordering the texture mapping idx
+    tmidx[this->faces[i] * 3] = vert_norm[texture_idx[i] * 3];
+    tmidx[this->faces[i] * 3 + 1] = vert_norm[texture_idx[i] * 3 + 1];
+    tmidx[this->faces[i] * 3 + 2] = vert_norm[texture_idx[i] * 3 + 2];
   }
   for (int i = 0; i < vertices.size(); ++i ) {
     this->vnormal.push_back(vnorm[i]);
+    this->texture_mapping.push_back(tmidx[i]);
   }
   delete[] vnorm;
+  delete[] tmidx;
   
   if (! (this->vertices.size() == this->vnormal.size()) ) {
     printf("Vert size: %d, VNormal size: %d \n", (int) vertices.size(),
@@ -210,32 +219,33 @@ void GraphicModel::InitModelData() {
   glNormalPointer( GL_FLOAT, 3 * sizeof(float), (void*)0);
 }
 
-void GraphicModel::DrawModel() {
+void GraphicModel::DrawModel(int draw_parameter) {
   glEnable(GL_DEPTH_TEST);
   glClearColor(0,0,0,0);
   //this->faces_size()
   for (int i = 0; i < 1; i ++) {
 //    glNormal3fv(&vnormal[this->vnormal_idx[i * 3]]);
-    glDrawElements(GL_QUADS, (int) this->faces_size() * 4, GL_UNSIGNED_INT, (void*)(i * 4 * 4) );
+    glDrawElements(GL_QUADS, (int) this->faces_draw_size(), GL_UNSIGNED_INT, (void*)(i * 4 * 4) );
     //fprintf(stderr, "model drawed\n");
   }
+ if (draw_parameter){
+   glUseProgram(0);
+   glDisable(GL_LIGHTING);
+   glClearColor(0,0,0,0);
+  //  float* v = normal;
+   float* vn = &vnormal[0];
+   float div = 10.0;
+   glColor4f(0, 0, 1.0, 1.0);
+   for (int i = 0; i < vnormal.size() / 3 ; i++) { //
+     glBegin(GL_LINES);
+       glVertex3fv(&vertices[i * 3]);
+       glVertex3f(vertices[i * 3] + vn[i * 3] / div ,
+            vertices[i * 3 + 1] + vn[i * 3 + 1] / div,
+            vertices[i * 3 + 2] + vn[i * 3 + 2] / div);
+     glEnd();
+   }
+   
 
-//  glUseProgram(0);
-//  glDisable(GL_LIGHTING);
-//  glClearColor(0,0,0,0);
-// //  float* v = normal;
-//  float* vn = &vnormal[0];
-//  float div = 10.0;
-//  glColor4f(0, 0, 1.0, 1.0);
-//  for (int i = 0; i < vnormal.size() / 3 ; i++) { //
-//    glBegin(GL_LINES);
-//      glVertex3fv(&vertices[i * 3]);
-//      glVertex3f(vertices[i * 3] + vn[i * 3] / div ,
-//           vertices[i * 3 + 1] + vn[i * 3 + 1] / div,
-//           vertices[i * 3 + 2] + vn[i * 3 + 2] / div);
-//    glEnd();
-//  }
-//  
-// 
-//  glEnable(GL_LIGHTING);
+   glEnable(GL_LIGHTING);
+ }
 }

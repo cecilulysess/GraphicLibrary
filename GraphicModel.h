@@ -23,16 +23,19 @@ using std::vector;
 
 class GraphicModel{
 public:
-  GraphicModel();
-  
+  GraphicModel(); 
+
   // Load model from .obj file
   bool LoadObject(char* file);
   void InitModelData();
   //draw this model in OpenGL
-  void DrawModel();
+  // draw_parameter control draw model specific info such as normal
+  void DrawModel(int draw_parameter);
   
   long vert_size() const { return this->vertices.size(); }
   long faces_size() const { return this->faces.size() / face_size; }
+  // return the faces index that used for glDrawElements
+  long faces_draw_size() const {return this->faces.size();}
   long vert_normal_size() const { return this->vnormal.size() / 3; }
 
   bool has_vnormal() const {return this->vnormal_idx.size() > 0; }
@@ -44,8 +47,9 @@ private:
   unsigned int GL_draw_buffer_id[3];
   
   vector<float> vertices;
-  vector<unsigned int>  faces;
   vector<float> vnormal;
+  vector<float> texture_mapping;
+  vector<unsigned int>  faces;
   vector<unsigned int> vnormal_idx;
   vector<unsigned int> texture_idx;
 

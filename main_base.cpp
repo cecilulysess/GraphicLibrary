@@ -120,7 +120,7 @@ void draw_stuff(){
                          selected_shader_id, "LtSwitch");
    glUniform1i(light_switch_loc, LightSwitch); 
  }
- model->DrawModel();
+ model->DrawModel((int) DrawNormal);
  printf("Using shader %d\n", selected_shader_id);
 //  glUseProgram(0);
 //  glEnableClientState(GL_VERTEX_ARRAY); 

@@ -372,13 +372,5 @@ void GLShortCut::PrintGLErrors(char *file, int line){
   }
 }
 
-/*
-inline float Camera::near_plane() { return _near_plane; }
-
-inline float Camera::far_plane() { return  _far_plane; }
-
-inline float Camera::fov() { return _fov; }
-
-*/
   
 }//GraphicUtilities
