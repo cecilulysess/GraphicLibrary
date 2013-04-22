@@ -362,6 +362,43 @@ void GraphicUtilities::DrawGrid(float size, float step) {
   glEnable(GL_LIGHTING);
 }
 
+bool GraphicUtilities::LoadTexture(char *filename, GLuint &texture){
+  FILE *fptr;
+  char buf[512], *parse;
+  int im_size, im_width, im_height, max_color;
+  unsigned char *texture_bytes;
+
+  fptr = fopen(filename, "r");
+  if (fptr == NULL) {
+    perror("Reading material file with error: ");
+    perror(filename);
+  }
+  fgets(buf, 512, fptr);
+
+  do {
+    fgets(buf, 512, fptr);
+  } while(buf[0] == '#' || buf[0] == '\n');
+  sscanf(buf, "%d %d", &im_width, &im_height);
+  fgets(buf, 512, fptr);
+  im_size = im_width * im_height;
+  texture_bytes = (unsigned char *) calloc(3, im_size);
+  fread(texture_bytes, 3, im_size, fptr);
+  fclose(fptr);
+
+  // glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, texture /*SetCurrentTexture id*/);
+  glTexImage2D(GL_TEXTURE_2D, 
+    0, // Mipmap level
+    GL_RGB, im_width, im_height, 0/* border size */, GL_RGB,
+    GL_UNSIGNED_BYTE, texture_bytes);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+  free(texture_bytes);
+  printf("Loaded texture: %s\n", filename);
+  return true;
+}
+
 void GLShortCut::PrintGLErrors(char *file, int line){
   GLenum glErr;
   glErr = glGetError();

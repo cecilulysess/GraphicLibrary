@@ -20,6 +20,8 @@
 using namespace std;
 #include "GraphicUtilities.h"
 using GraphicUtilities::GLShortCut;
+using GraphicUtilities::GraphicUtilities;
+
 
 // validate that every normal was used
 bool validate_vnormal(vector<unsigned int> vn, int upper) {
@@ -38,6 +40,58 @@ bool validate_vnormal(vector<unsigned int> vn, int upper) {
   }
   return true;
 }
+
+bool GraphicModel::LoadMaterial(char *file){
+  if (file == NULL) {
+    return false;
+  }
+  FILE *f;
+  f = fopen(file, "r");
+  if (f == NULL) {
+    perror("Reading material file with error: ");
+    perror(file);
+  }
+  char buff[255];
+  while(fgets(buff, 255, f) != NULL) {
+    if (strstr(buff, "#") == buff) continue; //skip commments
+    if (strstr(buff, "newmtl") == buff) continue; //currently useless
+    if (strstr(buff, "Ns ") == buff) {
+      sscanf(buff, "Ns %f", &this->material.Shininess);
+    }
+    if (strstr(buff, "Ka ") == buff) {
+      sscanf(buff, "Ka %f %f %f", &this->material.Ambient[0],
+                                  &this->material.Ambient[1],
+                                  &this->material.Ambient[2]);
+    }
+    if (strstr(buff, "Kd ") == buff) {
+      sscanf(buff, "Kd %f %f %f", &this->material.Diffuse[0],
+                                  &this->material.Diffuse[1],
+                                  &this->material.Diffuse[2]);
+    }
+    if (strstr(buff, "Ks ") == buff) {
+      sscanf(buff, "Ks %f %f %f", &this->material.Specular[0],
+                                  &this->material.Specular[1],
+                                  &this->material.Specular[2]);
+    }
+    if (strstr(buff, "map_Kd ") == buff) {
+      char texturefile[255];
+      sscanf(buff, "map_Kd %s", texturefile);
+      printf("Load Material from:%s\n", texturefile);
+      assert(
+        GraphicUtilities::GraphicUtilities::LoadTexture(
+          texturefile, GL_texture_id[0]) );
+    }
+    if (strstr(buff, "map_normal ") == buff) {
+      char normalfile[255];
+      sscanf(buff, "map_normal %s", normalfile);
+      printf("Load Normal from:%s\n", normalfile);
+      assert(
+        GraphicUtilities::GraphicUtilities::LoadTexture(
+          normalfile, GL_texture_id[1]) );
+    }
+  }
+}
+
 bool GraphicModel::LoadObject(char *file) {
   if (file == NULL) {
     return false;
@@ -46,12 +100,13 @@ bool GraphicModel::LoadObject(char *file) {
   f = fopen(file, "r");
   char buff[255];
   if (f == NULL) {
-    perror("Reading file with error: ");
+    perror("Reading object file with error: ");
   }
-  int vn_cnt = 0, v_cnt = 0, vt_cnt = 0;
+  int vn_cnt = 0, v_cnt = 0, vt_cnt = 0, vx_cnt = 0, vy_cnt = 0;
   float vert[4];
   float normal[3];
   float text_map[2];
+  float tangentnormal[3];
   unsigned int faceidx[4];
   unsigned int nidx[4];
   unsigned int textidx[4];
@@ -59,20 +114,16 @@ bool GraphicModel::LoadObject(char *file) {
   vector<float> vert_norm;
   vector<float> text_map_ori;
   while (fgets(buff, 255, f) != NULL) {
-    if (strstr(buff, "#") == buff) {
-      //skip comment.
-      continue;
-    }
+    if (strstr(buff, "#") == buff) continue;  // skip comments
+    if (strstr(buff, "o ") == buff) continue; // new object start
+    if (strstr(buff, "usemtl") == buff) continue; // using some material
     if (strstr(buff, "mtllib") == buff) {
-      char data[100], data2[100];
-      sscanf(buff, "%s %s", data, data2);
-      printf("Load mtllib: %s\n", data, data2);
+      char data[128];
+      sscanf(buff, "mtllib %s", data);
+      LoadMaterial(data);
       continue;
     }
-    if (strstr(buff, "o ") == buff) {
-      printf("New Object start\n");
-      continue;
-    }
+    
     if (strstr(buff, "v ") == buff) {
       int cnt = sscanf(buff, "v %f %f %f %f",
                                   vert, vert+1, vert+2, vert+3);
@@ -100,9 +151,25 @@ bool GraphicModel::LoadObject(char *file) {
       vt_cnt ++;
       continue;
     }
-    if (strstr(buff, "usemtl") == buff) {
-      printf("Use mtl\n");
+    if (strstr(buff, "vx ") == buff) {
+      sscanf(buff, "vx %f %f %f", tangentnormal, tangentnormal + 1,
+                                tangentnormal + 2);
+      for (int i = 0 ; i < 3; ++i) {
+        tengent.push_back(tangentnormal[i]);
+      }
+      vx_cnt ++;
+      continue;
     }
+    if (strstr(buff, "vy ") == buff) {
+      sscanf(buff, "vy %f %f %f", tangentnormal, tangentnormal + 1,
+                                  tangentnormal + 2);
+      for (int i = 0 ; i < 3; ++i) {
+        bitengent.push_back(tangentnormal[i]);
+      }
+      vy_cnt ++;
+      continue;
+    }
+
     if (strstr(buff, "f ") == buff) {
       // if use v//vn fashion
       if (strstr(buff, "//") != NULL){
@@ -121,7 +188,6 @@ bool GraphicModel::LoadObject(char *file) {
           //this->vnormal.push_back(nidx[i] - 1);
           this->vnormal_idx.push_back(nidx[i] - 1);
         }
-       
       } else {
         // use either v/vt or v/vt/vn
         if (strstr(buff, "/") != NULL) {
@@ -130,36 +196,29 @@ bool GraphicModel::LoadObject(char *file) {
                faceidx+1, textidx + 1, nidx+1, 
                faceidx+2, textidx + 2, nidx+2, 
                faceidx+3, textidx + 3, nidx+3 );
-          
+      
           for(int i = 0; i < 4; ++i) {
-            
             this->faces.push_back(faceidx[i] - 1);
             this->texture_idx.push_back(textidx[i] - 1);
             if (cnt > 8) {
               this->vnormal_idx.push_back(nidx[i] - 1);
             }
-            
-//            if (faces[faces.size()-1] == 13000) {
-//              printf("f/vn : %d %d\n", faceidx[i], nidx[i]);
-//            }
           }
         } else {
           // use only v v v fashion
           printf("I don't like it\n");
+          exit(1);
         }
       }
-//      int cnt= sscanf(buff, "f %d/%d/%d", faceidx, faceidx+1, faceidx+2);
-//      printf("Face %d : %d %d %d \n", cnt, faceidx[0], faceidx[1], faceidx[2]);
     }
-    // otherwise
-    // ignore
-    //
+
   }
 
   printf("Load raw data completed\n\tLoad vertex: %d, texture map: %d, vertex normal: %d\n",
           v_cnt, vt_cnt, vn_cnt);
-  printf("\tFaces: %d, Vertex Normal Index: %d\n", 
-          this->faces_size(), vnormal_idx.size());
+  printf("\tFaces: %d, VNormal Index: %d, VTengent: %d, VBitengent: %d\n", 
+          this->faces_size(), vnormal_idx.size(), tengent.size() / 3,
+          bitengent.size() / 3 );
   assert(vt_cnt > 0);
   for (int i = 0; i < faces.size(); ++i){
     this->vertices.push_back(vertex[faces[i] * 3 + 0]);
@@ -188,6 +247,7 @@ bool GraphicModel::LoadObject(char *file) {
 }
 GraphicModel::GraphicModel(){
   glGenBuffers(4, GL_draw_buffer_id);
+  glGenTextures(2, GL_texture_id);
   this->face_size = 4;
   this->vertice_size = 3;
 }
@@ -229,13 +289,18 @@ void GraphicModel::InitModelData(int shader_id) {
 void GraphicModel::DrawModel(int draw_parameter, int shader_id) {
   glEnable(GL_DEPTH_TEST);
   glClearColor(0,0,0,0);
+  // do materials for this model
+  glMaterialfv(GL_FRONT, GL_AMBIENT, material.Ambient);
+  glMaterialfv(GL_FRONT, GL_DIFFUSE, material.Diffuse);
+  glMaterialfv(GL_FRONT, GL_SPECULAR, material.Specular);
+  glMaterialfv(GL_FRONT, GL_SHININESS, &material.Shininess);
   // ============ Enable states=================
-  glClientActiveTexture(GL_TEXTURE0);
+  // glClientActiveTexture(GL_TEXTURE0);
   glEnableClientState(GL_VERTEX_ARRAY);
   glEnableClientState(GL_NORMAL_ARRAY);
   glEnableClientState(GL_TEXTURE_COORD_ARRAY);
   glEnable(GL_TEXTURE_2D);
-  glBindTexture(GL_TEXTURE_2D, 1);
+  glBindTexture(GL_TEXTURE_2D, GL_texture_id[0]);
   // ==========================================
   // 
   // int attribute_texcoord = glGetAttribLocation(shader_id, "texcoord");

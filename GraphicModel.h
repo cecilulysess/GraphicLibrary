@@ -15,12 +15,36 @@
 #define __Graphic__GraphicModel__
 
 #include "GLCommonHeader.h"
-
+#include <stdio.h>
 #include <vector>
 
 using std::vector;
 
+// Using a self defined structure
+typedef struct Material{
+  char name[128]; //name, I don't like pointer here
+  float Ambient[3];
+  float Diffuse[3];
+  float Specular[3];
+  float Shininess;
 
+  void print(){
+    printf("\tMaterial: %d\n", name);
+    printf("\tAmbient:  %f %f %f\n", Ambient[0], Ambient[1], Ambient[2]);
+    printf("\tDiffuse:  %f %f %f\n", Diffuse[0], Diffuse[1], Diffuse[2]);
+    printf("\tSpecular: %f %f %f\n", Specular[0], Specular[1], Specular[2]);
+    printf("\tShininess: %f\n", Shininess);
+  }
+
+} Material;
+
+// A graphic object model class that know how to draw itself, how to load
+// its material and texture
+// Assumptions: current only using 1 texture, 1 normal map, 1 material
+//
+// Usage: 1. LoadObject will fill in all the data required
+//        2. InitModelData will feed it into Graphic Card
+//        3. DrawModel within each frame
 class GraphicModel{
 public:
   GraphicModel(); 
@@ -45,17 +69,24 @@ public:
   bool has_texture() const {return this->texture_idx.size() > 0; }
   
 private:
+  bool LoadMaterial(char *file);
+
   int face_size ;
   int vertice_size;
-  unsigned int GL_draw_buffer_id[3];
-  
+  unsigned int GL_draw_buffer_id[4];
+  //texture at 0, normal map at 1
+  unsigned int GL_texture_id[2];
+
+  // vertices, note that this is not the v from obj file
   vector<float> vertices;
   vector<float> vnormal;
   vector<float> texture_mapping;
+  vector<float> tengent, bitengent;
   vector<unsigned int>  faces;
   vector<unsigned int> vnormal_idx;
   vector<unsigned int> texture_idx;
 
+  Material material;
   
 };
 

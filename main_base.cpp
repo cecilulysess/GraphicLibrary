@@ -85,7 +85,7 @@ void load_texture(char *filename) {
   fread(texture_bytes, 3, im_size, fptr);
   fclose(fptr);
 
-  glActiveTexture(GL_TEXTURE0);
+  // glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, 1 /*SetCurrentTexture id*/);
   glTexImage2D(GL_TEXTURE_2D, 
     0, // Mipmap level
@@ -96,18 +96,6 @@ void load_texture(char *filename) {
   glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
   free(texture_bytes);
   printf("Finished load texture: %s\n", filename);
-}
-
-void load_object(const char* path){
-  GraphicObject* obj = new GraphicObject();
-  obj->readFile(path);
-  obj->execute();
-  vertices = obj->getVertexPointer();
-  vertices_normal = obj->getNormalPointer();
-  vertices_number = obj->getVertexNumber();
-  normal_length = obj->getFaceNumber();
-  faces_length = obj->getFaceNumber();
-  normal = obj->getFaceNormal();
 }
 
 void SwitchLight(){
@@ -262,7 +250,7 @@ void do_lights(){
 void do_material(){
 
   float mat_ambient[] = {0.0, 0.0, 0.0, 0.0};
-  float mat_diffuse[] = {1.0, 0.8, 0.7, 1.0};
+  float mat_diffuse[] = {1.0, 1.0, 1.0, 1.0};
   float mat_specular[] = {0.15, 0.15, 0.15, 1};
   float mat_shininess[] = {shininess};
   
@@ -366,7 +354,7 @@ void init(const char* model_path, const char* vshader_path,
             Vec3d(0, 1 , 0), 0.02, 20, 60, focus);
   camera->PerspectiveDisplay(WIDTH, HEIGHT);
   do_lights();
-  do_material();
+  // do_material();
 
   
   //load_object(model_path);
@@ -453,11 +441,11 @@ void KeyBoardHandler(unsigned char key, int x, int y){
       break;
     case 'i':
       shininess += 0.1f;
-      do_material();
+      // do_material();
       break;
     case 'o':
       shininess -= 0.1f;
-      do_material();
+      // do_material();
       break;
     case 'k':
       l0brightness +=0.1f;
@@ -549,7 +537,7 @@ int main(int argc, char* argv[]){
   
   model = new GraphicModel();
   model->LoadObject(argv[3]);
-  load_texture("iss.ppm");
+  // load_texture("iss.ppm");
 
   // initialize the camera and such
   init(argv[3], argv[1], argv[2]);

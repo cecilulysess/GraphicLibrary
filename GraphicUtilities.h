@@ -64,25 +64,17 @@ public:
                                       Frustum* fru);
 
   static void DrawGrid(float size, float step);
+
+  // load a texture into specific texture id
+  static bool LoadTexture(char *filename, GLuint &texture);
 };
 
 // set of functions as short cut of OpenGL utility function
 class GLShortCut{
-  public:
+public:
   static void PrintGLErrors(char *file, int line); 
 };
-/*class Camera {
-public:
-  float near_plane();
-  float far_plane();
-  float fov();
-  
-private:
-  float _near_plane;
-  float _far_plane;
-  float _fov;
-  
-};*/
+
 }// ns GraphicUtilities
 
 #endif /* defined(__Graphic__GraphicUtilities__) */
