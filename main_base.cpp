@@ -549,7 +549,7 @@ int main(int argc, char* argv[]){
   
   model = new GraphicModel();
   model->LoadObject(argv[3]);
-  load_texture("sign2.ppm");
+  load_texture("iss.ppm");
 
   // initialize the camera and such
   init(argv[3], argv[1], argv[2]);

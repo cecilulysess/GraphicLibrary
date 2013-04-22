@@ -12,8 +12,7 @@ void main() {
   ec_vnormal = gl_NormalMatrix * gl_Normal;
   ec_vposition = gl_ModelViewMatrix * gl_Vertex;
   gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * gl_Vertex;
-  gl_TexCoord[0].x = texcoord.x;
-  gl_TexCoord[0].y = texcoord.y;
+  gl_TexCoord[0] = gl_MultiTexCoord0;
 
   light_dir0 = vec3(gl_LightSource[0].position.xyz - ec_vposition);
   float dis0 = length(light_dir0);

@@ -183,46 +183,6 @@ bool GraphicModel::LoadObject(char *file) {
   {
     faces.push_back(i);
   }
-  // float* vnorm = new float[vertices.size()];
-  // float* tmidx = new float[vertices.size()];
-  // // Change the vertice normal index according to the vertice index,
-  // // OpenGL doesn't support specifying vert normal seperactly.
-  // for (int i = 0; i < faces.size(); ++i) {
-  //   // Reordering the vertex normal so that it according to the 
-  //   // vertex index
-  //   vnorm[this->faces[i] * 3] = vert_norm[vnormal_idx[i] * 3 ];
-  //   vnorm[this->faces[i] * 3 + 1] = vert_norm[vnormal_idx[i] * 3 + 1];
-  //   vnorm[this->faces[i] * 3 + 2] = vert_norm[vnormal_idx[i] * 3 + 2];
-
-  //   // Reordering the texture mapping idx
-  //   // tmidx[this->faces[i] * 2] = text_map_ori[texture_idx[i] * 2];
-  //   // tmidx[this->faces[i] * 2 + 1] = text_map_ori[texture_idx[i] * 2 + 1];
-  // }
-  // for (int i = 0; i < vertices.size(); ++i ) {
-  //   this->vnormal.push_back(vnorm[i]);
-  // }
-  // for (int i = 0; i < this->texture_idx.size(); ++i) {
-  //   this->texture_mapping.push_back(text_map_ori[texture_idx[i] * 2]);
-  //   this->texture_mapping.push_back(text_map_ori[texture_idx[i] * 2 + 1]);
-
-  // }
-  // printf("\tLoad texture uv: %d\n", texture_mapping.size()/2);
-  
-  // // for (int i = 0; i < texture_mapping.size()/2; ++i)
-  // // {
-  // //   printf("\t%d: %f %f\n", i + 1, this->texture_mapping[2*i], 
-  // //     this->texture_mapping[2*i+1]);
-  // // }
-  // delete[] vnorm;
-  // delete[] tmidx;
-  
-  // if (! (this->vertices.size() == this->vnormal.size()) ) {
-  //   printf("Vert size: %d, VNormal size: %d \n", (int) vertices.size(),
-  //          (int)vnormal.size());
-  //   assert(this->vertices.size() == this->vnormal.size());
-  // }
-
-  // assert(validate_vnormal(vnormal_idx, vnormal.size() / 3));
   
   return true;
 }
@@ -234,11 +194,6 @@ GraphicModel::GraphicModel(){
 
 
 void GraphicModel::InitModelData(int shader_id) {
-  // for (int i = 0; i < vertices.size(); ++i)
-  // {
-  //   fprintf(stderr, "%f, ", vertices[i]);
-  //   if ((i + 1) % 3 == 0) fprintf(stderr, "\n");
-  // }
 
   //bind vertex array
   glBindBuffer(GL_ARRAY_BUFFER, GL_draw_buffer_id[0]);
@@ -266,7 +221,7 @@ void GraphicModel::InitModelData(int shader_id) {
   glBufferData(GL_ARRAY_BUFFER, 
                sizeof(float) * this->texture_mapping_size(),
                &this->texture_mapping[0], GL_STATIC_DRAW);
-  // glTexCoordPointer(2, GL_FLOAT, 0, (void*)0);
+  glTexCoordPointer(2, GL_FLOAT, 0, (void*)0);
 
 
 }
@@ -275,24 +230,24 @@ void GraphicModel::DrawModel(int draw_parameter, int shader_id) {
   glEnable(GL_DEPTH_TEST);
   glClearColor(0,0,0,0);
   // ============ Enable states=================
-  // glClientActiveTexture(GL_TEXTURE0);
+  glClientActiveTexture(GL_TEXTURE0);
   glEnableClientState(GL_VERTEX_ARRAY);
   glEnableClientState(GL_NORMAL_ARRAY);
-  // glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
   glEnable(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, 1);
   // ==========================================
   // 
-  int attribute_texcoord = glGetAttribLocation(shader_id, "texcoord");
-  glEnableVertexAttribArray(attribute_texcoord);
-  glVertexAttribPointer(
-    attribute_texcoord, // attribute
-    2,                  // number of elements per vertex, here (x,y)
-    GL_FLOAT,           // the type of each element
-    GL_FALSE,           // take our values as-is
-    0,                  // no extra data between each position
-    0                   // offset of first element
-  );
+  // int attribute_texcoord = glGetAttribLocation(shader_id, "texcoord");
+  // glEnableVertexAttribArray(attribute_texcoord);
+  // glVertexAttribPointer(
+  //   attribute_texcoord, // attribute
+  //   2,                  // number of elements per vertex, here (x,y)
+  //   GL_FLOAT,           // the type of each element
+  //   GL_FALSE,           // take our values as-is
+  //   0,                  // no extra data between each position
+  //   0                   // offset of first element
+  // );
 
   
   //this->faces_size()
@@ -310,8 +265,8 @@ void GraphicModel::DrawModel(int draw_parameter, int shader_id) {
  // ==============Disable States===============
   glDisableClientState(GL_VERTEX_ARRAY);
   glDisableClientState(GL_NORMAL_ARRAY);
-  // glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-  glDisableVertexAttribArray(attribute_texcoord);
+  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+  // glDisableVertexAttribArray(attribute_texcoord);
   glDisable(GL_TEXTURE_2D);
  // ===========================================
 
