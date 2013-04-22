@@ -55,6 +55,7 @@ bool GraphicModel::LoadObject(char *file) {
   unsigned int faceidx[4];
   unsigned int nidx[4];
   unsigned int textidx[4];
+  vector<float> vertex;
   vector<float> vert_norm;
   vector<float> text_map_ori;
   while (fgets(buff, 255, f) != NULL) {
@@ -94,7 +95,7 @@ bool GraphicModel::LoadObject(char *file) {
     if (strstr(buff, "vt") == buff) {
       sscanf(buff, "vt %f %f", text_map, text_map + 1);
       for (int i = 0 ; i < 2; ++i) {
-        text_map_ori.push_back(text_map[i]);
+        this->texture_mapping.push_back(text_map[i]);
       }
       vt_cnt ++;
       continue;
@@ -160,6 +161,9 @@ bool GraphicModel::LoadObject(char *file) {
   printf("\tFaces: %d, Vertex Normal Index: %d\n", 
           this->faces_size(), vnormal_idx.size());
   assert(vt_cnt > 0);
+  // for (int i = 0; i < faces.size(); ++i){
+  //   this->vertices.push_back(vertex[]);
+  // }
   float* vnorm = new float[vertices.size()];
   float* tmidx = new float[vertices.size()];
   // Change the vertice normal index according to the vertice index,
@@ -172,8 +176,8 @@ bool GraphicModel::LoadObject(char *file) {
     vnorm[this->faces[i] * 3 + 2] = vert_norm[vnormal_idx[i] * 3 + 2];
 
     // Reordering the texture mapping idx
-    tmidx[this->faces[i] * 2] = text_map_ori[texture_idx[i] * 2];
-    tmidx[this->faces[i] * 2 + 1] = text_map_ori[texture_idx[i] * 2 + 1];
+    // tmidx[this->faces[i] * 2] = text_map_ori[texture_idx[i] * 2];
+    // tmidx[this->faces[i] * 2 + 1] = text_map_ori[texture_idx[i] * 2 + 1];
   }
   // for (int i = 0; i < text_map_ori.size(); ++i)
   // {
@@ -181,7 +185,6 @@ bool GraphicModel::LoadObject(char *file) {
   // }
   for (int i = 0; i < vertices.size(); ++i ) {
     this->vnormal.push_back(vnorm[i]);
-    this->texture_mapping.push_back(tmidx[i]);
   }
   for (int i = 0; i < 4; ++i)
   {
@@ -262,9 +265,10 @@ void GraphicModel::DrawModel(int draw_parameter) {
   for (int i = 0; i < 1; i ++) {
 //    glNormal3fv(&vnormal[this->vnormal_idx[i * 3]]);\
     //(int) this->faces_draw_size()
-    glDrawElements(GL_QUADS, 4, GL_UNSIGNED_INT, (void*)(i * 4 * 4) );
+    glDrawElements(GL_QUADS, (int) this->faces_draw_size(), GL_UNSIGNED_INT, (void*)(i * 4 * 4) );
     //fprintf(stderr, "model drawed\n");
   }
+  printf("Drawed model, faces:%d\n", this->faces_draw_size());
 
 
  // ==============Disable States===============

@@ -86,6 +86,7 @@ void load_texture(char *filename) {
   fread(texture_bytes, 3, im_size, fptr);
   fclose(fptr);
 
+  glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, 1 /*SetCurrentTexture id*/);
   glTexImage2D(GL_TEXTURE_2D, 
     0, // Mipmap level
