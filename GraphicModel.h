@@ -27,10 +27,10 @@ public:
 
   // Load model from .obj file
   bool LoadObject(char* file);
-  void InitModelData();
+  void InitModelData(int text_attr_loc);
   //draw this model in OpenGL
   // draw_parameter control draw model specific info such as normal
-  void DrawModel(int draw_parameter);
+  void DrawModel(int draw_parameter, int shader_id);
   
   // vertices size (in terms of # of float)
   long vert_size() const { return this->vertices.size(); }

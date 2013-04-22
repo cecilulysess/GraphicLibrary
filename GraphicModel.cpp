@@ -79,7 +79,7 @@ bool GraphicModel::LoadObject(char *file) {
       this->vertice_size = cnt;
       assert(vertice_size >= 3 && vertice_size <=4);
       for (int i = 0; i < vertice_size; ++i) {
-        this->vertices.push_back(vert[i]);
+        vertex.push_back(vert[i]);
       }
       v_cnt ++;
       continue;
@@ -95,7 +95,7 @@ bool GraphicModel::LoadObject(char *file) {
     if (strstr(buff, "vt") == buff) {
       sscanf(buff, "vt %f %f", text_map, text_map + 1);
       for (int i = 0 ; i < 2; ++i) {
-        this->texture_mapping.push_back(text_map[i]);
+        text_map_ori.push_back(text_map[i]);
       }
       vt_cnt ++;
       continue;
@@ -161,46 +161,68 @@ bool GraphicModel::LoadObject(char *file) {
   printf("\tFaces: %d, Vertex Normal Index: %d\n", 
           this->faces_size(), vnormal_idx.size());
   assert(vt_cnt > 0);
-  // for (int i = 0; i < faces.size(); ++i){
-  //   this->vertices.push_back(vertex[]);
-  // }
-  float* vnorm = new float[vertices.size()];
-  float* tmidx = new float[vertices.size()];
-  // Change the vertice normal index according to the vertice index,
-  // OpenGL doesn't support specifying vert normal seperactly.
-  for (int i = 0; i < faces.size(); ++i) {
-    // Reordering the vertex normal so that it according to the 
-    // vertex index
-    vnorm[this->faces[i] * 3] = vert_norm[vnormal_idx[i] * 3 ];
-    vnorm[this->faces[i] * 3 + 1] = vert_norm[vnormal_idx[i] * 3 + 1];
-    vnorm[this->faces[i] * 3 + 2] = vert_norm[vnormal_idx[i] * 3 + 2];
+  for (int i = 0; i < faces.size(); ++i){
+    this->vertices.push_back(vertex[faces[i] * 3 + 0]);
+    this->vertices.push_back(vertex[faces[i] * 3 + 1]);
+    this->vertices.push_back(vertex[faces[i] * 3 + 2]);
+    this->vnormal.push_back(vert_norm[vnormal_idx[i] * 3 + 0]);
+    this->vnormal.push_back(vert_norm[vnormal_idx[i] * 3 + 1]);
+    this->vnormal.push_back(vert_norm[vnormal_idx[i] * 3 + 2]);
+    this->texture_mapping.push_back(text_map_ori[texture_idx[i] * 2]);
 
-    // Reordering the texture mapping idx
-    // tmidx[this->faces[i] * 2] = text_map_ori[texture_idx[i] * 2];
-    // tmidx[this->faces[i] * 2 + 1] = text_map_ori[texture_idx[i] * 2 + 1];
+    this->texture_mapping.push_back(text_map_ori[texture_idx[i] * 2 + 1]);
   }
-  // for (int i = 0; i < text_map_ori.size(); ++i)
-  // {
-  //   printf("\t%f %f\n", text_map_ori[])
-  // }
-  for (int i = 0; i < vertices.size(); ++i ) {
-    this->vnormal.push_back(vnorm[i]);
-  }
-  for (int i = 0; i < 4; ++i)
+
+  assert(this->vertices.size() == 3 * faces.size());
+  assert(this->vnormal.size() == 3 * faces.size());
+  assert(this->texture_mapping.size() == 2 * faces.size());
+
+  int idx = faces.size();
+  faces.clear();
+  for (int i = 0; i < idx; ++i)
   {
-    printf("\t%f %f\n", this->texture_mapping[2*i], 
-      this->texture_mapping[2*i+1]);
+    faces.push_back(i);
   }
-  delete[] vnorm;
-  delete[] tmidx;
-  
-  if (! (this->vertices.size() == this->vnormal.size()) ) {
-    printf("Vert size: %d, VNormal size: %d \n", (int) vertices.size(),
-           (int)vnormal.size());
-    assert(this->vertices.size() == this->vnormal.size());
-  }
+  // float* vnorm = new float[vertices.size()];
+  // float* tmidx = new float[vertices.size()];
+  // // Change the vertice normal index according to the vertice index,
+  // // OpenGL doesn't support specifying vert normal seperactly.
+  // for (int i = 0; i < faces.size(); ++i) {
+  //   // Reordering the vertex normal so that it according to the 
+  //   // vertex index
+  //   vnorm[this->faces[i] * 3] = vert_norm[vnormal_idx[i] * 3 ];
+  //   vnorm[this->faces[i] * 3 + 1] = vert_norm[vnormal_idx[i] * 3 + 1];
+  //   vnorm[this->faces[i] * 3 + 2] = vert_norm[vnormal_idx[i] * 3 + 2];
 
-  assert(validate_vnormal(vnormal_idx, vnormal.size() / 3));
+  //   // Reordering the texture mapping idx
+  //   // tmidx[this->faces[i] * 2] = text_map_ori[texture_idx[i] * 2];
+  //   // tmidx[this->faces[i] * 2 + 1] = text_map_ori[texture_idx[i] * 2 + 1];
+  // }
+  // for (int i = 0; i < vertices.size(); ++i ) {
+  //   this->vnormal.push_back(vnorm[i]);
+  // }
+  // for (int i = 0; i < this->texture_idx.size(); ++i) {
+  //   this->texture_mapping.push_back(text_map_ori[texture_idx[i] * 2]);
+  //   this->texture_mapping.push_back(text_map_ori[texture_idx[i] * 2 + 1]);
+
+  // }
+  // printf("\tLoad texture uv: %d\n", texture_mapping.size()/2);
+  
+  // // for (int i = 0; i < texture_mapping.size()/2; ++i)
+  // // {
+  // //   printf("\t%d: %f %f\n", i + 1, this->texture_mapping[2*i], 
+  // //     this->texture_mapping[2*i+1]);
+  // // }
+  // delete[] vnorm;
+  // delete[] tmidx;
+  
+  // if (! (this->vertices.size() == this->vnormal.size()) ) {
+  //   printf("Vert size: %d, VNormal size: %d \n", (int) vertices.size(),
+  //          (int)vnormal.size());
+  //   assert(this->vertices.size() == this->vnormal.size());
+  // }
+
+  // assert(validate_vnormal(vnormal_idx, vnormal.size() / 3));
   
   return true;
 }
@@ -211,7 +233,7 @@ GraphicModel::GraphicModel(){
 }
 
 
-void GraphicModel::InitModelData() {
+void GraphicModel::InitModelData(int shader_id) {
   // for (int i = 0; i < vertices.size(); ++i)
   // {
   //   fprintf(stderr, "%f, ", vertices[i]);
@@ -244,28 +266,42 @@ void GraphicModel::InitModelData() {
   glBufferData(GL_ARRAY_BUFFER, 
                sizeof(float) * this->texture_mapping_size(),
                &this->texture_mapping[0], GL_STATIC_DRAW);
-  glTexCoordPointer(2, GL_FLOAT, 0, (void*)0);
+  // glTexCoordPointer(2, GL_FLOAT, 0, (void*)0);
+
+
 }
 
-void GraphicModel::DrawModel(int draw_parameter) {
+void GraphicModel::DrawModel(int draw_parameter, int shader_id) {
   glEnable(GL_DEPTH_TEST);
   glClearColor(0,0,0,0);
   // ============ Enable states=================
   // glClientActiveTexture(GL_TEXTURE0);
   glEnableClientState(GL_VERTEX_ARRAY);
   glEnableClientState(GL_NORMAL_ARRAY);
-  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+  // glEnableClientState(GL_TEXTURE_COORD_ARRAY);
   glEnable(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, 1);
   // ==========================================
   // 
-  
+  int attribute_texcoord = glGetAttribLocation(shader_id, "texcoord");
+  glEnableVertexAttribArray(attribute_texcoord);
+  glVertexAttribPointer(
+    attribute_texcoord, // attribute
+    2,                  // number of elements per vertex, here (x,y)
+    GL_FLOAT,           // the type of each element
+    GL_FALSE,           // take our values as-is
+    0,                  // no extra data between each position
+    0                   // offset of first element
+  );
+
   
   //this->faces_size()
   for (int i = 0; i < 1; i ++) {
 //    glNormal3fv(&vnormal[this->vnormal_idx[i * 3]]);\
     //(int) this->faces_draw_size()
-    glDrawElements(GL_QUADS, (int) this->faces_draw_size(), GL_UNSIGNED_INT, (void*)(i * 4 * 4) );
+    // glTexCoord2fv(&this->texture_mapping[i * 4 * 2 + 0]);
+    glDrawElements(GL_QUADS, (int) this->faces_draw_size() ,
+                  GL_UNSIGNED_INT, (void*)(i * 4 * 4)  );
     //fprintf(stderr, "model drawed\n");
   }
   printf("Drawed model, faces:%d\n", this->faces_draw_size());
@@ -274,11 +310,12 @@ void GraphicModel::DrawModel(int draw_parameter) {
  // ==============Disable States===============
   glDisableClientState(GL_VERTEX_ARRAY);
   glDisableClientState(GL_NORMAL_ARRAY);
-  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+  // glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+  glDisableVertexAttribArray(attribute_texcoord);
   glDisable(GL_TEXTURE_2D);
  // ===========================================
 
-   if (draw_parameter){
+  if (draw_parameter){
    glUseProgram(0);
    glDisable(GL_LIGHTING);
    glClearColor(0,0,0,0);
@@ -297,5 +334,5 @@ void GraphicModel::DrawModel(int draw_parameter) {
    
 
    glEnable(GL_LIGHTING);
- }
+  }
 }

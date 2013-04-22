@@ -4,13 +4,17 @@ varying vec3 ec_vnormal, ec_vposition;
 //Attenuation
 varying float attent0, attent1, attent2;
 varying vec3 light_dir0, light_dir1, light_dir2;
+// Texture coordinate for this vertex
+attribute vec2 texcoord;
 
 void main() {
   // gl_NormalMatrix is inverse transpose model-view matrix
   ec_vnormal = gl_NormalMatrix * gl_Normal;
   ec_vposition = gl_ModelViewMatrix * gl_Vertex;
   gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * gl_Vertex;
-  
+  gl_TexCoord[0].x = texcoord.x;
+  gl_TexCoord[0].y = texcoord.y;
+
   light_dir0 = vec3(gl_LightSource[0].position.xyz - ec_vposition);
   float dis0 = length(light_dir0);
   attent0 = 1.0 / (gl_LightSource[0].constantAttenuation +

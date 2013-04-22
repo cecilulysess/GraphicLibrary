@@ -2,8 +2,11 @@ varying vec3 ec_vnormal, ec_vposition;
 uniform int LtSwitch;
 varying float attent0, attent1, attent2;
 varying vec3 light_dir0, light_dir1, light_dir2;
+uniform sampler2D mytexture;
 
 void main() {
+  vec2 flipped_texcoord = vec2(gl_TexCoord[0].x, 1.0 - gl_TexCoord[0].y);
+
   vec3 P, N, L0, L1, L2, V, H0, H1, H2;
   vec4 diffuse_color = gl_FrontMaterial.diffuse;
   vec4 specular_color = gl_FrontMaterial.specular;
@@ -13,6 +16,13 @@ void main() {
     + (gl_LightSource[1].ambient * gl_FrontMaterial.ambient) * attent1
     + (gl_LightSource[2].ambient * gl_FrontMaterial.ambient) * attent2;
   float shininess = gl_FrontMaterial.shininess;
+
+
+  //-------------handling texture---------------
+  vec3 tcolor;
+  tcolor = vec3(texture2D(mytexture, flipped_texcoord));
+  diffuse_color = 0.5 * diffuse_color + 0.5 *vec4(tcolor, 1.0);
+  //============================================
 
   P = ec_vposition;
   N = normalize(ec_vnormal);
@@ -56,6 +66,7 @@ void main() {
     
   diffuse_color = diff_c0 + diff_c1 + diff_c2 ;
   specular_color = spec_c0 + spec_c1 + spec_c2 ;
+
   gl_FragColor =  diffuse_color;
   gl_FragColor += specular_color;
   gl_FragColor += ambient_color;

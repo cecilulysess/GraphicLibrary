@@ -55,7 +55,6 @@ GLuint LightSwitch = 0x7;
 GraphicModel *model;
 GraphicCamera::GraphicCamera *camera;
 
-std::vector<GLuint> shaders;
 GLuint selected_shader_id = 0;
 
 GLfloat* vertices;
@@ -145,15 +144,19 @@ void draw_stuff(){
     GraphicUtilities::GraphicUtilities::DrawGrid(10, 1);
   
 
- glUseProgram(selected_shader_id);
- if (selected_shader_id) {
+  glUseProgram(selected_shader_id);
+  if (selected_shader_id) {
    // if not using fixed shading
    GLint light_switch_loc = glGetUniformLocation(
                          selected_shader_id, "LtSwitch");
    glUniform1i(light_switch_loc, LightSwitch); 
- }
- model->DrawModel((int) DrawNormal);
- printf("Using shader %d\n", selected_shader_id);
+  }
+
+  int location = glGetUniformLocation(selected_shader_id, "mytexture");
+  glUniform1i(location, 0);
+  
+  model->DrawModel((int) DrawNormal, selected_shader_id);
+  printf("Using shader %d\n", selected_shader_id);
 //  glUseProgram(0);
 //  glEnableClientState(GL_VERTEX_ARRAY); 
 //  glEnableClientState(GL_NORMAL_ARRAY);
@@ -170,12 +173,12 @@ void draw_stuff(){
 //  glTranslated(0.15, 0, -0.3);
 //  glRotated(45, 0, 1, 0);
 //  glDrawArrays(GL_TRIANGLES, 0, 3 * faces_length);
-//  glPopMatrix();
-//  glPushMatrix();
-//  glTranslated(-0.3, 0, -0.3);
-//  glScalef(0.1,0.1,0.1);
-//  glutSolidTeapot (0.5);
-//  glPopMatrix();
+ glPopMatrix();
+ glPushMatrix();
+ glTranslated(-2, 0, -1);
+ glScalef(0.1,0.1,0.1);
+ glutSolidTeapot (0.5);
+ glPopMatrix();
   /*for (i = 0; i < faces_length; ++i) {
     glNormal3fv(&normal[i]);
     glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (void*)(3 * i) );
@@ -303,7 +306,7 @@ bool LinkSuccessful(int obj) {
   return status == GL_TRUE;
 }
 // set up shaders for using GLSL. This version only load one shader
-void SetShadersOrDie(std::vector<GLuint>& shaders, const char* vshader,
+void SetShadersOrDie(GLuint &shader, const char* vshader,
                      const char* fshader){
   printf("Loading Vertex Shader: %s\nLoading Fragment Shader: %s\n",
           vshader, fshader);
@@ -345,7 +348,7 @@ void SetShadersOrDie(std::vector<GLuint>& shaders, const char* vshader,
   assert(LinkSuccessful(p));
   //glLinkProgram(bp);
   //assert(LinkSuccessful(bp));
-  shaders.push_back(p);
+  shader = p;
   //shaders.push_back(bp);
   glUseProgram(p);
   selected_shader_id = p;
@@ -357,7 +360,7 @@ void SetShadersOrDie(std::vector<GLuint>& shaders, const char* vshader,
 void init(const char* model_path, const char* vshader_path, 
     const char* fshader_path) {
   
-  model->InitModelData();
+  
   camera = new GraphicCamera::GraphicCamera(Vec3d(0, 2, 4),
                                             Vec3d(0, 1, 0),
             Vec3d(0, 1 , 0), 0.02, 20, 60, focus);
@@ -367,8 +370,8 @@ void init(const char* model_path, const char* vshader_path,
 
   
   //load_object(model_path);
-  SetShadersOrDie(shaders, vshader_path, fshader_path);
-  
+  SetShadersOrDie(selected_shader_id, vshader_path, fshader_path);
+  model->InitModelData(selected_shader_id);
   /*glBindBuffer(GL_ARRAY_BUFFER, mybuf[0]);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
   
@@ -547,6 +550,7 @@ int main(int argc, char* argv[]){
   model = new GraphicModel();
   model->LoadObject(argv[3]);
   load_texture("sign2.ppm");
+
   // initialize the camera and such
   init(argv[3], argv[1], argv[2]);
   
