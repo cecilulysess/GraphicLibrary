@@ -234,20 +234,23 @@ bool GraphicModel::LoadObject(char *file) {
 
     this->texture_mapping.push_back(text_map_ori[texture_idx[i] * 2]);
     this->texture_mapping.push_back(text_map_ori[texture_idx[i] * 2 + 1]);
-
-    this->tangent.push_back(vtan[vnormal_idx[i] * 3 + 0]);
-    this->tangent.push_back(vtan[vnormal_idx[i] * 3 + 1]);
-    this->tangent.push_back(vtan[vnormal_idx[i] * 3 + 2]);
-    this->bitangent.push_back(vbitan[vnormal_idx[i] * 3 + 0]);
-    this->bitangent.push_back(vbitan[vnormal_idx[i] * 3 + 1]);
-    this->bitangent.push_back(vbitan[vnormal_idx[i] * 3 + 2]);
+    if (vtan.size() > 0) {
+      this->tangent.push_back(vtan[vnormal_idx[i] * 3 + 0]);
+      this->tangent.push_back(vtan[vnormal_idx[i] * 3 + 1]);
+      this->tangent.push_back(vtan[vnormal_idx[i] * 3 + 2]);
+      this->bitangent.push_back(vbitan[vnormal_idx[i] * 3 + 0]);
+      this->bitangent.push_back(vbitan[vnormal_idx[i] * 3 + 1]);
+      this->bitangent.push_back(vbitan[vnormal_idx[i] * 3 + 2]);
+    }
   }
 
   assert(this->vertices.size() == 3 * faces.size());
   assert(this->vnormal.size() == 3 * faces.size());
   assert(this->texture_mapping.size() == 2 * faces.size());
-  assert(this->tangent.size() == 3 * faces.size());
-  assert(this->bitangent.size() == 3 * faces.size());
+  if (vtan.size() > 0) {
+    assert(this->tangent.size() == 3 * faces.size());
+    assert(this->bitangent.size() == 3 * faces.size());
+  }
   printf("Totally %d Texture normal after process\n", this->tangent.size()/3);
   int idx = faces.size();
   faces.clear();
@@ -267,14 +270,16 @@ GraphicModel::GraphicModel(){
 
 
 void GraphicModel::InitModelData(int shader_id) {
-
+  fprintf(stderr, "Binding buff using %d %d %d %d %d %d\n", GL_draw_buffer_id[0],
+    GL_draw_buffer_id[1],GL_draw_buffer_id[2], GL_draw_buffer_id[3],
+    GL_draw_buffer_id[4], GL_draw_buffer_id[5]);
+  
   //bind vertex array
   glBindBuffer(GL_ARRAY_BUFFER, GL_draw_buffer_id[0]);
   
   glBufferData(GL_ARRAY_BUFFER, sizeof(float) * this->vertices.size(),
                &this->vertices[0], GL_STATIC_DRAW);
   GLShortCut::PrintGLErrors(__FILE__, __LINE__);
-  
   glVertexPointer(vertice_size, GL_FLOAT, 3 * sizeof(float), (void*)0);
   // bind face index array
   
@@ -342,16 +347,20 @@ void GraphicModel::DrawModel(int draw_parameter, int shader_id) {
   //   0,                  // no extra data between each position
   //   0                   // offset of first element
   // );
-
-  int location = glGetUniformLocation(shader_id, "mytexture");
-  glUniform1i(location, 0);
-  location = glGetUniformLocation(shader_id, "mynormalmap");
-  glUniform1i(location, 1);
   int idx_tan = glGetAttribLocation(shader_id, "tangent");
   int idx_bitan = glGetAttribLocation(shader_id, "bitangent");
-  glEnableVertexAttribArray(idx_tan);
-  glEnableVertexAttribArray(idx_bitan);
-
+  int location = glGetUniformLocation(shader_id, "mytexture");
+  glUniform1i(location, 0);
+  if (has_normalmap()) {
+    location = glGetUniformLocation(shader_id, "mynormalmap");
+    glUniform1i(location, 1);
+    glEnableVertexAttribArray(idx_tan);
+    glEnableVertexAttribArray(idx_bitan);
+  } else {
+    int normalcontrol = glGetUniformLocation(shader_id, "IsNormalMap");
+    glUniform1i(normalcontrol, 0);
+  }
+  fprintf(stderr, "!!!!!!!!!!!!!!!Pass here\n");
   
   //this->faces_size()
   for (int i = 0; i < 1; i ++) {
@@ -369,8 +378,10 @@ void GraphicModel::DrawModel(int draw_parameter, int shader_id) {
   glDisableClientState(GL_VERTEX_ARRAY);
   glDisableClientState(GL_NORMAL_ARRAY);
   glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-  glDisableVertexAttribArray(idx_bitan);
-  glDisableVertexAttribArray(idx_tan);
+  if (has_normalmap()) {
+    glDisableVertexAttribArray(idx_bitan);
+    glDisableVertexAttribArray(idx_tan);
+  }
   // glDisableVertexAttribArray(attribute_texcoord);
   glDisable(GL_TEXTURE_2D);
  // ===========================================

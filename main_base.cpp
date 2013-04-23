@@ -53,6 +53,7 @@ GLuint LightSwitch = 0x7;
 
 
 GraphicModel *model;
+GraphicModel *ground;
 GraphicCamera::GraphicCamera *camera;
 
 GLuint selected_shader_id = 0;
@@ -125,12 +126,9 @@ void SwitchLight(){
 void draw_stuff(){
   SwitchLight();
   glEnable(GL_DEPTH_TEST);
-  glUseProgram(0);
+  // glUseProgram(0);
   glClearColor(0.4, 0.4, 0.4, 0);
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-  if (IsDrawGrid)
-    GraphicUtilities::GraphicUtilities::DrawGrid(10, 1);
-  
 
   glUseProgram(selected_shader_id);
   if (selected_shader_id) {
@@ -140,11 +138,10 @@ void draw_stuff(){
    glUniform1i(light_switch_loc, LightSwitch); 
   }
 
-  int location = glGetUniformLocation(selected_shader_id, "mytexture");
-  glUniform1i(location, 0);
-  location = glGetUniformLocation(selected_shader_id, "mynormalmap");
-  glUniform1i(location, 1);
+
   model->DrawModel((int) DrawNormal, selected_shader_id);
+  
+  // ground->DrawModel((int) DrawNormal, selected_shader_id);
   printf("Using shader %d\n", selected_shader_id);
 //  glUseProgram(0);
 //  glEnableClientState(GL_VERTEX_ARRAY); 
@@ -344,6 +341,8 @@ void init(const char* model_path, const char* vshader_path,
   do_lights();
   SetShadersOrDie(selected_shader_id, vshader_path, fshader_path);
   model->InitModelData(selected_shader_id);
+  ground->InitModelData(selected_shader_id);
+  
   /*glBindBuffer(GL_ARRAY_BUFFER, mybuf[0]);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
   
@@ -493,8 +492,8 @@ int main(int argc, char* argv[]){
   test_Vector();
   test_Matrix();
 #endif
-  if(argc != 4){
-    fprintf(stderr, "usage: show_bunny vertex_shader frag_shader object.ply\n");
+  if(argc != 5){
+    fprintf(stderr, "usage: show_bunny vertex_shader frag_shader model1.obj model2.obj\n");
     exit(1);
   }
   
@@ -518,7 +517,9 @@ int main(int argc, char* argv[]){
   glutCreateWindow("Golden Bunny");
   
   model = new GraphicModel();
+  ground = new GraphicModel();
   model->LoadObject(argv[3]);
+  ground->LoadObject(argv[4]);
 
   // initialize the camera and such
   init(argv[3], argv[1], argv[2]);

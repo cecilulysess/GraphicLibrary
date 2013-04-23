@@ -1,5 +1,5 @@
 varying vec3 ec_vnormal, ec_vposition, ec_vtangent, ec_vbitangent;
-uniform int LtSwitch;
+uniform int LtSwitch, IsNormalMap;
 varying float attent0, attent1, attent2;
 varying vec3 light_dir0, light_dir1, light_dir2;
 uniform sampler2D mytexture;
@@ -7,7 +7,7 @@ uniform sampler2D mynormalmap;
 
 void main() {
   vec2 flipped_texcoord = vec2(gl_TexCoord[0].x, 1.0 - gl_TexCoord[0].y);
-  mat3 tform = mat3(ec_vtangent, ec_vbitangent, ec_vnormal); 
+  
   vec3 P, N, L0, L1, L2, V, H0, H1, H2, mapN, tcolor;
   vec4 diffuse_color = gl_FrontMaterial.diffuse;
   vec4 specular_color = gl_FrontMaterial.specular;
@@ -28,13 +28,16 @@ void main() {
   H1 = normalize(L1 + V);
   H2 = normalize(L2 + V);
 
-
-  //---------------handling normal map-----------
-  mapN = vec3(texture2D(mynormalmap, flipped_texcoord));
-  mapN.xy = 2.0 * mapN.xy - vec2(1.0, 1.0);
-  N = normalize(tform * normalize(mapN));
-  //=============================================
-
+  if (IsNormalMap) {
+    mat3 tform = mat3(ec_vtangent, ec_vbitangent, ec_vnormal); 
+    //---------------handling normal map-----------
+    mapN = vec3(texture2D(mynormalmap, flipped_texcoord));
+    mapN.xy = 2.0 * mapN.xy - vec2(1.0, 1.0);
+    N = normalize(tform * normalize(mapN));
+    //=============================================
+  } else {
+    N = normalize(ec_vnormal);
+  }
   //-------------handling texture---------------
   tcolor = vec3(texture2D(mytexture, flipped_texcoord));
   diffuse_color = vec4(tcolor, 1.0);

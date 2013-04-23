@@ -67,7 +67,7 @@ public:
 
   bool has_vnormal() const {return this->vnormal_idx.size() > 0; }
   bool has_texture() const {return this->texture_idx.size() > 0; }
-  
+  bool has_normalmap() const {return this->tangent.size() > 0;}
 private:
   bool LoadMaterial(char *file);
 
