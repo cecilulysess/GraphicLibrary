@@ -142,7 +142,8 @@ void draw_stuff(){
 
   int location = glGetUniformLocation(selected_shader_id, "mytexture");
   glUniform1i(location, 0);
-  
+  location = glGetUniformLocation(selected_shader_id, "mynormalmap");
+  glUniform1i(location, 1);
   model->DrawModel((int) DrawNormal, selected_shader_id);
   printf("Using shader %d\n", selected_shader_id);
 //  glUseProgram(0);
@@ -161,12 +162,12 @@ void draw_stuff(){
 //  glTranslated(0.15, 0, -0.3);
 //  glRotated(45, 0, 1, 0);
 //  glDrawArrays(GL_TRIANGLES, 0, 3 * faces_length);
- glPopMatrix();
- glPushMatrix();
- glTranslated(-2, 0, -1);
- glScalef(0.1,0.1,0.1);
- glutSolidTeapot (0.5);
- glPopMatrix();
+ // glPopMatrix();
+ // glPushMatrix();
+ // glTranslated(-2, 0, -1);
+ // glScalef(0.1,0.1,0.1);
+ // glutSolidTeapot (0.5);
+ // glPopMatrix();
   /*for (i = 0; i < faces_length; ++i) {
     glNormal3fv(&normal[i]);
     glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (void*)(3 * i) );
@@ -245,19 +246,6 @@ void do_lights(){
 
   glEnable(GL_LIGHTING);
   
-}
-
-void do_material(){
-
-  float mat_ambient[] = {0.0, 0.0, 0.0, 0.0};
-  float mat_diffuse[] = {1.0, 1.0, 1.0, 1.0};
-  float mat_specular[] = {0.15, 0.15, 0.15, 1};
-  float mat_shininess[] = {shininess};
-  
-  glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
-  glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
-  glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
-  glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
 }
 
 unsigned int mybuf[2] = { 1, 2 };
@@ -354,10 +342,6 @@ void init(const char* model_path, const char* vshader_path,
             Vec3d(0, 1 , 0), 0.02, 20, 60, focus);
   camera->PerspectiveDisplay(WIDTH, HEIGHT);
   do_lights();
-  // do_material();
-
-  
-  //load_object(model_path);
   SetShadersOrDie(selected_shader_id, vshader_path, fshader_path);
   model->InitModelData(selected_shader_id);
   /*glBindBuffer(GL_ARRAY_BUFFER, mybuf[0]);
@@ -528,16 +512,13 @@ int main(int argc, char* argv[]){
   // Julian: Add GLUT_DEPTH when in 3D program so that 3D objects drawed
   // correctly regardless the order they draw
   glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH |
-                       GLUT_DOUBLE |GLUT_ACCUM ); // | GLUT_ACCUM |
-                       //GLUT_MULTISAMPLE );
-  // glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH );
+                       GLUT_DOUBLE |GLUT_ACCUM );
   glutInitWindowSize(WIDTH, HEIGHT);
   //  glutInitWindowPosition(50, 50);
   glutCreateWindow("Golden Bunny");
   
   model = new GraphicModel();
   model->LoadObject(argv[3]);
-  // load_texture("iss.ppm");
 
   // initialize the camera and such
   init(argv[3], argv[1], argv[2]);
@@ -553,11 +534,6 @@ int main(int argc, char* argv[]){
   glutIdleFunc(Redraw);
   
   glutMainLoop();
-  /* Set shading to flat shading */
-  //  glShadeModel(GL_FLAT);
-  
-  //  MakeMenu();
-  
   // Routine that loops forever looking for events. It calls the registered
   // callback routine to handle each event that is detected
   return 0;

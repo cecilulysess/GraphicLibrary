@@ -1,13 +1,14 @@
-varying vec3 ec_vnormal, ec_vposition;
+varying vec3 ec_vnormal, ec_vposition, ec_vtangent, ec_vbitangent;
 uniform int LtSwitch;
 varying float attent0, attent1, attent2;
 varying vec3 light_dir0, light_dir1, light_dir2;
 uniform sampler2D mytexture;
+uniform sampler2D mynormalmap;
 
 void main() {
   vec2 flipped_texcoord = vec2(gl_TexCoord[0].x, 1.0 - gl_TexCoord[0].y);
-
-  vec3 P, N, L0, L1, L2, V, H0, H1, H2;
+  mat3 tform = mat3(ec_vtangent, ec_vbitangent, ec_vnormal); 
+  vec3 P, N, L0, L1, L2, V, H0, H1, H2, mapN, tcolor;
   vec4 diffuse_color = gl_FrontMaterial.diffuse;
   vec4 specular_color = gl_FrontMaterial.specular;
   vec4 ambient_color = 
@@ -17,15 +18,8 @@ void main() {
     + (gl_LightSource[2].ambient * gl_FrontMaterial.ambient) * attent2;
   float shininess = gl_FrontMaterial.shininess;
 
-
-  //-------------handling texture---------------
-  vec3 tcolor;
-  tcolor = vec3(texture2D(mytexture, flipped_texcoord));
-  diffuse_color = 0.5 * diffuse_color + 0.5 *vec4(tcolor, 1.0);
-  //============================================
-
   P = ec_vposition;
-  N = normalize(ec_vnormal);
+  //N = normalize(ec_vnormal);
   L0 = normalize(gl_LightSource[0].position - P);
   L1 = normalize(gl_LightSource[1].position - P);
   L2 = normalize(gl_LightSource[2].position - P);
@@ -33,6 +27,22 @@ void main() {
   H0 = normalize(L0 + V);
   H1 = normalize(L1 + V);
   H2 = normalize(L2 + V);
+
+
+  //---------------handling normal map-----------
+  mapN = vec3(texture2D(mynormalmap, flipped_texcoord));
+  mapN.xy = 2.0 * mapN.xy - vec2(1.0, 1.0);
+  N = normalize(tform * normalize(mapN));
+  //=============================================
+
+  //-------------handling texture---------------
+  tcolor = vec3(texture2D(mytexture, flipped_texcoord));
+  diffuse_color = vec4(tcolor, 1.0);
+  // diffuse_color = 0.5 * diffuse_color + 0.5 *vec4(tcolor, 1.0);
+  // diffuse_color *= max(dot(N, L0), 0.0);
+  //============================================
+
+  
 
   vec4 diff_c0 = diffuse_color ;
   vec4 diff_c1 = diff_c0, diff_c2 = diff_c0;

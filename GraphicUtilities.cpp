@@ -384,8 +384,7 @@ bool GraphicUtilities::LoadTexture(char *filename, GLuint &texture){
   texture_bytes = (unsigned char *) calloc(3, im_size);
   fread(texture_bytes, 3, im_size, fptr);
   fclose(fptr);
-
-  // glActiveTexture(GL_TEXTURE0);
+  
   glBindTexture(GL_TEXTURE_2D, texture /*SetCurrentTexture id*/);
   glTexImage2D(GL_TEXTURE_2D, 
     0, // Mipmap level

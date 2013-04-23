@@ -73,7 +73,9 @@ private:
 
   int face_size ;
   int vertice_size;
-  unsigned int GL_draw_buffer_id[4];
+  // vertex position in 0, face vertice idx in 1, vertex normal in 2, texture uv in 3
+  // vertex tangent in 4, vertex bitangent in 5
+  unsigned int GL_draw_buffer_id[6];
   //texture at 0, normal map at 1
   unsigned int GL_texture_id[2];
 
@@ -81,7 +83,7 @@ private:
   vector<float> vertices;
   vector<float> vnormal;
   vector<float> texture_mapping;
-  vector<float> tengent, bitengent;
+  vector<float> tangent, bitangent;
   vector<unsigned int>  faces;
   vector<unsigned int> vnormal_idx;
   vector<unsigned int> texture_idx;

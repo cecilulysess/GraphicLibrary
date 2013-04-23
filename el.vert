@@ -1,16 +1,18 @@
 uniform vec3 eye_pos;
 uniform int L0Switch;
-varying vec3 ec_vnormal, ec_vposition;
+varying vec3 ec_vnormal, ec_vposition, ec_vtangent, ec_vbitangent;
 //Attenuation
 varying float attent0, attent1, attent2;
 varying vec3 light_dir0, light_dir1, light_dir2;
 // Texture coordinate for this vertex
-attribute vec2 texcoord;
+attribute vec3 tangent, bitangent;
 
 void main() {
   // gl_NormalMatrix is inverse transpose model-view matrix
   ec_vnormal = gl_NormalMatrix * gl_Normal;
   ec_vposition = gl_ModelViewMatrix * gl_Vertex;
+  ec_vtangent = gl_NormalMatrix * tangent;
+  ec_vbitangent = gl_NormalMatrix * bitangent;
   gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * gl_Vertex;
   gl_TexCoord[0] = gl_MultiTexCoord0;
 
