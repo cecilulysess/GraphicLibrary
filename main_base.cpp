@@ -52,8 +52,7 @@ float l0brightness = 1.2;
 GLuint LightSwitch = 0x7;
 
 
-GraphicModel *model;
-GraphicModel *ground;
+GraphicModel *model, *ground, *skydome;
 GraphicCamera::GraphicCamera *camera;
 
 GLuint selected_shader_id = 0;
@@ -67,37 +66,6 @@ int normal_length;
 GLuint vertices_normal_length;
 GLfloat* vertices_normal;
 
-void load_texture(char *filename) {
-  FILE *fptr;
-  char buf[512], *parse;
-  int im_size, im_width, im_height, max_color;
-  unsigned char *texture_bytes;
-
-  fptr = fopen(filename, "r");
-  fgets(buf, 512, fptr);
-
-  do {
-    fgets(buf, 512, fptr);
-  } while(buf[0] == '#' || buf[0] == '\n');
-  sscanf(buf, "%d %d", &im_width, &im_height);
-  fgets(buf, 512, fptr);
-  im_size = im_width * im_height;
-  texture_bytes = (unsigned char *) calloc(3, im_size);
-  fread(texture_bytes, 3, im_size, fptr);
-  fclose(fptr);
-
-  // glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, 1 /*SetCurrentTexture id*/);
-  glTexImage2D(GL_TEXTURE_2D, 
-    0, // Mipmap level
-    GL_RGB, im_width, im_height, 0/* border size */, GL_RGB,
-    GL_UNSIGNED_BYTE, texture_bytes);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-  free(texture_bytes);
-  printf("Finished load texture: %s\n", filename);
-}
 
 void SwitchLight(){
   if (IsFillLight) {
@@ -123,54 +91,7 @@ void SwitchLight(){
   }
 }
 
-void draw_stuff(){
-  SwitchLight();
-  glEnable(GL_DEPTH_TEST);
-  // glUseProgram(0);
-  glClearColor(0.4, 0.4, 0.4, 0);
-  glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-  glUseProgram(selected_shader_id);
-  if (selected_shader_id) {
-   // if not using fixed shading
-   GLint light_switch_loc = glGetUniformLocation(
-                         selected_shader_id, "LtSwitch");
-   glUniform1i(light_switch_loc, LightSwitch); 
-  }
-
-
-  model->DrawModel((int) DrawNormal, selected_shader_id);
-
-  ground->DrawModel((int) DrawNormal, selected_shader_id);
-  printf("Using shader %d\n", selected_shader_id);
-//  glUseProgram(0);
-//  glEnableClientState(GL_VERTEX_ARRAY); 
-//  glEnableClientState(GL_NORMAL_ARRAY);
-//  //glScalef(10, 10, 10);
-//  glVertexPointer(3,GL_FLOAT, 3 * sizeof(GLfloat), vertices); 
-//  glNormalPointer(GL_FLOAT, 3 * sizeof(GLfloat), vertices_normal);
-//  //for (int i = 0; i < faces_length; ++i) {
-//    //glNormal3fv(&normal[i * 3]);    
-//  //  glDrawArrays(GL_TRIANGLES, 3 * i, 3); 
-//  //} 
-//  glDrawArrays(GL_TRIANGLES, 0, 3 * faces_length);
-//  
-//  glPushMatrix();
-//  glTranslated(0.15, 0, -0.3);
-//  glRotated(45, 0, 1, 0);
-//  glDrawArrays(GL_TRIANGLES, 0, 3 * faces_length);
- // glPopMatrix();
- // glPushMatrix();
- // glTranslated(-2, 0, -1);
- // glScalef(0.1,0.1,0.1);
- // glutSolidTeapot (0.5);
- // glPopMatrix();
-  /*for (i = 0; i < faces_length; ++i) {
-    glNormal3fv(&normal[i]);
-    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (void*)(3 * i) );
-  }
-  glFlush();*/
-}
 
 void do_lights(){
   // Light0 as key light
@@ -243,6 +164,55 @@ void do_lights(){
 
   glEnable(GL_LIGHTING);
   
+}
+void draw_stuff(){
+  SwitchLight();
+  glEnable(GL_DEPTH_TEST);
+  // glUseProgram(0);
+  glClearColor(0.4, 0.4, 0.4, 0);
+  glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+  do_lights();
+  glUseProgram(selected_shader_id);
+  if (selected_shader_id) {
+   // if not using fixed shading
+   GLint light_switch_loc = glGetUniformLocation(
+                         selected_shader_id, "LtSwitch");
+   glUniform1i(light_switch_loc, LightSwitch); 
+  }
+
+
+  model->DrawModel((int) DrawNormal, selected_shader_id);
+
+  ground->DrawModel((int) DrawNormal, selected_shader_id);
+  skydome->DrawModel((int) DrawNormal, selected_shader_id);
+  printf("Using shader %d\n", selected_shader_id);
+//  glUseProgram(0);
+//  glEnableClientState(GL_VERTEX_ARRAY); 
+//  glEnableClientState(GL_NORMAL_ARRAY);
+//  //glScalef(10, 10, 10);
+//  glVertexPointer(3,GL_FLOAT, 3 * sizeof(GLfloat), vertices); 
+//  glNormalPointer(GL_FLOAT, 3 * sizeof(GLfloat), vertices_normal);
+//  //for (int i = 0; i < faces_length; ++i) {
+//    //glNormal3fv(&normal[i * 3]);    
+//  //  glDrawArrays(GL_TRIANGLES, 3 * i, 3); 
+//  //} 
+//  glDrawArrays(GL_TRIANGLES, 0, 3 * faces_length);
+//  
+//  glPushMatrix();
+//  glTranslated(0.15, 0, -0.3);
+//  glRotated(45, 0, 1, 0);
+//  glDrawArrays(GL_TRIANGLES, 0, 3 * faces_length);
+ // glPopMatrix();
+ // glPushMatrix();
+ // glTranslated(-2, 0, -1);
+ // glScalef(0.1,0.1,0.1);
+ // glutSolidTeapot (0.5);
+ // glPopMatrix();
+  /*for (i = 0; i < faces_length; ++i) {
+    glNormal3fv(&normal[i]);
+    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (void*)(3 * i) );
+  }
+  glFlush();*/
 }
 
 unsigned int mybuf[2] = { 1, 2 };
@@ -342,7 +312,7 @@ void init(const char* model_path, const char* vshader_path,
   SetShadersOrDie(selected_shader_id, vshader_path, fshader_path);
   model->InitModelData(selected_shader_id);
   ground->InitModelData(selected_shader_id);
-  
+  skydome->InitModelData(selected_shader_id);
   /*glBindBuffer(GL_ARRAY_BUFFER, mybuf[0]);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
   
@@ -492,8 +462,8 @@ int main(int argc, char* argv[]){
   test_Vector();
   test_Matrix();
 #endif
-  if(argc != 5){
-    fprintf(stderr, "usage: show_bunny vertex_shader frag_shader model1.obj model2.obj\n");
+  if(argc != 6){
+    fprintf(stderr, "usage: show_bunny vertex_shader frag_shader model1.obj model2.obj sky.obj\n");
     exit(1);
   }
   
@@ -518,8 +488,10 @@ int main(int argc, char* argv[]){
   
   model = new GraphicModel(0);
   ground = new GraphicModel(2);
+  skydome = new GraphicModel(4);
   model->LoadObject(argv[3]);
   ground->LoadObject(argv[4]);
+  skydome->LoadObject(argv[5]);
 
   // initialize the camera and such
   init(argv[3], argv[1], argv[2]);

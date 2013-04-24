@@ -4,6 +4,6 @@ Ka 0.00 0.00 0.00
 Kd 1.00 0.80 0.70
 Ks 0.15 0.15 0.15
 Ns 60.0
-map_Kd iss.ppm
+map_Kd iss2.ppm
 map_normal mar.ppm
 
