@@ -77,7 +77,7 @@ bool GraphicModel::LoadMaterial(char *file){
       char texturefile[255];
       sscanf(buff, "map_Kd %s", texturefile);
       printf("Load Material from:%s\n", texturefile);
-      glActiveTexture( GL_TEXTURE0 );
+      glActiveTexture( GL_TEXTURE0 + this->texture_unit );
       assert(
         GraphicUtilities::GraphicUtilities::LoadTexture(
           texturefile, GL_texture_id[0]) );
@@ -86,7 +86,7 @@ bool GraphicModel::LoadMaterial(char *file){
       char normalfile[255];
       sscanf(buff, "map_normal %s", normalfile);
       printf("Load Normal from:%s\n", normalfile);
-      glActiveTexture( GL_TEXTURE1 );
+      glActiveTexture( GL_TEXTURE0 + this->texture_unit + 1);
       assert(
         GraphicUtilities::GraphicUtilities::LoadTexture(
           normalfile, GL_texture_id[1]) );
@@ -261,11 +261,12 @@ bool GraphicModel::LoadObject(char *file) {
   
   return true;
 }
-GraphicModel::GraphicModel(){
+GraphicModel::GraphicModel(int texture_unit){
   glGenBuffers(6, GL_draw_buffer_id);
   glGenTextures(2, GL_texture_id);
   this->face_size = 4;
   this->vertice_size = 3;
+  this->texture_unit = texture_unit;
 }
 
 
@@ -274,6 +275,13 @@ void GraphicModel::InitModelData(int shader_id) {
     GL_draw_buffer_id[1],GL_draw_buffer_id[2], GL_draw_buffer_id[3],
     GL_draw_buffer_id[4], GL_draw_buffer_id[5]);
   
+  // glGenVertexArrays(1, GL_VAO_id);
+  // glBindVertexArray(GL_VAO_id[0]);
+
+  // glBindBuffer(GL_ARRAY_BUFFER, GL_draw_buffer_id[0]);
+  // glEnableClientState(GL_VERTEX_ARRAY);
+
+
   //bind vertex array
   glBindBuffer(GL_ARRAY_BUFFER, GL_draw_buffer_id[0]);
   
@@ -333,32 +341,36 @@ void GraphicModel::DrawModel(int draw_parameter, int shader_id) {
   glEnableClientState(GL_NORMAL_ARRAY);
   glEnableClientState(GL_TEXTURE_COORD_ARRAY);
   glEnable(GL_TEXTURE_2D);
-  // glBindTexture(GL_TEXTURE_2D, GL_texture_id[0]);
-  // glBindTexture(GL_TEXTURE_2D, GL_texture_id[1]);
-  // ==========================================
-  // 
-  // int attribute_texcoord = glGetAttribLocation(shader_id, "texcoord");
-  // glEnableVertexAttribArray(attribute_texcoord);
-  // glVertexAttribPointer(
-  //   attribute_texcoord, // attribute
-  //   2,                  // number of elements per vertex, here (x,y)
-  //   GL_FLOAT,           // the type of each element
-  //   GL_FALSE,           // take our values as-is
-  //   0,                  // no extra data between each position
-  //   0                   // offset of first element
-  // );
+  glBindBuffer(GL_ARRAY_BUFFER, GL_draw_buffer_id[0]);
+  glVertexPointer(vertice_size, GL_FLOAT, 3 * sizeof(float), (void*)0);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_draw_buffer_id[1]);
+  glBindBuffer(GL_ARRAY_BUFFER, GL_draw_buffer_id[2]);
+  glNormalPointer( GL_FLOAT, 3 * sizeof(float), (void*)0);
+  glBindBuffer(GL_ARRAY_BUFFER, GL_draw_buffer_id[3]);
+  glTexCoordPointer(2, GL_FLOAT, 0, (void*)0);
   int idx_tan = glGetAttribLocation(shader_id, "tangent");
   int idx_bitan = glGetAttribLocation(shader_id, "bitangent");
+  int normalcontrol = glGetUniformLocation(shader_id, "IsNormalMap");
   int location = glGetUniformLocation(shader_id, "mytexture");
-  glUniform1i(location, 0);
+  
+  glUniform1i(location, this->texture_unit);
   if (has_normalmap()) {
+
+    glBindBuffer(GL_ARRAY_BUFFER, GL_draw_buffer_id[4]);
+    glBindBuffer(GL_ARRAY_BUFFER, GL_draw_buffer_id[5]);
+    glVertexAttribPointer(idx_tan, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    glVertexAttribPointer(idx_bitan, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
     location = glGetUniformLocation(shader_id, "mynormalmap");
-    glUniform1i(location, 1);
+    glUniform1i(location, this->texture_unit + 1);
     glEnableVertexAttribArray(idx_tan);
     glEnableVertexAttribArray(idx_bitan);
+    
+    glUniform1i(normalcontrol, 1);
+
+    fprintf(stderr, "\tWith Normal map\n");
   } else {
-    int normalcontrol = glGetUniformLocation(shader_id, "IsNormalMap");
-    glUniform1i(normalcontrol, 0);
+    glUniform1i(normalcontrol, 0 );
+    fprintf(stderr, "\tNo Normal map\n");
   }
   fprintf(stderr, "!!!!!!!!!!!!!!!Pass here\n");
   

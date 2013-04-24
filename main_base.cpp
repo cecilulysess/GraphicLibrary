@@ -140,8 +140,8 @@ void draw_stuff(){
 
 
   model->DrawModel((int) DrawNormal, selected_shader_id);
-  
-  // ground->DrawModel((int) DrawNormal, selected_shader_id);
+
+  ground->DrawModel((int) DrawNormal, selected_shader_id);
   printf("Using shader %d\n", selected_shader_id);
 //  glUseProgram(0);
 //  glEnableClientState(GL_VERTEX_ARRAY); 
@@ -516,8 +516,8 @@ int main(int argc, char* argv[]){
   //  glutInitWindowPosition(50, 50);
   glutCreateWindow("Golden Bunny");
   
-  model = new GraphicModel();
-  ground = new GraphicModel();
+  model = new GraphicModel(0);
+  ground = new GraphicModel(2);
   model->LoadObject(argv[3]);
   ground->LoadObject(argv[4]);
 
