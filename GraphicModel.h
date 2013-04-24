@@ -47,7 +47,7 @@ typedef struct Material{
 //        3. DrawModel within each frame
 class GraphicModel{
 public:
-  GraphicModel(int texture_unit); 
+  GraphicModel(int texture_unit, bool is_env_lighting); 
 
   // Load model from .obj file
   bool LoadObject(char* file);
@@ -68,6 +68,8 @@ public:
   bool has_vnormal() const {return this->vnormal_idx.size() > 0; }
   bool has_texture() const {return this->texture_idx.size() > 0; }
   bool has_normalmap() const {return this->tangent.size() > 0;}
+
+  static unsigned int env_lighting_texture_id;
 private:
   bool LoadMaterial(char *file);
 
@@ -81,6 +83,7 @@ private:
   unsigned int GL_texture_id[2];
 
   unsigned int GL_VAO_id[1];
+  bool is_env_lighting_map;
 
   // vertices, note that this is not the v from obj file
   vector<float> vertices;

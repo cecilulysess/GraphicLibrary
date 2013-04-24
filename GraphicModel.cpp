@@ -23,6 +23,8 @@ using GraphicUtilities::GLShortCut;
 using GraphicUtilities::GraphicUtilities;
 
 
+unsigned int GraphicModel::env_lighting_texture_id = 0;
+
 // validate that every normal was used
 bool validate_vnormal(vector<unsigned int> vn, int upper) {
   bool *tab = new bool[upper];
@@ -81,6 +83,9 @@ bool GraphicModel::LoadMaterial(char *file){
       assert(
         GraphicUtilities::GraphicUtilities::LoadTexture(
           texturefile, GL_texture_id[0]) );
+      if (is_env_lighting_map) {
+        GraphicModel::env_lighting_texture_id = this->texture_unit;
+      }
     }
     if (strstr(buff, "map_normal ") == buff) {
       char normalfile[255];
@@ -261,12 +266,14 @@ bool GraphicModel::LoadObject(char *file) {
   
   return true;
 }
-GraphicModel::GraphicModel(int texture_unit){
+GraphicModel::GraphicModel(int texture_unit, bool is_env_lighting){
+
   glGenBuffers(6, GL_draw_buffer_id);
   glGenTextures(2, GL_texture_id);
   this->face_size = 4;
   this->vertice_size = 3;
   this->texture_unit = texture_unit;
+  is_env_lighting_map = is_env_lighting;
 }
 
 
@@ -352,8 +359,12 @@ void GraphicModel::DrawModel(int draw_parameter, int shader_id) {
   int idx_bitan = glGetAttribLocation(shader_id, "bitangent");
   int normalcontrol = glGetUniformLocation(shader_id, "IsNormalMap");
   int location = glGetUniformLocation(shader_id, "mytexture");
-  
   glUniform1i(location, this->texture_unit);
+  location = glGetUniformLocation(shader_id, "diffuse_irr_map");
+  glUniform1i(location, GraphicModel::env_lighting_texture_id);
+  location = glGetUniformLocation(shader_id, "specular_irr_map");
+  glUniform1i(location, GraphicModel::env_lighting_texture_id);
+  
   if (has_normalmap()) {
 
     glBindBuffer(GL_ARRAY_BUFFER, GL_draw_buffer_id[4]);
@@ -373,7 +384,9 @@ void GraphicModel::DrawModel(int draw_parameter, int shader_id) {
     fprintf(stderr, "\tNo Normal map\n");
   }
   fprintf(stderr, "!!!!!!!!!!!!!!!Pass here\n");
-  
+  location = glGetUniformLocation(shader_id, "IsEnvLightSrc");
+  glUniform1i(location, (int)is_env_lighting_map);
+
   //this->faces_size()
   for (int i = 0; i < 1; i ++) {
 //    glNormal3fv(&vnormal[this->vnormal_idx[i * 3]]);\

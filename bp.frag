@@ -1,14 +1,17 @@
-varying vec3 ec_vnormal, ec_vposition, ec_vtangent, ec_vbitangent;
-uniform int LtSwitch, IsNormalMap;
+varying vec3 ec_vnormal, ec_vposition, ec_vtangent, ec_vbitangent, ec_reflect;
+uniform int LtSwitch, IsNormalMap, IsEnvLightSrc;
 varying float attent0, attent1, attent2;
 varying vec3 light_dir0, light_dir1, light_dir2;
 uniform sampler2D mytexture;
 uniform sampler2D mynormalmap;
+uniform sampler2D diffuse_irr_map;
+uniform sampler2D specular_irr_map;
 
 void main() {
+  vec2 d_irr_idx, s_irr_idx;
   vec2 flipped_texcoord = vec2(gl_TexCoord[0].x, 1.0 - gl_TexCoord[0].y);
   
-  vec3 P, N, L0, L1, L2, V, H0, H1, H2, mapN, tcolor;
+  vec3 P, N, L0, L1, L2, V, H0, H1, H2, mapN, R, tcolor, d_irr, s_irr;
   vec4 diffuse_color = gl_FrontMaterial.diffuse;
   vec4 specular_color = gl_FrontMaterial.specular;
   vec4 ambient_color = 
@@ -20,6 +23,7 @@ void main() {
 
   P = ec_vposition;
   //N = normalize(ec_vnormal);
+  R = 0.99 * normalize(ec_reflect);
   L0 = normalize(gl_LightSource[0].position - P);
   L1 = normalize(gl_LightSource[1].position - P);
   L2 = normalize(gl_LightSource[2].position - P);
@@ -36,15 +40,21 @@ void main() {
     N = normalize(tform * normalize(mapN));
     //=============================================
   } else {
-    N = normalize(ec_vnormal);
+    N = 0.99 * normalize(ec_vnormal);
   }
+  d_irr_idx = 0.5 * (N.st + vec2(1.0, 1.0));
+  s_irr_idx = 0.5 * (R.st + vec2(1.0, 1.0));
   //-------------handling texture---------------
   tcolor = vec3(texture2D(mytexture, flipped_texcoord));
   diffuse_color = vec4(tcolor, 1.0);
   // diffuse_color = 0.5 * diffuse_color + 0.5 *vec4(tcolor, 1.0);
   // diffuse_color *= max(dot(N, L0), 0.0);
   //============================================
-
+  float coef = 0.8;
+  d_irr = vec3(texture2D(diffuse_irr_map, d_irr_idx));
+  s_irr = vec3(texture2D(specular_irr_map, s_irr_idx));
+  // diffuse_color = diffuse_color * coef + (1 - coef) * vec4(d_irr, 1.0);
+  // specular_color = specular_color * coef + (1 - coef) * vec4(s_irr, 1.0);
   
 
   vec4 diff_c0 = diffuse_color ;
@@ -76,12 +86,21 @@ void main() {
     diff_c2 *= 0.0;
     spec_c2 *= 0.0;
   }
-    
-  diffuse_color = diff_c0 + diff_c1 + diff_c2 ;
-  specular_color = spec_c0 + spec_c1 + spec_c2 ;
 
-  gl_FragColor =  diffuse_color;
-  gl_FragColor += specular_color;
-  gl_FragColor += ambient_color;
-  //gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
+  if (IsEnvLightSrc) {
+    gl_FragColor = vec4(tcolor, 1.0);
+  } else {
+    diff_c0 = diff_c0 * coef + (1 - coef) * vec4(tcolor * 0.7 + 0.3 * d_irr, 1.0);
+    // diff_c1 = diff_c1 * coef + (1 - coef) * vec4(d_irr, 1.0);
+    // diff_c2 = diff_c2 * coef + (1 - coef) * vec4(d_irr, 1.0);
+
+    diffuse_color = diff_c0 + diff_c1 + diff_c2 ;
+    specular_color = spec_c0 + spec_c1 + spec_c2 ;
+
+    gl_FragColor =  diffuse_color;
+    gl_FragColor += 0.5 * specular_color;
+    gl_FragColor += ambient_color;
+    //gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
+  }
+
 }

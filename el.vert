@@ -1,6 +1,6 @@
 uniform vec3 eye_pos;
 uniform int L0Switch;
-varying vec3 ec_vnormal, ec_vposition, ec_vtangent, ec_vbitangent;
+varying vec3 ec_vnormal, ec_vposition, ec_vtangent, ec_vbitangent, ec_reflect;
 //Attenuation
 varying float attent0, attent1, attent2;
 varying vec3 light_dir0, light_dir1, light_dir2;
@@ -8,6 +8,9 @@ varying vec3 light_dir0, light_dir1, light_dir2;
 attribute vec3 tangent, bitangent;
 
 void main() {
+  vec4 ec_vertex;
+  vec3 ec_eyedir;
+
   // gl_NormalMatrix is inverse transpose model-view matrix
   ec_vnormal = gl_NormalMatrix * gl_Normal;
   ec_vposition = gl_ModelViewMatrix * gl_Vertex;
@@ -15,6 +18,9 @@ void main() {
   ec_vbitangent = gl_NormalMatrix * bitangent;
   gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * gl_Vertex;
   gl_TexCoord[0] = gl_MultiTexCoord0;
+  ec_eyedir = normalize(-ec_vposition);
+  ec_reflect = -ec_eyedir + 
+               2.0 * (dot(ec_eyedir, normalize(ec_vnormal))) * normalize(ec_vnormal);
 
   light_dir0 = vec3(gl_LightSource[0].position.xyz - ec_vposition);
   float dis0 = length(light_dir0);
