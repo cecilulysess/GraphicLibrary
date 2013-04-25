@@ -48,7 +48,7 @@ void main() {
   // diffuse_color = 0.5 * diffuse_color + 0.5 *vec4(tcolor, 1.0);
   // diffuse_color *= max(dot(N, L0), 0.0);
   //============================================
-  float coef = 0.99;
+  float coef = 0.85;
   d_irr = vec3(texture2D(diffuse_irr_map, d_irr_idx));
   s_irr = vec3(texture2D(specular_irr_map, s_irr_idx));
   
@@ -87,7 +87,7 @@ void main() {
       specular_color += spec[i];
     }
 
-    gl_FragColor =  diffuse_color;
+    gl_FragColor =  0.8 * diffuse_color;
     gl_FragColor += 0.5 * specular_color;
     //gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
   }

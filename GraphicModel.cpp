@@ -411,23 +411,23 @@ void GraphicModel::DrawModel(int draw_parameter, int shader_id) {
  // ===========================================
   glDisable(GL_LIGHTING);
   if (draw_parameter){
-   glUseProgram(0);
-   glDisable(GL_LIGHTING);
-   glClearColor(0,0,0,0);
-  //  float* v = normal;
-   float* vn = &vnormal[0];
-   float div = 10.0;
-   glColor4f(0, 0, 1.0, 1.0);
-   for (int i = 0; i < vnormal.size() / 3 ; i++) { //
+    glUseProgram(0);
+    glDisable(GL_LIGHTING);
+    glClearColor(0,0,0,0);
+    //  float* v = normal;
+    float* vn = &vnormal[0];
+    float div = 10.0;
+    glColor4f(0, 0, 1.0, 1.0);
+    for (int i = 0; i < vnormal.size() / 3 ; i++) { //
      glBegin(GL_LINES);
        glVertex3fv(&vertices[i * 3]);
        glVertex3f(vertices[i * 3] + vn[i * 3] / div ,
             vertices[i * 3 + 1] + vn[i * 3 + 1] / div,
             vertices[i * 3 + 2] + vn[i * 3 + 2] / div);
      glEnd();
-   }
-   
+    }
+    glUseProgram(shader_id);
 
-   glEnable(GL_LIGHTING);
   }
+  glEnable(GL_LIGHTING);
 }

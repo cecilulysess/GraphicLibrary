@@ -151,7 +151,7 @@ void draw_stuff(){
   }
   model->DrawModel((int) DrawNormal, selected_shader_id);
   ground->DrawModel((int) DrawNormal, selected_shader_id);
-  // skydome->DrawModel((int) DrawNormal, selected_shader_id);
+  skydome->DrawModel((int) DrawNormal, selected_shader_id);
   printf("Using shader %d\n", selected_shader_id);
 }
 
