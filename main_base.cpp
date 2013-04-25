@@ -217,13 +217,13 @@ void draw_stuff(){
   //   light0_position[1] + light0_direction[1], 
   //   light0_position[2] + light0_direction[2], 0.0, 1.0, 0.0);
   model->DrawModel((int) DrawNormal, 0);
-  // ground->DrawModel((int) DrawNormal, 0);
-  // glBegin(GL_TRIANGLES);
-  //   for (int i = 0; i < 3; ++i)
-  //   {
-  //     glVertex3fv(&surface[i * 3]);
-  //   }
-  // glEnd();
+  ground->DrawModel((int) DrawNormal, 0);
+  glBegin(GL_TRIANGLES);
+    for (int i = 0; i < 3; ++i)
+    {
+      glVertex3fv(&surface[i * 3]);
+    }
+  glEnd();
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
   save_matrix(camera);
   //================================================
