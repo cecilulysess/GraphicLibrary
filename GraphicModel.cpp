@@ -383,7 +383,6 @@ void GraphicModel::DrawModel(int draw_parameter, int shader_id) {
     glUniform1i(normalcontrol, 0 );
     fprintf(stderr, "\tNo Normal map\n");
   }
-  fprintf(stderr, "!!!!!!!!!!!!!!!Pass here\n");
   location = glGetUniformLocation(shader_id, "IsEnvLightSrc");
   glUniform1i(location, (int)is_env_lighting_map);
 
@@ -410,7 +409,7 @@ void GraphicModel::DrawModel(int draw_parameter, int shader_id) {
   // glDisableVertexAttribArray(attribute_texcoord);
   glDisable(GL_TEXTURE_2D);
  // ===========================================
-
+  glDisable(GL_LIGHTING);
   if (draw_parameter){
    glUseProgram(0);
    glDisable(GL_LIGHTING);
