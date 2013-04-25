@@ -378,10 +378,10 @@ void GraphicModel::DrawModel(int draw_parameter, int shader_id) {
     
     glUniform1i(normalcontrol, 1);
 
-    fprintf(stderr, "\tWith Normal map\n");
+    // fprintf(stderr, "\tWith Normal map\n");
   } else {
     glUniform1i(normalcontrol, 0 );
-    fprintf(stderr, "\tNo Normal map\n");
+    // fprintf(stderr, "\tNo Normal map\n");
   }
   location = glGetUniformLocation(shader_id, "IsEnvLightSrc");
   glUniform1i(location, (int)is_env_lighting_map);
@@ -395,7 +395,7 @@ void GraphicModel::DrawModel(int draw_parameter, int shader_id) {
                   GL_UNSIGNED_INT, (void*)(i * 4 * 4)  );
     //fprintf(stderr, "model drawed\n");
   }
-  printf("Drawed model, faces:%d\n", this->faces_draw_size());
+  // printf("Drawed model, faces:%d\n", this->faces_draw_size());
 
 
  // ==============Disable States===============

@@ -152,7 +152,7 @@ void draw_stuff(){
   model->DrawModel((int) DrawNormal, selected_shader_id);
   ground->DrawModel((int) DrawNormal, selected_shader_id);
   skydome->DrawModel((int) DrawNormal, selected_shader_id);
-  printf("Using shader %d\n", selected_shader_id);
+  // printf("Using shader %d\n", selected_shader_id);
 }
 
 unsigned int mybuf[2] = { 1, 2 };
@@ -272,10 +272,13 @@ void KeyBoardHandler(unsigned char key, int x, int y){
     case 'z':
       if(camera->focus() > 0.2) camera->focus() -= 0.03;
       WantToRedraw = true;
+      fprintf(stderr, "current_focus: %f\n", camera->focus());
       break;
     case 'x':
       if(camera->focus() < 100.0) camera->focus() += 0.03;
       WantToRedraw = true;
+      
+      fprintf(stderr, "current_focus: %f\n", camera->focus());
       break;
     case 's':
       (++selected_shader_id) %= 2;
