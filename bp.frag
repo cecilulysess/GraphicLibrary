@@ -4,16 +4,30 @@ uniform sampler2D mytexture;
 uniform sampler2D mynormalmap;
 uniform sampler2D diffuse_irr_map;
 uniform sampler2D specular_irr_map;
+uniform sampler2D shadow_map0;
+varying vec4 tcoord;
 
 void main() {
   vec2 d_irr_idx, s_irr_idx;
-  float attent[3] = {0.0, 0.0, 0.0};
+  float attent[3] ;//= {0.0, 0.0, 0.0};
+  for (int i = 0; i < 3; ++i)
+  {
+    attent[i] = 1.0;
+  }
   vec2 flipped_texcoord = vec2(gl_TexCoord[0].x, 1.0 - gl_TexCoord[0].y);
   
   vec3 P, N, L[3], V, H[3], mapN, R, tcolor, d_irr, s_irr;
   vec4 diffuse_color = gl_FrontMaterial.diffuse;
   vec4 specular_color = gl_FrontMaterial.specular;
+  vec4 pccoords;
   float shininess = gl_FrontMaterial.shininess;
+  float depthsample, clarity;
+
+  pccoords = tcoord/tcoord.w;
+  pccoords.z += 0.0005;
+  depthsample = texture2D(shadow_map0, pccoords.st).z;
+  clarity = 1.0;
+  if(depthsample < pccoords.z) clarity = 0.5;
 
   P = ec_vposition;
   V = normalize(-P);
@@ -26,11 +40,11 @@ void main() {
     attent[i] = 1.0 / (gl_LightSource[i].constantAttenuation +
                 (gl_LightSource[i].linearAttenuation * light_dist) + 
                 (gl_LightSource[i].quadraticAttenuation * light_dist * light_dist ) );
-    L[i] = normalize(gl_LightSource[i].position - P);
+    L[i] = normalize(gl_LightSource[i].position.xyz - P);
     H[i] = normalize(L[i] + V);
   }
   
-  if (IsNormalMap) {
+  if (IsNormalMap > 0) {
     mat3 tform = mat3(ec_vtangent, ec_vbitangent, ec_vnormal); 
     //---------------handling normal map-----------
     mapN = vec3(texture2D(mynormalmap, flipped_texcoord));
@@ -61,23 +75,26 @@ void main() {
     spec[i] *= (pow(max(dot(H[i], N), 0.0), shininess) / 8.0 / 3.14159 * 
               (shininess + 2.0) * attent[i] * gl_LightSource[0].specular);
     diff[i] = diff[i] * coef + (1 - coef) * vec4(tcolor * coef + (1-coef) * d_irr, 1.0);
+    spec[i] = spec[i] * coef + (1 - coef) * vec4(tcolor * coef + (1-coef) * s_irr, 1.0);
+    // diff[i] *= clarity;
+    // spec[i] *= clarity;
   }
 
-  if (! (LtSwitch & 0x1) ) {
-    diff[0] *= 0.0;
-    spec[0] *= 0.0; 
-  }
-  if (! (LtSwitch & 0x2) ) {
-    diff[1] *= 0.0;
-    spec[1] *= 0.0;
+  // if (! (LtSwitch & 0x1) ) {
+  //   diff[0] *= 0.0;
+  //   spec[0] *= 0.0; 
+  // }
+  // if (! (LtSwitch & 0x2) ) {
+  //   diff[1] *= 0.0;
+  //   spec[1] *= 0.0;
 
-  }
-  if (! (LtSwitch & 0x4) ) {
-    diff[2] *= 0.0;
-    spec[2] *= 0.0;
-  }
+  // }
+  // if (! (LtSwitch & 0x4) ) {
+  //   diff[2] *= 0.0;
+  //   spec[2] *= 0.0;
+  // }
 
-  if (IsEnvLightSrc) {
+  if (IsEnvLightSrc > 0) {
     gl_FragColor = vec4(tcolor, 1.0);
   } else {
     diffuse_color = diff[0];
@@ -87,8 +104,9 @@ void main() {
       specular_color += spec[i];
     }
 
-    gl_FragColor =  diffuse_color;
+    gl_FragColor =  0.5 * diffuse_color;
     gl_FragColor += 0.5 * specular_color;
+    gl_FragColor *= clarity;
     //gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
   }
 

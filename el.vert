@@ -2,10 +2,12 @@ uniform vec3 eye_pos;
 uniform int L0Switch;
 varying vec3 ec_vnormal, ec_vposition, ec_vtangent, ec_vbitangent, ec_reflect;
 attribute vec3 tangent, bitangent;
+varying vec4 tcoord;
 
 void main() {
   vec4 ec_vertex;
   vec3 ec_eyedir;
+  tcoord = gl_TextureMatrix[7] * gl_Vertex;
 
   // gl_NormalMatrix is inverse transpose model-view matrix
   ec_vnormal = gl_NormalMatrix * gl_Normal;
@@ -17,4 +19,5 @@ void main() {
   ec_eyedir = normalize(-ec_vposition);
   ec_reflect = -ec_eyedir + 
                2.0 * (dot(ec_eyedir, normalize(ec_vnormal))) * normalize(ec_vnormal);
+
 }

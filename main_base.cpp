@@ -27,8 +27,8 @@
 
 #ifdef MAIN_PROG
 
-#define WIDTH 1024
-#define HEIGHT 768
+#define WIDTH 320
+#define HEIGHT 240
 
 
 unsigned int RENDER_MODE = 0;
@@ -46,9 +46,16 @@ float shininess = 10.0;
 float l0brightness = 1.2;
 GLuint LightSwitch = 0x7;
 
+//=====================Lights=======================
+  float light0_ambient[] = { 0.0, 0.0, 0.0, 0.0 };
+  float light0_diffuse[] = { l0brightness,l0brightness,l0brightness,0.0};
+  float light0_specular[] = { l0brightness,l0brightness,l0brightness,0.0};
+  float light0_position[] = { 3, 4, 3, 1.0 };
+  float light0_direction[] = { -1.5, -2.0, -2.0, 1.0 };
+//==================================================
 
 GraphicModel *model, *ground, *skydome;
-GraphicCamera::GraphicCamera *camera;
+GraphicCamera::GraphicCamera *camera, *eye_cam, *light0_cam;
 
 GLuint selected_shader_id = 0;
 
@@ -90,11 +97,7 @@ void SwitchLight(){
 
 void do_lights(){
   // Light0 as key light
-  float light0_ambient[] = { 0.0, 0.0, 0.0, 0.0 };
-  float light0_diffuse[] = { l0brightness,l0brightness,l0brightness,0.0};
-  float light0_specular[] = { l0brightness,l0brightness,l0brightness,0.0};
-  float light0_position[] = { 3, 4, 3, 1.0 };
-  float light0_direction[] = { -1.5, -2.0, -2.0, 1.0 };
+
   
   glLightfv(GL_LIGHT0, GL_DIFFUSE, light0_diffuse);
   glLightfv(GL_LIGHT0, GL_SPECULAR, light0_specular);
@@ -136,23 +139,115 @@ void do_lights(){
   glEnable(GL_LIGHTING);
   
 }
+
+void set_shadow_uniform(int shader_id){
+  if (shader_id == 0) return;
+  int location = glGetUniformLocation(shader_id, "shadow_map0");
+  glUniform1i(location, 7);
+}
+
+  unsigned int texid = 6;
+  unsigned int framebuf[2];
+  unsigned int framebuft[1], fbo_depth;
+void build_shadowmap(){
+  glGenTextures(1, framebuft);
+  glGenFramebuffers(2, framebuf);
+  glActiveTexture(GL_TEXTURE7);
+
+  glBindTexture(GL_TEXTURE_2D, framebuft[0]);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, WIDTH, HEIGHT, 0, 
+    GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+  // glBindTexture(GL_TEXTURE_2D, 6);
+  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, framebuf[1]);
+  glDrawBuffer(GL_NONE);
+  glReadBuffer(GL_NONE);
+  glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, 
+                            GL_TEXTURE_2D, framebuft[0], 0);
+  
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  GLenum FBOstatus = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+  if(FBOstatus != GL_FRAMEBUFFER_COMPLETE_EXT)
+    printf("GL_FRAMEBUFFER_COMPLETE_EXT failed, CANNOT use FBO\n");
+
+    // switch back to window-system-provided framebuffer
+  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+
+}
+void save_matrix(GraphicCamera::GraphicCamera *cam) {
+  glMatrixMode(GL_TEXTURE);
+  glActiveTextureARB(GL_TEXTURE7);
+  glEnable(GL_TEXTURE_2D);
+  glLoadIdentity();
+  glTranslatef(0.0, 0.0, -0.005);
+  glScalef(0.5, 0.5, 0.5);
+  glTranslatef(1.0,1.0,1.0);
+  gluPerspective(60, (float)WIDTH/(float) HEIGHT, 0.1, 20.0);
+  gluLookAt(light0_position[0], light0_position[1], light0_position[2],
+    light0_position[0] + light0_direction[0], 
+    light0_position[1] + light0_direction[1], 
+    light0_position[2] + light0_direction[2], 0.0, 1.0, 0.0);
+  // cam->PerspectiveDisplay(WIDTH, HEIGHT);
+}
+float edg = 5.0;
+float surface[] = {
+  -edg, 0, -edg/2,
+  edg, 0, -edg,
+  edg, 0, edg/2,
+  -edg, 0, edg
+};
 void draw_stuff(){
+
   SwitchLight();
-  glEnable(GL_DEPTH_TEST);
-  glClearColor(0.4, 0.4, 0.4, 0);
+  glClearColor(0.4, 0.4, 0.4, 1.0);
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+  glEnable(GL_DEPTH_TEST);
+  //=================do shadows=====================
+  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, framebuf[1]);
+  glUseProgram(0);
+  camera = light0_cam;
+  camera->PerspectiveDisplay(WIDTH, HEIGHT);
+  // gluPerspective(60, 1024.0/768.0, 0.1, 20.0);
+  // gluLookAt(light0_position[0], light0_position[1], light0_position[2],
+  //   light0_position[0] + light0_direction[0], 
+  //   light0_position[1] + light0_direction[1], 
+  //   light0_position[2] + light0_direction[2], 0.0, 1.0, 0.0);
+  model->DrawModel((int) DrawNormal, 0);
+  // ground->DrawModel((int) DrawNormal, 0);
+  // glBegin(GL_TRIANGLES);
+  //   for (int i = 0; i < 3; ++i)
+  //   {
+  //     glVertex3fv(&surface[i * 3]);
+  //   }
+  // glEnd();
+  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+  save_matrix(camera);
+  //================================================
   do_lights();
+  // selected_shader_id = 0;
   glUseProgram(selected_shader_id);
+  set_shadow_uniform(selected_shader_id);
+  glActiveTexture(GL_TEXTURE7);
+  glBindTexture(GL_TEXTURE_2D, framebuft[0]);
+
+  camera = eye_cam;
+  camera->PerspectiveDisplay(WIDTH, HEIGHT);
   if (selected_shader_id) {
    // if not using fixed shading
    GLint light_switch_loc = glGetUniformLocation(
                          selected_shader_id, "LtSwitch");
    glUniform1i(light_switch_loc, LightSwitch); 
   }
-  model->DrawModel((int) DrawNormal, selected_shader_id);
   ground->DrawModel((int) DrawNormal, selected_shader_id);
+  model->DrawModel((int) DrawNormal, selected_shader_id);
   // skydome->DrawModel((int) DrawNormal, selected_shader_id);
   printf("Using shader %d\n", selected_shader_id);
+  glutSwapBuffers();
+
 }
 
 unsigned int mybuf[2] = { 1, 2 };
@@ -230,15 +325,24 @@ void SetShadersOrDie(GLuint &shader, const char* vshader,
 
 void init(const char* model_path, const char* vshader_path, 
     const char* fshader_path) {
-  camera = new GraphicCamera::GraphicCamera(Vec3d(0, 2, 4),
+  eye_cam = new GraphicCamera::GraphicCamera(Vec3d(0, 2, 4),
                                             Vec3d(0, 1, 0),
                           Vec3d(0, 1 , 0), 0.02, 20, 60, focus);
+  camera = eye_cam;
   camera->PerspectiveDisplay(WIDTH, HEIGHT);
+  light0_cam = new GraphicCamera::GraphicCamera(
+    Vec3d(light0_position[0], light0_position[1], light0_position[2]),
+    Vec3d(light0_direction[0], light0_direction[1], light0_direction[2]),
+    Vec3d(0, 1, 0), 0.02, 20, 60, focus
+    );
+    
   do_lights();
+  build_shadowmap();
   SetShadersOrDie(selected_shader_id, vshader_path, fshader_path);
   model->InitModelData(selected_shader_id);
   ground->InitModelData(selected_shader_id);
   skydome->InitModelData(selected_shader_id);
+  glEnable(GL_TEXTURE_2D);
 }
 
 

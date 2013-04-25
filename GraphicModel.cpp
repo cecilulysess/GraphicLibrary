@@ -278,17 +278,6 @@ GraphicModel::GraphicModel(int texture_unit, bool is_env_lighting){
 
 
 void GraphicModel::InitModelData(int shader_id) {
-  fprintf(stderr, "Binding buff using %d %d %d %d %d %d\n", GL_draw_buffer_id[0],
-    GL_draw_buffer_id[1],GL_draw_buffer_id[2], GL_draw_buffer_id[3],
-    GL_draw_buffer_id[4], GL_draw_buffer_id[5]);
-  
-  // glGenVertexArrays(1, GL_VAO_id);
-  // glBindVertexArray(GL_VAO_id[0]);
-
-  // glBindBuffer(GL_ARRAY_BUFFER, GL_draw_buffer_id[0]);
-  // glEnableClientState(GL_VERTEX_ARRAY);
-
-
   //bind vertex array
   glBindBuffer(GL_ARRAY_BUFFER, GL_draw_buffer_id[0]);
   
@@ -335,15 +324,14 @@ void GraphicModel::InitModelData(int shader_id) {
 }
 
 void GraphicModel::DrawModel(int draw_parameter, int shader_id) {
-  glEnable(GL_DEPTH_TEST);
-  glClearColor(0,0,0,0);
+  // glClearColor(0,0,0,0);
   // do materials for this model
   glMaterialfv(GL_FRONT, GL_AMBIENT, material.Ambient);
   glMaterialfv(GL_FRONT, GL_DIFFUSE, material.Diffuse);
   glMaterialfv(GL_FRONT, GL_SPECULAR, material.Specular);
   glMaterialfv(GL_FRONT, GL_SHININESS, &material.Shininess);
   // ============ Enable states=================
-  glClientActiveTexture(GL_TEXTURE0);
+  
   glEnableClientState(GL_VERTEX_ARRAY);
   glEnableClientState(GL_NORMAL_ARRAY);
   glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -355,79 +343,82 @@ void GraphicModel::DrawModel(int draw_parameter, int shader_id) {
   glNormalPointer( GL_FLOAT, 3 * sizeof(float), (void*)0);
   glBindBuffer(GL_ARRAY_BUFFER, GL_draw_buffer_id[3]);
   glTexCoordPointer(2, GL_FLOAT, 0, (void*)0);
-  int idx_tan = glGetAttribLocation(shader_id, "tangent");
-  int idx_bitan = glGetAttribLocation(shader_id, "bitangent");
-  int normalcontrol = glGetUniformLocation(shader_id, "IsNormalMap");
-  int location = glGetUniformLocation(shader_id, "mytexture");
-  glUniform1i(location, this->texture_unit);
-  location = glGetUniformLocation(shader_id, "diffuse_irr_map");
-  glUniform1i(location, GraphicModel::env_lighting_texture_id);
-  location = glGetUniformLocation(shader_id, "specular_irr_map");
-  glUniform1i(location, GraphicModel::env_lighting_texture_id);
-  
-  if (has_normalmap()) {
-
-    glBindBuffer(GL_ARRAY_BUFFER, GL_draw_buffer_id[4]);
-    glBindBuffer(GL_ARRAY_BUFFER, GL_draw_buffer_id[5]);
-    glVertexAttribPointer(idx_tan, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-    glVertexAttribPointer(idx_bitan, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-    location = glGetUniformLocation(shader_id, "mynormalmap");
-    glUniform1i(location, this->texture_unit + 1);
-    glEnableVertexAttribArray(idx_tan);
-    glEnableVertexAttribArray(idx_bitan);
+  if (shader_id > 0) {
+    int idx_tan = glGetAttribLocation(shader_id, "tangent");
+    int idx_bitan = glGetAttribLocation(shader_id, "bitangent");
+    int normalcontrol = glGetUniformLocation(shader_id, "IsNormalMap");
+    int location = glGetUniformLocation(shader_id, "mytexture");
+    glUniform1i(location, this->texture_unit);
+    location = glGetUniformLocation(shader_id, "diffuse_irr_map");
+    glUniform1i(location, GraphicModel::env_lighting_texture_id);
+    location = glGetUniformLocation(shader_id, "specular_irr_map");
+    glUniform1i(location, GraphicModel::env_lighting_texture_id);
     
-    glUniform1i(normalcontrol, 1);
+    if (has_normalmap()) {
+      glBindBuffer(GL_ARRAY_BUFFER, GL_draw_buffer_id[4]);
+      glBindBuffer(GL_ARRAY_BUFFER, GL_draw_buffer_id[5]);
+      glVertexAttribPointer(idx_tan, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+      glVertexAttribPointer(idx_bitan, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+      location = glGetUniformLocation(shader_id, "mynormalmap");
+      glUniform1i(location, this->texture_unit + 1);
+      glEnableVertexAttribArray(idx_tan);
+      glEnableVertexAttribArray(idx_bitan);
+      
+      glUniform1i(normalcontrol, 1);
 
-    fprintf(stderr, "\tWith Normal map\n");
+      fprintf(stderr, "\tWith Normal map\n");
+    } else {
+      glUniform1i(normalcontrol, 0 );
+      fprintf(stderr, "\tNo Normal map\n");
+    }
+    location = glGetUniformLocation(shader_id, "IsEnvLightSrc");
+    glUniform1i(location, (int)is_env_lighting_map);
+  
+    //this->faces_size()
+    for (int i = 0; i < 1; i ++) {
+  //    glNormal3fv(&vnormal[this->vnormal_idx[i * 3]]);\
+      //(int) this->faces_draw_size()
+      // glTexCoord2fv(&this->texture_mapping[i * 4 * 2 + 0]);
+      glDrawElements(GL_QUADS, (int) this->faces_draw_size() ,
+                    GL_UNSIGNED_INT, (void*)(i * 4 * 4)  );
+      //fprintf(stderr, "model drawed\n");
+    }
+    printf("Drawed model, faces:%d\n", this->faces_draw_size());
+
+    if (has_normalmap()) {
+      glDisableVertexAttribArray(idx_bitan);
+      glDisableVertexAttribArray(idx_tan);
+    }
+
   } else {
-    glUniform1i(normalcontrol, 0 );
-    fprintf(stderr, "\tNo Normal map\n");
-  }
-  location = glGetUniformLocation(shader_id, "IsEnvLightSrc");
-  glUniform1i(location, (int)is_env_lighting_map);
-
-  //this->faces_size()
-  for (int i = 0; i < 1; i ++) {
-//    glNormal3fv(&vnormal[this->vnormal_idx[i * 3]]);\
-    //(int) this->faces_draw_size()
-    // glTexCoord2fv(&this->texture_mapping[i * 4 * 2 + 0]);
     glDrawElements(GL_QUADS, (int) this->faces_draw_size() ,
-                  GL_UNSIGNED_INT, (void*)(i * 4 * 4)  );
-    //fprintf(stderr, "model drawed\n");
+                    GL_UNSIGNED_INT, (void*)(0)  );
   }
-  printf("Drawed model, faces:%d\n", this->faces_draw_size());
 
-
- // ==============Disable States===============
+   // ==============Disable States===============
   glDisableClientState(GL_VERTEX_ARRAY);
   glDisableClientState(GL_NORMAL_ARRAY);
   glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-  if (has_normalmap()) {
-    glDisableVertexAttribArray(idx_bitan);
-    glDisableVertexAttribArray(idx_tan);
-  }
-  // glDisableVertexAttribArray(attribute_texcoord);
   glDisable(GL_TEXTURE_2D);
- // ===========================================
+   // ===========================================
+
   glDisable(GL_LIGHTING);
   if (draw_parameter){
-   glUseProgram(0);
-   glDisable(GL_LIGHTING);
-   glClearColor(0,0,0,0);
-  //  float* v = normal;
-   float* vn = &vnormal[0];
-   float div = 10.0;
-   glColor4f(0, 0, 1.0, 1.0);
-   for (int i = 0; i < vnormal.size() / 3 ; i++) { //
-     glBegin(GL_LINES);
-       glVertex3fv(&vertices[i * 3]);
-       glVertex3f(vertices[i * 3] + vn[i * 3] / div ,
+    glUseProgram(0);
+    glClearColor(0,0,0,0);
+    //  float* v = normal;
+    float* vn = &vnormal[0];
+    float div = 10.0;
+    glColor4f(0, 0, 1.0, 1.0);
+    for (int i = 0; i < vnormal.size() / 3 ; i++) { //
+      glBegin(GL_LINES);
+        glVertex3fv(&vertices[i * 3]);
+        glVertex3f(vertices[i * 3] + vn[i * 3] / div ,
             vertices[i * 3 + 1] + vn[i * 3 + 1] / div,
             vertices[i * 3 + 2] + vn[i * 3 + 2] / div);
-     glEnd();
-   }
-   
-
-   glEnable(GL_LIGHTING);
+      glEnd();
+    }
   }
+  glEnable(GL_LIGHTING);
+  glUseProgram(shader_id);
 }
