@@ -26,11 +26,6 @@
 #include "GraphicModel.h"
 
 #ifdef MAIN_PROG
-//#define TESTING_
-
-#ifdef TESTING_
-#include "_test_case.h"
-#endif
 
 #define WIDTH 1024
 #define HEIGHT 768
@@ -101,20 +96,13 @@ void do_lights(){
   float light0_position[] = { 3, 4, 3, 1.0 };
   float light0_direction[] = { -1.5, -2.0, -2.0, 1.0 };
   
-  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, light0_ambient);
-  glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 1);
-  
-  glLightfv(GL_LIGHT0, GL_AMBIENT, light0_ambient);
   glLightfv(GL_LIGHT0, GL_DIFFUSE, light0_diffuse);
   glLightfv(GL_LIGHT0, GL_SPECULAR, light0_specular);
-  glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 1.0);
-  glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 180.0);
   glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0 );
   glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.2 );
   glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.01);
   
   glLightfv(GL_LIGHT0, GL_POSITION, light0_position);
-  glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, light0_direction);
   
 // Light1 as fill light
   float light1_ambient[] = { 0.0, 0.0, 0.0, 0.0 };
@@ -123,21 +111,13 @@ void do_lights(){
   float light1_position[] = { -3, 2.5, 4, 1.0 };
   float light1_direction[] = { -1.5, -2.0, -2.0, 1.0 };
   
-  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, light1_ambient);
-  glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 1);
-  
-  glLightfv(GL_LIGHT1, GL_AMBIENT, light1_ambient);
   glLightfv(GL_LIGHT1, GL_DIFFUSE, light1_diffuse);
   glLightfv(GL_LIGHT1, GL_SPECULAR, light1_specular);
-  glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 1.0);
-  glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 180.0);
   glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 0.8 );
   glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0.5 );
   glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, 0.2);
   
   glLightfv(GL_LIGHT1, GL_POSITION, light1_position);
-  glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, light1_direction);
-
 
 // Light2 as background light
   float light2_ambient[] = { 0.0, 0.0, 0.0, 0.0 };
@@ -146,29 +126,19 @@ void do_lights(){
   float light2_position[] = { 0, 4, -5, 1.0 };
   float light2_direction[] = { -1.5, -2.0, -2.0, 1.0 };
   
-  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, light2_ambient);
-  glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 1);
-  
-  glLightfv(GL_LIGHT2, GL_AMBIENT, light2_ambient);
   glLightfv(GL_LIGHT2, GL_DIFFUSE, light2_diffuse);
   glLightfv(GL_LIGHT2, GL_SPECULAR, light2_specular);
-  glLightf(GL_LIGHT2, GL_SPOT_EXPONENT, 1.0);
-  glLightf(GL_LIGHT2, GL_SPOT_CUTOFF, 180.0);
   glLightf(GL_LIGHT2, GL_CONSTANT_ATTENUATION, 0.8 );
   glLightf(GL_LIGHT2, GL_LINEAR_ATTENUATION, 0.4 );
   glLightf(GL_LIGHT2, GL_QUADRATIC_ATTENUATION, 0.20);
   
   glLightfv(GL_LIGHT2, GL_POSITION, light2_position);
-  glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, light2_direction);
-
-
   glEnable(GL_LIGHTING);
   
 }
 void draw_stuff(){
   SwitchLight();
   glEnable(GL_DEPTH_TEST);
-  // glUseProgram(0);
   glClearColor(0.4, 0.4, 0.4, 0);
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
   do_lights();
@@ -179,40 +149,10 @@ void draw_stuff(){
                          selected_shader_id, "LtSwitch");
    glUniform1i(light_switch_loc, LightSwitch); 
   }
-
-
   model->DrawModel((int) DrawNormal, selected_shader_id);
-
   ground->DrawModel((int) DrawNormal, selected_shader_id);
   // skydome->DrawModel((int) DrawNormal, selected_shader_id);
   printf("Using shader %d\n", selected_shader_id);
-//  glUseProgram(0);
-//  glEnableClientState(GL_VERTEX_ARRAY); 
-//  glEnableClientState(GL_NORMAL_ARRAY);
-//  //glScalef(10, 10, 10);
-//  glVertexPointer(3,GL_FLOAT, 3 * sizeof(GLfloat), vertices); 
-//  glNormalPointer(GL_FLOAT, 3 * sizeof(GLfloat), vertices_normal);
-//  //for (int i = 0; i < faces_length; ++i) {
-//    //glNormal3fv(&normal[i * 3]);    
-//  //  glDrawArrays(GL_TRIANGLES, 3 * i, 3); 
-//  //} 
-//  glDrawArrays(GL_TRIANGLES, 0, 3 * faces_length);
-//  
-//  glPushMatrix();
-//  glTranslated(0.15, 0, -0.3);
-//  glRotated(45, 0, 1, 0);
-//  glDrawArrays(GL_TRIANGLES, 0, 3 * faces_length);
- // glPopMatrix();
- // glPushMatrix();
- // glTranslated(-2, 0, -1);
- // glScalef(0.1,0.1,0.1);
- // glutSolidTeapot (0.5);
- // glPopMatrix();
-  /*for (i = 0; i < faces_length; ++i) {
-    glNormal3fv(&normal[i]);
-    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (void*)(3 * i) );
-  }
-  glFlush();*/
 }
 
 unsigned int mybuf[2] = { 1, 2 };
@@ -268,8 +208,6 @@ void SetShadersOrDie(GLuint &shader, const char* vshader,
   // shader, # of string, array of string and array of tring length
   glShaderSource(pv, 1, (const char**)&vs, NULL);
   glShaderSource(pf, 1, (const char**)&fs, NULL);
-//  glShaderSource(bpv, 1, (const char**)&vs, NULL);
-//  glShaderSource(bpf, 1, (const char**)&bpfs, NULL);
   free(vs);
   free(fs);
   free(bpfs);
@@ -277,22 +215,12 @@ void SetShadersOrDie(GLuint &shader, const char* vshader,
   assert(CompileSuccess(pv));
   glCompileShader(pf);
   assert(CompileSuccess(pf));
-  //glCompileShader(bpv);
-  //assert(CompileSuccess(bpv));
-  //glCompileShader(bpf);
-  //assert(CompileSuccess(bpf));
   p = glCreateProgram();
-  //bp = glCreateProgram();
   glAttachShader(p, pf);
   glAttachShader(p, pv);
-  //glAttachShader(bp, bpf);
-  //glAttachShader(bp, pv);
   glLinkProgram(p);
   assert(LinkSuccessful(p));
-  //glLinkProgram(bp);
-  //assert(LinkSuccessful(bp));
   shader = p;
-  //shaders.push_back(bp);
   glUseProgram(p);
   selected_shader_id = p;
   cout<<"Finished Set up of Shaders: "<<p<<endl;
@@ -302,37 +230,15 @@ void SetShadersOrDie(GLuint &shader, const char* vshader,
 
 void init(const char* model_path, const char* vshader_path, 
     const char* fshader_path) {
-  
-  
   camera = new GraphicCamera::GraphicCamera(Vec3d(0, 2, 4),
                                             Vec3d(0, 1, 0),
-            Vec3d(0, 1 , 0), 0.02, 20, 60, focus);
+                          Vec3d(0, 1 , 0), 0.02, 20, 60, focus);
   camera->PerspectiveDisplay(WIDTH, HEIGHT);
   do_lights();
   SetShadersOrDie(selected_shader_id, vshader_path, fshader_path);
   model->InitModelData(selected_shader_id);
   ground->InitModelData(selected_shader_id);
   skydome->InitModelData(selected_shader_id);
-  /*glBindBuffer(GL_ARRAY_BUFFER, mybuf[0]);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-  
-  //final arg is bte offset, not address
-  glVertexPointer(3, GL_FLOAT, 3 * sizeof(GLfloat), 0);
-  glEnableClientState(GL_VERTEX_ARRAY);
-  
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mybuf[1]);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, faces_length * sizeof(GLfloat),
-               faces,
-              GL_STATIC_DRAW);
-  */
-//  
-//  glEnable(GL_FOG);
-//  glFogi(GL_FOG_MODE, GL_EXP);
-//  glFogf(GL_FOG_DENSITY, 3.0);
-//  glFogf(GL_FOG_START, 0.0);
-//  glFogf(GL_FOG_END, 100.0);
-//  float color[] = {0.5, 0.5, 0.5, 1.0 };
-//  glFogfv(GL_FOG_COLOR, color);
 }
 
 
@@ -458,25 +364,12 @@ void motionEventHandler(int x, int y) {
  Main program to draw the square, change colors, and wait for quit
  */
 int main(int argc, char* argv[]){
-#ifdef TESTING_
-  test_Vector();
-  test_Matrix();
-#endif
   if(argc != 6){
     fprintf(stderr, "usage: show_bunny vertex_shader frag_shader model1.obj model2.obj sky.obj\n");
     exit(1);
   }
-  
-//  return 0;
-  //LoadParameters(argv[1]);
-//  //parafile = argv[1];
-//  const GLubyte* glslv = glGetString(GL_VENDOR);
-//  printf("GLSL Support:%s\n", (const char*)glslv);
-  
-  // start up the glut utilities
   glutInit(&argc, argv);
-  
-  
+
   // make GLUT select a double buffered display that uses RGBA colors
   // Julian: Add GLUT_DEPTH when in 3D program so that 3D objects drawed
   // correctly regardless the order they draw
@@ -495,17 +388,12 @@ int main(int argc, char* argv[]){
 
   // initialize the camera and such
   init(argv[3], argv[1], argv[2]);
-  
-  // set up the callback routines to be called when glutMainLoop() detects
-  // an event
-  //  glutReshapeFunc(doReshape);
-  
+  //glutReshapeFunc(doReshape);
   glutDisplayFunc(RenderScene);
   glutMouseFunc(mouseEventHandler);
   glutMotionFunc(motionEventHandler);
   glutKeyboardFunc(KeyBoardHandler);
   glutIdleFunc(Redraw);
-  
   glutMainLoop();
   // Routine that loops forever looking for events. It calls the registered
   // callback routine to handle each event that is detected
