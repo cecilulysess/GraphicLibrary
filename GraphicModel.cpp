@@ -16,32 +16,14 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-#include<iostream>
+#include <iostream>
 using namespace std;
 #include "GraphicUtilities.h"
 using GraphicUtilities::GLShortCut;
 using GraphicUtilities::GraphicUtilities;
 
-
 unsigned int GraphicModel::env_lighting_texture_id = 0;
 
-// validate that every normal was used
-bool validate_vnormal(vector<unsigned int> vn, int upper) {
-  bool *tab = new bool[upper];
-  for (int i = 0; i < upper; ++i) {
-    tab[i] = false;
-  }
-  for (int i = 0; i < vn.size(); ++i) {
-    tab[vn[i]] = true;
-  }
-  for (int i = 0; i < upper; ++i) {
-    if(tab[i] == false) {
-      printf("Vertex Nomal: %d is not used\n", i);
-      return false;
-    }
-  }
-  return true;
-}
 
 bool GraphicModel::LoadMaterial(char *file){
   if (file == NULL) {
@@ -222,11 +204,11 @@ bool GraphicModel::LoadObject(char *file) {
 
   }
 
-  printf("Load raw data completed\n\tLoad vertex: %d, texture map: %d, vertex normal: %d\n",
-          v_cnt, vt_cnt, vn_cnt);
-  printf("\tFaces: %d, VNormal Index: %d, VTangent: %d, VBitangent: %d\n", 
-          this->faces_size(), vnormal_idx.size(), vx_cnt,
-          vy_cnt);
+  // printf("Load raw data completed\n\tLoad vertex: %d, texture map: %d, vertex normal: %d\n",
+  //         v_cnt, vt_cnt, vn_cnt);
+  // printf("\tFaces: %d, VNormal Index: %d, VTangent: %d, VBitangent: %d\n", 
+  //         this->faces_size(), vnormal_idx.size(), vx_cnt,
+  //         vy_cnt);
   assert(vt_cnt > 0);
   for (int i = 0; i < faces.size(); ++i){
     this->vertices.push_back(vertex[faces[i] * 3 + 0]);
@@ -256,7 +238,7 @@ bool GraphicModel::LoadObject(char *file) {
     assert(this->tangent.size() == 3 * faces.size());
     assert(this->bitangent.size() == 3 * faces.size());
   }
-  printf("Totally %d Texture normal after process\n", this->tangent.size()/3);
+  // printf("Totally %d Texture normal after process\n", this->tangent.size()/3);
   int idx = faces.size();
   faces.clear();
   for (int i = 0; i < idx; ++i)
@@ -266,6 +248,7 @@ bool GraphicModel::LoadObject(char *file) {
   
   return true;
 }
+
 GraphicModel::GraphicModel(int texture_unit, bool is_env_lighting){
 
   glGenBuffers(6, GL_draw_buffer_id);
@@ -278,17 +261,6 @@ GraphicModel::GraphicModel(int texture_unit, bool is_env_lighting){
 
 
 void GraphicModel::InitModelData(int shader_id) {
-  fprintf(stderr, "Binding buff using %d %d %d %d %d %d\n", GL_draw_buffer_id[0],
-    GL_draw_buffer_id[1],GL_draw_buffer_id[2], GL_draw_buffer_id[3],
-    GL_draw_buffer_id[4], GL_draw_buffer_id[5]);
-  
-  // glGenVertexArrays(1, GL_VAO_id);
-  // glBindVertexArray(GL_VAO_id[0]);
-
-  // glBindBuffer(GL_ARRAY_BUFFER, GL_draw_buffer_id[0]);
-  // glEnableClientState(GL_VERTEX_ARRAY);
-
-
   //bind vertex array
   glBindBuffer(GL_ARRAY_BUFFER, GL_draw_buffer_id[0]);
   
@@ -337,17 +309,16 @@ void GraphicModel::InitModelData(int shader_id) {
 void GraphicModel::DrawModel(int draw_parameter, int shader_id) {
   glEnable(GL_DEPTH_TEST);
   glClearColor(0,0,0,0);
+  glEnable(GL_TEXTURE_2D);
   // do materials for this model
   glMaterialfv(GL_FRONT, GL_AMBIENT, material.Ambient);
   glMaterialfv(GL_FRONT, GL_DIFFUSE, material.Diffuse);
   glMaterialfv(GL_FRONT, GL_SPECULAR, material.Specular);
   glMaterialfv(GL_FRONT, GL_SHININESS, &material.Shininess);
   // ============ Enable states=================
-  glClientActiveTexture(GL_TEXTURE0);
   glEnableClientState(GL_VERTEX_ARRAY);
   glEnableClientState(GL_NORMAL_ARRAY);
   glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-  glEnable(GL_TEXTURE_2D);
   glBindBuffer(GL_ARRAY_BUFFER, GL_draw_buffer_id[0]);
   glVertexPointer(vertice_size, GL_FLOAT, 3 * sizeof(float), (void*)0);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_draw_buffer_id[1]);
@@ -366,7 +337,6 @@ void GraphicModel::DrawModel(int draw_parameter, int shader_id) {
   glUniform1i(location, GraphicModel::env_lighting_texture_id);
   
   if (has_normalmap()) {
-
     glBindBuffer(GL_ARRAY_BUFFER, GL_draw_buffer_id[4]);
     glBindBuffer(GL_ARRAY_BUFFER, GL_draw_buffer_id[5]);
     glVertexAttribPointer(idx_tan, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
@@ -386,17 +356,8 @@ void GraphicModel::DrawModel(int draw_parameter, int shader_id) {
   location = glGetUniformLocation(shader_id, "IsEnvLightSrc");
   glUniform1i(location, (int)is_env_lighting_map);
 
-  //this->faces_size()
-  for (int i = 0; i < 1; i ++) {
-//    glNormal3fv(&vnormal[this->vnormal_idx[i * 3]]);\
-    //(int) this->faces_draw_size()
-    // glTexCoord2fv(&this->texture_mapping[i * 4 * 2 + 0]);
-    glDrawElements(GL_QUADS, (int) this->faces_draw_size() ,
-                  GL_UNSIGNED_INT, (void*)(i * 4 * 4)  );
-    //fprintf(stderr, "model drawed\n");
-  }
-  // printf("Drawed model, faces:%d\n", this->faces_draw_size());
-
+  glDrawElements(GL_QUADS, (int) this->faces_draw_size() ,
+                GL_UNSIGNED_INT, (void*)(0) );
 
  // ==============Disable States===============
   glDisableClientState(GL_VERTEX_ARRAY);
@@ -415,8 +376,7 @@ void GraphicModel::DrawModel(int draw_parameter, int shader_id) {
     glDisable(GL_LIGHTING);
     glClearColor(0,0,0,0);
     //  float* v = normal;
-    float* vn = &vnormal[0];
-    float div = 10.0;
+    float* vn = &vnormal[0], div = 10.0;
     glColor4f(0, 0, 1.0, 1.0);
     for (int i = 0; i < vnormal.size() / 3 ; i++) { //
      glBegin(GL_LINES);
@@ -427,7 +387,6 @@ void GraphicModel::DrawModel(int draw_parameter, int shader_id) {
      glEnd();
     }
     glUseProgram(shader_id);
-
   }
   glEnable(GL_LIGHTING);
 }

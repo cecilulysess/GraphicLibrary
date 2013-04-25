@@ -21,121 +21,66 @@
 #include "GLCommonHeader.h"
 #include "common_data_structure.h"
 #include "GraphicUtilities.h"
-#include "GraphicObject.h"
 #include "GraphicCamera.h"
 #include "GraphicModel.h"
-
-#ifdef MAIN_PROG
 
 #define WIDTH 1024
 #define HEIGHT 768
 
+typedef struct LightSource{
+  float diffuse[4];
+  float specular[4];
+  float position[4];
+  float const_atten, linear_atten, quadra_atten; 
+} LightSource;
+
+LightSource lights[3] = {
+  { 1, 1, 1, 0,
+    1, 1, 1, 0,
+    3, 4, 3, 1.0,
+    0, 0.2, 0.01   },
+  { 1, 1, 1, 0,
+    1, 1, 1, 0,
+    -3, 2.5, 4, 1.0,
+    0.8, 0.5, 0.2   },
+  { 2, 2, 2, 0,
+    2, 2, 2, 0,
+    0, 4, -5, 1.0,
+    0.8, 0.4, 0.2    }
+};
 
 unsigned int RENDER_MODE = 0;
-
+int light_switch[3] = {1, 1, 1};
 int AALevel = 4;
-bool WantToRedraw = false;
-bool DrawNormal = false;
-bool IsDrawFrame = false;
-bool IsDrawGrid = true;
-bool IsFillLight = true;
-bool IsKeyLight = true;
-bool IsBgLight = true;
+bool WantToRedraw = false, DrawNormal = false;
 double focus = 1.2;
-float shininess = 10.0;
-float l0brightness = 1.2;
-GLuint LightSwitch = 0x7;
-
 
 GraphicModel *model, *ground, *skydome;
 GraphicCamera::GraphicCamera *camera;
 
 GLuint selected_shader_id = 0;
 
-GLfloat* vertices;
-GLfloat vertices_number;
-GLuint* faces;
-GLuint faces_length;
-GLfloat* normal;
-int normal_length;
-GLuint vertices_normal_length;
-GLfloat* vertices_normal;
-
-
 void SwitchLight(){
-  if (IsFillLight) {
-    glEnable(GL_LIGHT1);
-    LightSwitch |= 0x2;
-  } else {
-    glDisable(GL_LIGHT1);
-    LightSwitch &= (~0x2);
-  }
-  if (IsKeyLight) {
-    glEnable(GL_LIGHT0);
-    LightSwitch |= 0x1;
-  } else {
-    glDisable(GL_LIGHT0);
-    LightSwitch &= (~0x1);
-  }
-  if (IsBgLight) {
-    glEnable(GL_LIGHT2);
-    LightSwitch |= 0x4;
-  } else {
-    glDisable(GL_LIGHT2);
-    LightSwitch &= (~0x4);
+  for (int i = 0; i < 3; ++i)   {
+    if (light_switch[i])
+      glEnable(GL_LIGHT0 + i);
+    else
+      glDisable(GL_LIGHT0 + i);
   }
 }
-
-
 
 void do_lights(){
-  // Light0 as key light
-  float light0_ambient[] = { 0.0, 0.0, 0.0, 0.0 };
-  float light0_diffuse[] = { l0brightness,l0brightness,l0brightness,0.0};
-  float light0_specular[] = { l0brightness,l0brightness,l0brightness,0.0};
-  float light0_position[] = { 3, 4, 3, 1.0 };
-  float light0_direction[] = { -1.5, -2.0, -2.0, 1.0 };
-  
-  glLightfv(GL_LIGHT0, GL_DIFFUSE, light0_diffuse);
-  glLightfv(GL_LIGHT0, GL_SPECULAR, light0_specular);
-  glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0 );
-  glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.2 );
-  glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.01);
-  
-  glLightfv(GL_LIGHT0, GL_POSITION, light0_position);
-  
-// Light1 as fill light
-  float light1_ambient[] = { 0.0, 0.0, 0.0, 0.0 };
-  float light1_diffuse[] = { l0brightness, l0brightness, l0brightness, 0.0 };
-  float light1_specular[] = { l0brightness, l0brightness, l0brightness, 0.0 };
-  float light1_position[] = { -3, 2.5, 4, 1.0 };
-  float light1_direction[] = { -1.5, -2.0, -2.0, 1.0 };
-  
-  glLightfv(GL_LIGHT1, GL_DIFFUSE, light1_diffuse);
-  glLightfv(GL_LIGHT1, GL_SPECULAR, light1_specular);
-  glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 0.8 );
-  glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0.5 );
-  glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, 0.2);
-  
-  glLightfv(GL_LIGHT1, GL_POSITION, light1_position);
-
-// Light2 as background light
-  float light2_ambient[] = { 0.0, 0.0, 0.0, 0.0 };
-  float light2_diffuse[] = { 2.0, 2.0, 2.0, 0.0 };
-  float light2_specular[] = { 2.0, 2.0, 2.0, 0.0 };
-  float light2_position[] = { 0, 4, -5, 1.0 };
-  float light2_direction[] = { -1.5, -2.0, -2.0, 1.0 };
-  
-  glLightfv(GL_LIGHT2, GL_DIFFUSE, light2_diffuse);
-  glLightfv(GL_LIGHT2, GL_SPECULAR, light2_specular);
-  glLightf(GL_LIGHT2, GL_CONSTANT_ATTENUATION, 0.8 );
-  glLightf(GL_LIGHT2, GL_LINEAR_ATTENUATION, 0.4 );
-  glLightf(GL_LIGHT2, GL_QUADRATIC_ATTENUATION, 0.20);
-  
-  glLightfv(GL_LIGHT2, GL_POSITION, light2_position);
+  for (int i = 0; i < 3; ++i) {
+    glLightfv(GL_LIGHT0, GL_POSITION, lights[i].position);
+    glLightfv(GL_LIGHT0 + i, GL_DIFFUSE, lights[i].diffuse);
+    glLightfv(GL_LIGHT0 + i, GL_SPECULAR, lights[i].specular);
+    glLightf(GL_LIGHT0 + i, GL_CONSTANT_ATTENUATION, lights[i].const_atten);
+    glLightf(GL_LIGHT0 + i, GL_LINEAR_ATTENUATION, lights[i].linear_atten);
+    glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, lights[i].quadra_atten);
+  }
   glEnable(GL_LIGHTING);
-  
 }
+
 void draw_stuff(){
   SwitchLight();
   glEnable(GL_DEPTH_TEST);
@@ -144,18 +89,14 @@ void draw_stuff(){
   do_lights();
   glUseProgram(selected_shader_id);
   if (selected_shader_id) {
-   // if not using fixed shading
-   GLint light_switch_loc = glGetUniformLocation(
-                         selected_shader_id, "LtSwitch");
-   glUniform1i(light_switch_loc, LightSwitch); 
+   glUniform1iv(glGetUniformLocation(
+                    selected_shader_id, "LtSwitch"), 3, light_switch); 
   }
   model->DrawModel((int) DrawNormal, selected_shader_id);
   ground->DrawModel((int) DrawNormal, selected_shader_id);
   skydome->DrawModel((int) DrawNormal, selected_shader_id);
-  // printf("Using shader %d\n", selected_shader_id);
-}
 
-unsigned int mybuf[2] = { 1, 2 };
+}
 
 void GLSL_LogReport(int shader, bool is_print){
   GLint maxLength = 0;
@@ -203,14 +144,10 @@ void SetShadersOrDie(GLuint &shader, const char* vshader,
         read_shader_program(vshader);
   fs = GraphicUtilities::GraphicUtilities::
         read_shader_program(fshader);
-  bpfs = GraphicUtilities::GraphicUtilities::
-        read_shader_program(fshader);
-  // shader, # of string, array of string and array of tring length
   glShaderSource(pv, 1, (const char**)&vs, NULL);
   glShaderSource(pf, 1, (const char**)&fs, NULL);
   free(vs);
   free(fs);
-  free(bpfs);
   glCompileShader(pv);
   assert(CompileSuccess(pv));
   glCompileShader(pf);
@@ -227,7 +164,6 @@ void SetShadersOrDie(GLuint &shader, const char* vshader,
   return ;
 }
 
-
 void init(const char* model_path, const char* vshader_path, 
     const char* fshader_path) {
   camera = new GraphicCamera::GraphicCamera(Vec3d(0, 2, 4),
@@ -241,11 +177,9 @@ void init(const char* model_path, const char* vshader_path,
   skydome->InitModelData(selected_shader_id);
 }
 
-
 void KeyBoardHandler(unsigned char key, int x, int y){
   switch (key) {
     case 'q':
-      glDeleteBuffers(2, /*(GLuint*)*/ mybuf);
       exit(1);
       break;
     case 'a':
@@ -253,74 +187,36 @@ void KeyBoardHandler(unsigned char key, int x, int y){
         RENDER_MODE = 0;
       RENDER_MODE ^= GL_CONTROL_DEF::KAA_MARKER;
       printf("Set AA to %d \n", (RENDER_MODE & GL_CONTROL_DEF::KAA_MARKER) > 0);
-      WantToRedraw = true;
       break;
     case 'w':
       AALevel = (AALevel + 4)%16;
       if (AALevel == 0) {
         AALevel = 16;
       }
-      WantToRedraw = true;
       break;
     case 'b':
       if ((RENDER_MODE & (~GL_CONTROL_DEF::KDOF_MARKER)) != 0 )
         RENDER_MODE = 0;
       RENDER_MODE ^= GL_CONTROL_DEF::KDOF_MARKER;
       printf("Set DoF to %d \n", (RENDER_MODE & GL_CONTROL_DEF::KDOF_MARKER) > 0);
-      WantToRedraw = true;
       break;
     case 'z':
       if(camera->focus() > 0.2) camera->focus() -= 0.03;
-      WantToRedraw = true;
-      fprintf(stderr, "current_focus: %f\n", camera->focus());
       break;
     case 'x':
       if(camera->focus() < 100.0) camera->focus() += 0.03;
-      WantToRedraw = true;
-      
-      fprintf(stderr, "current_focus: %f\n", camera->focus());
-      break;
-    case 's':
-      (++selected_shader_id) %= 2;
       break;
     case 'n':
       DrawNormal = !DrawNormal;
       break;
-    case 'f':
-      IsDrawFrame = !IsDrawFrame;
-      break;
-    case 'g':
-      IsDrawGrid = !IsDrawGrid;
-      break;
-    case '2':
-      IsFillLight = !IsFillLight;
-      break;
     case '1':
-      IsKeyLight = !IsKeyLight;
-      break;
+    case '2':
     case '3':
-      IsBgLight = !IsBgLight;
-      break;
-    case 'i':
-      shininess += 0.1f;
-      // do_material();
-      break;
-    case 'o':
-      shininess -= 0.1f;
-      // do_material();
-      break;
-    case 'k':
-      l0brightness +=0.1f;
-      do_lights();
-      break;
-    case 'l':
-      l0brightness -=0.1f;
-      do_lights();
+      light_switch[key - '1'] = !light_switch[key - '1'];
       break;
     default:
-      break;
+      return;
   }
-//  printf("Shininess: %f\n", shininess);
   WantToRedraw = true;
 }
 
@@ -348,39 +244,29 @@ void RenderScene(){
 }
 
 void Redraw(){
-  if (WantToRedraw)
-    RenderScene();
+  if (WantToRedraw)  RenderScene();
 }
 
 void mouseEventHandler(int button, int state, int x, int y) {
-    // let the camera handle some specific mouse events (similar to maya)
-      camera->MouseEventHandler(button, state, x, y);
+  camera->MouseEventHandler(button, state, x, y);
 }
 
 void motionEventHandler(int x, int y) {
-    // let the camera handle some mouse motions if the camera is to be moved
-      camera->MouseMotionEventHandler(x, y);
-      glutPostRedisplay();
+  camera->MouseMotionEventHandler(x, y);
+  glutPostRedisplay();
 }
 
-/*
- Main program to draw the square, change colors, and wait for quit
- */
 int main(int argc, char* argv[]){
   if(argc != 6){
     fprintf(stderr, "usage: show_bunny vertex_shader frag_shader model1.obj model2.obj sky.obj\n");
     exit(1);
   }
   glutInit(&argc, argv);
-
-  // make GLUT select a double buffered display that uses RGBA colors
-  // Julian: Add GLUT_DEPTH when in 3D program so that 3D objects drawed
-  // correctly regardless the order they draw
   glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH |
                        GLUT_DOUBLE |GLUT_ACCUM );
   glutInitWindowSize(WIDTH, HEIGHT);
   //  glutInitWindowPosition(50, 50);
-  glutCreateWindow("Golden Bunny");
+  glutCreateWindow("Porcelain teapot with cracks");
   
   model = new GraphicModel(0, false);
   ground = new GraphicModel(2, false);
@@ -402,5 +288,3 @@ int main(int argc, char* argv[]){
   // callback routine to handle each event that is detected
   return 0;
 }
-
-#endif

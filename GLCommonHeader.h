@@ -28,6 +28,4 @@
   #include <GL/glext.h>
 #endif
 #define kPI 3.141592653
-#define MAIN_PROG
-//#define TESTING_
 #endif

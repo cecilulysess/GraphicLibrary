@@ -69,11 +69,6 @@ public:
                             render_callback render_frame);
   void DoFPerspectiveDisplay(int width, int height, int blur_level,
                              render_callback render_frame);
-  
-  // set the clipping planes
-  void SetClippingPlanes(float near, float far);
-  // set the direction aim position
-  void SetCenterOfFocus(const Vec3d& new_center);
 
   void MouseEventHandler(int button, int state, int x, int y);
   void MouseMotionEventHandler(int x, int y);

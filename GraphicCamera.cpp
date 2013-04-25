@@ -123,16 +123,6 @@ GraphicCamera::GraphicCamera::GraphicCamera(const Vec3d& pos,
   Init();
 }
 
-void GraphicCamera::SetClippingPlanes(float near, float far) {
-  fru_.Near() = near;
-  fru_.Far() = far;
-}
-
-void GraphicCamera::SetCenterOfFocus(const Vec3d& new_center) {
-  Vec3d dif = new_center - aim_;
-  GetCoordinate(pos_ + dif, new_center, up_);
-}
-
 // Set up perspective display with this camera
 void GraphicCamera::PerspectiveDisplay(int width, int height) {
   glMatrixMode(GL_PROJECTION);
@@ -202,10 +192,10 @@ void RotateX(Vec3d &v, double degree){
 
 void RotateY(Vec3d &v, double degree){
     double c = cos(Deg2Rad(degree));
-      double s = sin(Deg2Rad(degree));
-        double v0 = v[0] * c + v[2] * s;
-          double v2 = -v[0] * s + v[2] * c;
-            v[0] = v0; v[2] = v2; 
+    double s = sin(Deg2Rad(degree));
+    double v0 = v[0] * c + v[2] * s;
+    double v2 = -v[0] * s + v[2] * c;
+        v[0] = v0; v[2] = v2; 
 }
 
 void ArbitraryRotate(Vec3d U, Vec3d V, Vec3d W,
@@ -274,7 +264,6 @@ void GraphicCamera::MouseMotionEventHandler(int x, int y) {
     }
 
     switch(CameraMode) {
-
       case kZOOM:
         z = (double) d / 100.0;
         dir = aim_ - pos_;
@@ -339,13 +328,8 @@ const GraphicCamera& GraphicCamera::operator=(const GraphicCamera& cam) {
   aim_ = cam.aim_;
   pos_ = cam.pos_;
   up_ = cam.up_;
-
   return *this;
 }
-
-  
-
-  
 
 //=====================Below is the implementation of AA and DoF===============
 // These data comes from OpenGL Programming Guide
@@ -355,33 +339,21 @@ Matrixd jitterTable4 = {
 };
 
 Matrixd jitterTable8 = {
-  {0.5625, 0.4375},
-  {0.0625, 0.9375},
-  {0.3125, 0.6875},
-  {0.6875, 0.8124},
-  {0.8125, 0.1875},
-  {0.9375, 0.5625},
-  {0.4375, 0.0625},
-  {0.1875, 0.3125}
+  {0.5625, 0.4375}, {0.0625, 0.9375}, {0.3125, 0.6875}, {0.6875, 0.8124},
+  {0.8125, 0.1875}, {0.9375, 0.5625}, {0.4375, 0.0625}, {0.1875, 0.3125}
 };
 
 Matrixd jitterTable12 = {
   {0.4166666666, 0.625}, {0.9166666666, 0.875}, {0.25, 0.375},
-  
   {0.4166666666, 0.125}, {0.75, 0.125}, {0.0833333333, 0.125}, {0.75, 0.625},
-  
   {0.25, 0.875}, {0.5833333333, 0.375}, {0.9166666666, 0.375},
-  
   {0.0833333333, 0.625}, {0.583333333, 0.875}
 };
 
 Matrixd jitterTable16 = {
   {0.375, 0.4375}, {0.625, 0.0625}, {0.875, 0.1875}, {0.125, 0.0625},
-  
   {0.375, 0.6875}, {0.875, 0.4375}, {0.625, 0.5625}, {0.375, 0.9375},
-  
   {0.625, 0.3125}, {0.125, 0.5625}, {0.125, 0.8125}, {0.375, 0.1875},
-  
   {0.875, 0.9375}, {0.875, 0.6875}, {0.125, 0.3125}, {0.625, 0.8125}
 };
 
@@ -430,9 +402,7 @@ void GraphicCamera::DoFPerspectiveDisplay(int width, int height,
         glAccum(GL_ACCUM, 1.0/accu_times);
       }
     }
-    
     glAccum(GL_RETURN, 1.0);
-    //  glFlush();
   }
 
 void GraphicCamera::JitterCamera(GLfloat pix_x, GLfloat pix_y,
@@ -456,30 +426,15 @@ void GraphicCamera::JitterCamera(GLfloat pix_x, GLfloat pix_y,
   
   GLfloat dx, dy;
   dx = - (pix_x * frustumWidth/wndWidth + eye_x * fru_.Near() / focus);
-  //  dx = (eye_x - fru->Near()/focus * eye_x);
   dy = - (pix_y * frustumHeight/WndHeight + eye_y * fru_.Near() / focus);
-  //  printf("world delta = %f %f\n",dx,dy);q
   glFrustum(fru_.Left() + dx, fru_.Right() + dx, fru_.Bottom() + dy,
             fru_.Top() + dy, fru_.Near(), fru_.Far() );
   glMatrixMode(GL_MODELVIEW);
-//  //  glPushMatrix();
-//  //Problematic to do a view translation here, it will remove the materials.
-//  glLoadIdentity();
-//  glRotated(0, 0, 0, 1);
-//  glRotated(10, 1, 0, 0);
-//  glRotated(0, 0, 1, 0);
-//  glTranslated(0, -0.15, -0.4);
-//  //  cout<<"Translate Eye:"<<eye_x <<", "<<eye_y<<endl;
-//  glTranslatef(-eye_x, -eye_y, 0.0);
-//  //  glPopMatrix();
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   gluLookAt(pos_.x() + eye_x, pos_.y() + eye_y, pos_.z(),
             aim_.x(), aim_.y(), aim_.z(),
             up_.x(),  up_.y(),  up_.z());
-//  glTranslated(-eye_x, -eye_x, 0.0);
-
-//  glTranslated(-pos_.x(), -pos_.y(), -pos_.z());
 }
 
 // jitter a camera by pixels in x and y
@@ -525,135 +480,23 @@ void GraphicCamera::JitterCamera(GLfloat pix_x, GLfloat pix_y) {
   }
   
   
-  inline double& Frustum::Left() {
-    return this->left;
-  }
+  inline double& Frustum::Left() { return this->left; }
   
-  inline double& Frustum::Right() {
-    return this->right;
-  }
+  inline double& Frustum::Right() { return this->right; }
   
+  inline double& Frustum::Top(){ return this->top; }
   
-  inline double& Frustum::Top(){
-    return this->top;
-  }
+  inline double& Frustum::Bottom(){ return this->bottom; }
   
-  inline double& Frustum::Bottom(){
-    return this->bottom;
-  }
+  inline double& Frustum::Near(){ return this->near; }
   
-  inline double& Frustum::Near(){
-    return this->near;
-  }
+  inline double& Frustum::Far(){ return this->far; }
   
-  inline double& Frustum::Far(){
-    return this->far;
-  }
+  inline double& Frustum::FoV() { return  this->fov; }
   
-  inline double& Frustum::FoV() {
-    return  this->fov;
-  }
-  
-  Matrix4d& Frustum::GetMatrix(){
-    return this->matrix;
-  }
+  Matrix4d& Frustum::GetMatrix(){ return this->matrix; }
   
   
   
   
-  // This function comes from the code of Songho's works:
-  //    http://www.songho.ca/opengl/gl_transform.html#modelview
-  // I use this as debug helper functions that help me better understand
-  // about the OpenGL frustum works.
-  // It should not be used in the assignment
-  void Frustum::DrawFrustum(float fovY, float aspectRatio, float nearPlane, float farPlane){
-    float tangent = tanf(fovY/2 * 3.141593f / 180.0);
-    float nearHeight = nearPlane * tangent;
-    float nearWidth = nearHeight * aspectRatio;
-    float farHeight = farPlane * tangent;
-    float farWidth = farHeight * aspectRatio;
-    
-    // compute 8 vertices of the frustum
-    float vertices[8][3];
-    // near top right
-    vertices[0][0] = nearWidth;     vertices[0][1] = nearHeight;    vertices[0][2] = -nearPlane;
-    // near top left
-    vertices[1][0] = -nearWidth;    vertices[1][1] = nearHeight;    vertices[1][2] = -nearPlane;
-    // near bottom left
-    vertices[2][0] = -nearWidth;    vertices[2][1] = -nearHeight;   vertices[2][2] = -nearPlane;
-    // near bottom right
-    vertices[3][0] = nearWidth;     vertices[3][1] = -nearHeight;   vertices[3][2] = -nearPlane;
-    // far top right
-    vertices[4][0] = farWidth;      vertices[4][1] = farHeight;     vertices[4][2] = -farPlane;
-    // far top left
-    vertices[5][0] = -farWidth;     vertices[5][1] = farHeight;     vertices[5][2] = -farPlane;
-    // far bottom left
-    vertices[6][0] = -farWidth;     vertices[6][1] = -farHeight;    vertices[6][2] = -farPlane;
-    // far bottom right
-    vertices[7][0] = farWidth;      vertices[7][1] = -farHeight;    vertices[7][2] = -farPlane;
-    
-    float colorLine1[4] = { 0.7f, 0.7f, 0.7f, 0.7f };
-    float colorLine2[4] = { 0.2f, 0.2f, 0.2f, 0.7f };
-    float colorPlane[4] = { 0.5f, 0.5f, 0.5f, 0.5f };
-    
-    glDisable(GL_LIGHTING);
-    glDisable(GL_CULL_FACE);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    
-    // draw the edges around frustum
-    glBegin(GL_LINES);
-    glColor4fv(colorLine2);
-    glVertex3f(0, 0, 0);
-    glColor4fv(colorLine1);
-    glVertex3fv(vertices[4]);
-    
-    glColor4fv(colorLine2);
-    glVertex3f(0, 0, 0);
-    glColor4fv(colorLine1);
-    glVertex3fv(vertices[5]);
-    
-    glColor4fv(colorLine2);
-    glVertex3f(0, 0, 0);
-    glColor4fv(colorLine1);
-    glVertex3fv(vertices[6]);
-    
-    glColor4fv(colorLine2);
-    glVertex3f(0, 0, 0);
-    glColor4fv(colorLine1);
-    glVertex3fv(vertices[7]);
-    glEnd();
-    
-    glColor4fv(colorLine1);
-    glBegin(GL_LINE_LOOP);
-    glVertex3fv(vertices[4]);
-    glVertex3fv(vertices[5]);
-    glVertex3fv(vertices[6]);
-    glVertex3fv(vertices[7]);
-    glEnd();
-    
-    glColor4fv(colorLine1);
-    glBegin(GL_LINE_LOOP);
-    glVertex3fv(vertices[0]);
-    glVertex3fv(vertices[1]);
-    glVertex3fv(vertices[2]);
-    glVertex3fv(vertices[3]);
-    glEnd();
-    
-    // draw near and far plane
-    glColor4fv(colorPlane);
-    glBegin(GL_QUADS);
-    glVertex3fv(vertices[0]);
-    glVertex3fv(vertices[1]);
-    glVertex3fv(vertices[2]);
-    glVertex3fv(vertices[3]);
-    glVertex3fv(vertices[4]);
-    glVertex3fv(vertices[5]);
-    glVertex3fv(vertices[6]);
-    glVertex3fv(vertices[7]);
-    glEnd();
-    
-    glEnable(GL_CULL_FACE);
-    glEnable(GL_LIGHTING);
-  }
- 
 } //ns GraphicCamera

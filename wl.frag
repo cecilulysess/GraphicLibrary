@@ -1,4 +1,4 @@
-uniform vec3 eye_position, light_position;
+niform vec3 eye_position, light_position;
 
 varying vec3 wc_normal, wc_position;
 

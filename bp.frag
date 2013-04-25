@@ -1,5 +1,5 @@
 varying vec3 ec_vnormal, ec_vposition, ec_vtangent, ec_vbitangent, ec_reflect;
-uniform int LtSwitch, IsNormalMap, IsEnvLightSrc;
+uniform int LtSwitch[3], IsNormalMap, IsEnvLightSrc;
 uniform sampler2D mytexture;
 uniform sampler2D mynormalmap;
 uniform sampler2D diffuse_irr_map;
@@ -7,7 +7,7 @@ uniform sampler2D specular_irr_map;
 
 void main() {
   vec2 d_irr_idx, s_irr_idx;
-  float attent[3] = {0.0, 0.0, 0.0};
+  float attent[3];
   vec2 flipped_texcoord = vec2(gl_TexCoord[0].x, 1.0 - gl_TexCoord[0].y);
   
   vec3 P, N, L[3], V, H[3], mapN, R, tcolor, d_irr, s_irr;
@@ -63,18 +63,10 @@ void main() {
     diff[i] = diff[i] * coef + (1 - coef) * vec4(tcolor * coef + (1-coef) * d_irr, 1.0);
   }
 
-  if (! (LtSwitch & 0x1) ) {
-    diff[0] *= 0.0;
-    spec[0] *= 0.0; 
-  }
-  if (! (LtSwitch & 0x2) ) {
-    diff[1] *= 0.0;
-    spec[1] *= 0.0;
-
-  }
-  if (! (LtSwitch & 0x4) ) {
-    diff[2] *= 0.0;
-    spec[2] *= 0.0;
+  for (int i = 0; i < 3; ++i){
+    if (LtSwitch[i] == 0){
+      diff[i] = 0.0, spec[i] = 0.0;
+    }
   }
 
   if (IsEnvLightSrc) {

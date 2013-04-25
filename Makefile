@@ -22,8 +22,8 @@ else
 endif
 
 
-HFILES 	= GraphicUtilities.${H} GLCommonHeader.${H} GraphicObject.${H} GraphicMath.${H} GraphicCamera.${H} GraphicModel.${H}
-OFILES 	= GraphicUtilities.o GraphicMath.o GraphicObject.o GraphicCamera.o GraphicModel.o
+HFILES 	= GraphicUtilities.${H} GLCommonHeader.${H} GraphicMath.${H} GraphicCamera.${H} GraphicModel.${H}
+OFILES 	= GraphicUtilities.o GraphicMath.o  GraphicCamera.o GraphicModel.o
 	
 PROJECT = main_base
 
@@ -35,9 +35,6 @@ ${PROJECT}.o: ${PROJECT}.${C} $(HFILES)
 
 GraphicUtilities.o: GraphicUtilities.${C} GraphicUtilities.${H} 
 	${CC} $(CFLAGS) -c GraphicUtilities.${C}
-
-GraphicObject.o: GraphicObject.${C} GraphicObject.${H} 
-	${CC} $(CFLAGS) -c GraphicObject.${C}
 
 GraphicMath.o: GraphicMath.${C} GraphicMath.${H}
 	${CC} $(CFLAGS) -c GraphicMath.${C}
