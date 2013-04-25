@@ -16,7 +16,6 @@ void main() {
   float shininess = gl_FrontMaterial.shininess;
 
   P = ec_vposition;
-  //N = normalize(ec_vnormal);
   V = normalize(-P);
   R = 0.99 * normalize(ec_reflect);
   vec3 light_dir;
