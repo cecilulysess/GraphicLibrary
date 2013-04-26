@@ -85,7 +85,11 @@ public:
   void DoFPerspectiveDisplay(int width, int height, int blur_level,
                              render_callback render_frame);
 
-
+  void MoveCamera(float x, float y, float z) {
+    this->pos_.x +=x;
+    this->pos_.y +=y;
+    this->pos_.z +=z;
+  }
   const GraphicCamera& operator=(const GraphicCamera& cam);
 
   const vec3d& position() const { return pos_; } 

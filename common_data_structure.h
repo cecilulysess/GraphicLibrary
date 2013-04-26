@@ -10,7 +10,6 @@
 #ifndef Graphic_common_data_structure_h
 #define Graphic_common_data_structure_h
 
-#include "GraphicMath.h"
 
 namespace GL_CONTROL_DEF {
   const unsigned int KAA_MARKER = 0x1;

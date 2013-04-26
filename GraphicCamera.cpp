@@ -45,9 +45,9 @@ GraphicCamera::GraphicCamera(const float* pos,
                              fru_(60, 1.333, 0.02, 100){
 
   vec3d zaixs(pos[0] - aim[0], pos[1] - aim[1], pos[2] - aim[2]);
-  zaixs.print_v();
+  // zaixs.print_v();
   vec3d nzaixs(-zaixs.x, -zaixs.y, -zaixs.z);
-  nzaixs.print_v();
+  // nzaixs.print_v();
   vec3d dir = nzaixs.Normalization();
   vec3d _up = (new vec3d(up[0], up[1], up[2]))->Normalization();
   vec3d xaxis = dir.cross(_up);

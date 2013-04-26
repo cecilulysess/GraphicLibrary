@@ -17,6 +17,8 @@
 #include <stdlib.h>
 #include <math.h>
 #include <assert.h>
+#include <iostream>
+using namespace std;
 
 #include "GLCommonHeader.h"
 #include "common_data_structure.h"
@@ -27,18 +29,18 @@
 #define WIDTH 1024
 #define HEIGHT 768
 
-unsigned int RENDER_MODE = 0;
+unsigned int RENDER_MODE = 0x2;
 int light_switch[3] = {1, 1, 1};
 int AALevel = 4;
 bool WantToRedraw = false, DrawNormal = false;
-double focus = 1.2;
+double focus = 2.4;
 
 GraphicModel *model, *ground, *skydome;
 GraphicCamera::GraphicCamera *camera;
 
 GLuint selected_shader_id = 0;
 
-float eye_loc[] = {0.0, 2.0, 4.0}, eye_aim[] = {0.0, 1.0, 0.0};
+float eye_loc[] = {-3.5, 2, -2}, eye_aim[] = {0.0, 1.0, 0.0};
 
 
 typedef struct LightSource{
@@ -51,16 +53,16 @@ typedef struct LightSource{
 LightSource lights[3] = {
   { 1, 1, 1, 0,
     1, 1, 1, 0,
-    3, 4, 3, 1.0,
-    0, 0.2, 0.01   },
+    -5, 1, 0, 1.0,
+    0.5, 0.2, 0.01   },
   { 1, 1, 1, 0,
     1, 1, 1, 0,
-    -3, 2.5, 4, 1.0,
-    0.8, 0.5, 0.2   },
-  { 2, 2, 2, 0,
-    2, 2, 2, 0,
-    0, 4, -5, 1.0,
-    0.8, 0.4, 0.2    }
+    -12, 10, -20, 1.0,
+    0.9, 0.05, 0.01   },
+  { 1, 1, 1, 0,
+    1, 1, 1, 0,
+    4, 5, 6, 1.0,
+    0.4, 0.2, 0.01    }
 };
 
 
@@ -75,12 +77,12 @@ void SwitchLight(){
 
 void do_lights(){
   for (int i = 0; i < 3; ++i) {
-    glLightfv(GL_LIGHT0, GL_POSITION, lights[i].position);
+    glLightfv(GL_LIGHT0 + i, GL_POSITION, lights[i].position);
     glLightfv(GL_LIGHT0 + i, GL_DIFFUSE, lights[i].diffuse);
     glLightfv(GL_LIGHT0 + i, GL_SPECULAR, lights[i].specular);
     glLightf(GL_LIGHT0 + i, GL_CONSTANT_ATTENUATION, lights[i].const_atten);
     glLightf(GL_LIGHT0 + i, GL_LINEAR_ATTENUATION, lights[i].linear_atten);
-    glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, lights[i].quadra_atten);
+    glLightf(GL_LIGHT0 + i, GL_QUADRATIC_ATTENUATION, lights[i].quadra_atten);
   }
   glEnable(GL_LIGHTING);
 }
@@ -96,7 +98,9 @@ void draw_stuff(){
    glUniform1iv(glGetUniformLocation(
                     selected_shader_id, "LtSwitch"), 3, light_switch); 
   }
+  glRotatef(180, 0, 1, 0);
   model->DrawModel((int) DrawNormal, selected_shader_id);
+  glRotatef(-180, 0, 1, 0);
   ground->DrawModel((int) DrawNormal, selected_shader_id);
   skydome->DrawModel((int) DrawNormal, selected_shader_id);
 
