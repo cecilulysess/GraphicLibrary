@@ -11,8 +11,8 @@
 //
 #include "GLCommonHeader.h"
 #include "GraphicCamera.h"
-#include <math.h>
 
+#include <stdio.h>
 namespace GraphicCamera {
   
 static const int kINACTIVE = 0;
@@ -26,102 +26,57 @@ static const float kEPSILON = 1e-5;
 inline double Rad2Deg(double rad) { return rad / kPI * 180.0; }
 inline double Deg2Rad(double deg) { return deg / 180 * kPI;}
 
-Matrix4d MvMat;
-Matrix4d ProjMat;
-GLint ViewPort[4];
 
-int CameraMode = kINACTIVE;
-Vec3d PrevMousePos;
 
-double dt_elev, dt_azim, loc_dt_elev, loc_dt_azim;
+// GraphicCamera::GraphicCamera() : 
+//   fru_(60, 1.333,0.02, 100){
+//   this->focus_ = 1;
+//   pos_ = new vec3d(0.0, 1.0, 2.0);
+//   aim_ = new vec3d(0.0, 0.0, 0.0);
+//   up_  = new vec3d(0.0, 1.0, 0.0);
 
-// set camera position, aim, up. Verify, and make up the true up direction
-void GraphicCamera::GetCoordinate(const Vec3d& pos, const Vec3d& aim,
-                                  const Vec3d& up){
-  Vec3d zaixs = pos - aim;
-  if (zaixs.Norm() < kEPSILON) {
-    throw "Camera position and aim are the same. Problematic";
-    exit(1);
-  }
-  Vec3d dir = -zaixs.Normalization();
-  Vec3d _up = up.Normalization();
-  Vec3d xaxis = dir % _up;
+// }
+
+
+
+// Constructor with position, aim, and up vector
+GraphicCamera::GraphicCamera(const float* pos, 
+                             const float* aim, const float* up, double focus) :
+                             fru_(60, 1.333, 0.02, 100){
+
+  vec3d zaixs(pos[0] - aim[0], pos[1] - aim[1], pos[2] - aim[2]);
+  zaixs.print_v();
+  vec3d nzaixs(-zaixs.x, -zaixs.y, -zaixs.z);
+  nzaixs.print_v();
+  vec3d dir = nzaixs.Normalization();
+  vec3d _up = (new vec3d(up[0], up[1], up[2]))->Normalization();
+  vec3d xaxis = dir.cross(_up);
   if (xaxis.Norm() < kEPSILON ) {
+    fprintf(stderr, "Error xaxis: %f %f %f\n", 
+      zaixs.x, zaixs.y, zaixs.z);
+      //xaxis.x, xaxis.y, xaxis.z);
     throw "Up parallel to aim. Wrong parameter";
   }
 
-  this->pos_ = pos;
-  this->aim_ = aim;
-  this->up_ = xaxis.Normalization() % dir; // make it always perpendicular
+  this->pos_ = *(new vec3d(pos));
+  this->aim_ = *(new vec3d(aim));
+  this->up_ = xaxis.Normalization().cross(dir); // make it always perpendicular
                                         // to dir
-}
-
-void GraphicCamera::Init(){
-  Vec3d axis_origin, update_pos;
-  Vec3d tmp, tmp1, tmp2;
-
-  default_position = pos_;
-  default_aim = aim_;
-  default_up = up_;
-
-  // the angle around x axis
-  update_pos = pos_ - aim_;
-  axis_origin.x() = update_pos.x();
-  double dist = (axis_origin - update_pos).Norm();
-  
-  tmp1.x() = update_pos.x();
-  tmp1.z() = dist;
-  
-  tmp = update_pos.Normalize();
-  tmp1 = tmp1.Normalize();
-
-  current_elev = Rad2Deg(acos(tmp * tmp1));
-  
-  // the angle around y axis
-  axis_origin = {0, update_pos.y(), 0};
-
-  dist = (axis_origin - update_pos).Norm();
-
-  tmp2 = {0, update_pos.y(), dist};
-  tmp2 = tmp2.Normalize();
-
-  current_azim = 360.0 - Rad2Deg(acos(tmp2 * tmp));
-
-  default_azim = current_azim;
-  default_elev = current_elev;
-}
-
-GraphicCamera::GraphicCamera() :
-                             fru_(60, 1.333,0.02, 100){
-  pos_ = {0.0, 1.0, 2.0};
-  aim_ = {0.0, 0.0, 0.0};
-  up_  = {0.0, 1.0, 0.0};
-
-  this->focus_ = 1;
-  Init();
-}
-
-// Constructor with position, aim, and up vector
-GraphicCamera::GraphicCamera(const Vec3d& pos, 
-                             const Vec3d& aim, const Vec3d up, double focus) :
-                             fru_(60, 1.333, 0.02, 100){
-  this->GetCoordinate(pos, aim, up);
   this->focus_ = focus;
-
-  Init();
 }
 
-// Constructor with position, aim, and up vercor as well as the
-//  clipping plane and view angle (FoV)
-GraphicCamera::GraphicCamera::GraphicCamera(const Vec3d& pos, 
-    const Vec3d& aim, const Vec3d up, float near, float far, 
-                                            float ViewAngle,
-                                            double focus) :
-    fru_(ViewAngle, 1.333, near, far){
-  this->GetCoordinate(pos, aim, up);
-  this->focus_ = focus;
-  Init();
-}
+
+// // Constructor with position, aim, and up vercor as well as the
+// //  clipping plane and view angle (FoV)
+// GraphicCamera::GraphicCamera::GraphicCamera(const Vec3d& pos, 
+//     const Vec3d& aim, const Vec3d up, float near, float far, 
+//                                             float ViewAngle,
+//                                             double focus) :
+//     fru_(ViewAngle, 1.333, near, far){
+//   this->GetCoordinate(pos, aim, up);
+//   this->focus_ = focus;
+//   Init();
+// }
 
 // Set up perspective display with this camera
 void GraphicCamera::PerspectiveDisplay(int width, int height) {
@@ -132,196 +87,9 @@ void GraphicCamera::PerspectiveDisplay(int width, int height) {
                  fru_.Near(), fru_.Far());
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  gluLookAt(pos_.x(), pos_.y(), pos_.z(),
-            aim_.x(), aim_.y(), aim_.z(),
-            up_.x(),  up_.y(),  up_.z());
-}
-
-void GraphicCamera::MouseEventHandler(int button, int state, int x, int y){ 
-  double realy, wx, wy, wz;
-  // if ALT key used
-//  int mode = glutGetModifiers();  
-  
-  if (state == GLUT_UP && CameraMode != kINACTIVE) {
-    current_elev += dt_elev;
-    current_azim += dt_azim;
-    //reset change in elevation and roll of the camera;
-    dt_elev = dt_azim = 0.0;
-    CameraMode = kINACTIVE;
-  } else if (state == GLUT_DOWN) { 
-    MouseStartX = MousePrevX = x;
-    MouseStartY = MousePrevY = y;
-    switch(button) {
-      case GLUT_LEFT_BUTTON:
-        //rotating 
-        CameraMode = kROTATE;
-        break;
-      case GLUT_MIDDLE_BUTTON:
-        // translating
-        CameraMode = kTRANSLATE;
-        glGetIntegerv(GL_VIEWPORT, ViewPort);
-        glGetDoublev(GL_MODELVIEW_MATRIX, MvMat.GetPtr());
-        glGetDoublev(GL_PROJECTION_MATRIX, ProjMat.GetPtr());
-        // height of window in pixels
-        realy = ViewPort[3] - y - 1;
-        gluProject(aim_.x(), aim_.y(), aim_.z(), MvMat.GetPtr(), 
-                   ProjMat.GetPtr(), ViewPort, &wx, &wy, &wz);
-        gluUnProject((GLdouble) x, (GLdouble) realy, wz, MvMat.GetPtr(),
-                     ProjMat.GetPtr(), ViewPort, &PrevMousePos.x(), 
-                     &PrevMousePos.y(), &PrevMousePos.z()); 
-        break;
-      case GLUT_RIGHT_BUTTON:
-        CameraMode = kZOOM;
-        break;
-    }
-  }
-}
-
-//
-// Rotation routines - regular functions, not methods
-//
-
-void RotateX(Vec3d &v, double degree){
-  double c = cos(Deg2Rad(degree));
-  double s = sin(Deg2Rad(degree));
-  double v1 = v[1] * c - v[2] * s;
-  double v2 = v[1] * s + v[2] * c;
-  v[1] = v1; v[2] = v2; 
-  return;
-}
-
-void RotateY(Vec3d &v, double degree){
-    double c = cos(Deg2Rad(degree));
-    double s = sin(Deg2Rad(degree));
-    double v0 = v[0] * c + v[2] * s;
-    double v2 = -v[0] * s + v[2] * c;
-        v[0] = v0; v[2] = v2; 
-}
-
-void ArbitraryRotate(Vec3d U, Vec3d V, Vec3d W,
-                     double degreeX, double degreeY,
-                     Vec3d& point, Vec3d aim) {
-  double cx = cos(Deg2Rad(degreeX));
-  double sx = sin(Deg2Rad(degreeX));
-  double cy = cos(Deg2Rad(degreeY));
-  double sy = sin(Deg2Rad(degreeY));
-  
-  Matrixd trans = { {1, 0, 0, -aim[0]},
-    {0, 1, 0, -aim[1]},
-    {0, 0, 1, -aim[2]},
-    {0, 0, 0, 1}};
-  
-  Matrixd mat = { {U[0], U[1], U[2], 0},
-    {V[0], V[1], V[2], 0},
-    {W[0], W[1], W[2], 0},
-    {0, 0, 0, 1}};
-  
-  Matrixd rot(4, 4);
-  Matrixd pos =  {{point[0]}, {point[1]}, {point[2]}, {1}};
-  
-  pos = trans * pos;
-  
-  pos = mat*pos;
-  
-  rot = {{1,   0,  0, 0},
-    {0,  cx, sx, 0},
-    {0, -sx, cx, 0},
-    {0,   0,  0, 1}};
-  
-  pos = rot*pos;
-  
-  rot = {{ cy, 0, sy, 0},
-    {0, 1,  0, 0},
-    {-sy, 0, cy, 0},
-    {0, 0,  0, 1}};
-  
-  pos = rot * pos;
-  
-  pos = mat.inv()*pos;
-  
-  pos = trans.inv()*pos;
-  
-  point = {pos.get(0, 0), pos.get(1, 0), pos.get(2, 0)};
-}
-
-
-void GraphicCamera::MouseMotionEventHandler(int x, int y) {
-  int mouse_dx, mouse_dy, d;
-  double z;
-  Vec3d mouse_pos, dir;
-  Vec3d WndX, WndY, WndZ;
-  float realy;
-  double wx, wy, wz;
-
-  if (CameraMode != kINACTIVE) {
-    mouse_dx = x - MousePrevX;
-    mouse_dy = y - MousePrevY;
-
-    if (abs(mouse_dx) > abs(mouse_dy)) {
-      d = mouse_dx;
-    } else {
-      d = mouse_dy;
-    }
-
-    switch(CameraMode) {
-      case kZOOM:
-        z = (double) d / 100.0;
-        dir = aim_ - pos_;
-        if (dir.Norm() < 0.1 && z > 0) {
-          z *= 10.0;
-          aim_ = aim_ + z * dir;
-        }
-        pos_ = pos_ + z * dir;
-        break;
-      case kROTATE:
-        dt_azim = ((double) (x - MouseStartX)) / 5.0;
-        dt_elev = ((double) (y - MouseStartY)) / 5.0;
-        
-        loc_dt_azim = ((double) mouse_dx) / 5.0;
-        loc_dt_elev = ((double) mouse_dy) / 5.0;
-
-        WndX = {1.0, 0.0, 0.0};
-        WndY = {0.0, 1.0, 0.0};
-
-        RotateX(WndX, current_elev + dt_elev);
-        RotateY(WndX, current_azim + dt_azim);
-        WndX.z() *= -1;
-        
-        RotateX(WndY, current_elev + dt_elev);
-        RotateY(WndY, current_azim + dt_azim);
-        WndY.z() *= -1;
-
-        WndZ = (WndX % WndY).Normalization();
-
-        ArbitraryRotate(WndX, WndY, WndZ, loc_dt_elev, 0, pos_, aim_);
-        ArbitraryRotate(Vec3d(1, 0, 0), Vec3d(0, 1, 0), Vec3d(0, 0, 1), 0,
-                        -loc_dt_azim, pos_, aim_);
-        up_ = WndY.Normalization();
-
-        break;
-      case kTRANSLATE:
-
-        realy = ViewPort[3] - y - 1;
-        gluProject(aim_.x(), aim_.y(), aim_.z(), MvMat.GetPtr(),
-                   ProjMat.GetPtr(), ViewPort,
-                   &wx, &wy, &wz);
-
-        gluUnProject((GLdouble) x, (GLdouble) realy, wz, MvMat.GetPtr(),
-                     ProjMat.GetPtr(),
-                     ViewPort, &mouse_pos.x(), &mouse_pos.y(), 
-                     &mouse_pos.z());
-        
-        // move both the camera position and its aim coordinate
-        dir = mouse_pos - PrevMousePos;
-        pos_ = pos_ - dir;
-        aim_ = aim_ - dir;
-
-        PrevMousePos = mouse_pos;
-        break;
-    }
-    MousePrevX = x;
-    MousePrevY = y;
-  }
+  gluLookAt(pos_.x, pos_.y, pos_.z,
+            aim_.x, aim_.y, aim_.z,
+            up_.x,  up_.y,  up_.z);
 }
 
 const GraphicCamera& GraphicCamera::operator=(const GraphicCamera& cam) {
@@ -334,30 +102,30 @@ const GraphicCamera& GraphicCamera::operator=(const GraphicCamera& cam) {
 //=====================Below is the implementation of AA and DoF===============
 // These data comes from OpenGL Programming Guide
 // http://www.glprogramming.com/red/chapter10.html
-Matrixd jitterTable4 = {
-  {0.375, 0.25}, {0.125, 0.75}, {0.875, 0.25}, {0.625, 0.75}
+double jitterTable4[] = {
+  0.375, 0.25, 0.125, 0.75, 0.875, 0.25, 0.625, 0.75
 };
 
-Matrixd jitterTable8 = {
-  {0.5625, 0.4375}, {0.0625, 0.9375}, {0.3125, 0.6875}, {0.6875, 0.8124},
-  {0.8125, 0.1875}, {0.9375, 0.5625}, {0.4375, 0.0625}, {0.1875, 0.3125}
+double jitterTable8[] = {
+  0.5625, 0.4375, 0.0625, 0.9375, 0.3125, 0.6875, 0.6875, 0.8124,
+  0.8125, 0.1875, 0.9375, 0.5625, 0.4375, 0.0625, 0.1875, 0.3125
 };
 
-Matrixd jitterTable12 = {
-  {0.4166666666, 0.625}, {0.9166666666, 0.875}, {0.25, 0.375},
-  {0.4166666666, 0.125}, {0.75, 0.125}, {0.0833333333, 0.125}, {0.75, 0.625},
-  {0.25, 0.875}, {0.5833333333, 0.375}, {0.9166666666, 0.375},
-  {0.0833333333, 0.625}, {0.583333333, 0.875}
+double jitterTable12[] = {
+  0.4166666666, 0.625, 0.9166666666, 0.875, 0.25, 0.375,
+  0.4166666666, 0.125, 0.75, 0.125, 0.0833333333, 0.125, 0.75, 0.625,
+  0.25, 0.875, 0.5833333333, 0.375, 0.9166666666, 0.375,
+  0.0833333333, 0.625, 0.583333333, 0.875
 };
 
-Matrixd jitterTable16 = {
-  {0.375, 0.4375}, {0.625, 0.0625}, {0.875, 0.1875}, {0.125, 0.0625},
-  {0.375, 0.6875}, {0.875, 0.4375}, {0.625, 0.5625}, {0.375, 0.9375},
-  {0.625, 0.3125}, {0.125, 0.5625}, {0.125, 0.8125}, {0.375, 0.1875},
-  {0.875, 0.9375}, {0.875, 0.6875}, {0.125, 0.3125}, {0.625, 0.8125}
+double jitterTable16[] = {
+  0.375, 0.4375, 0.625, 0.0625, 0.875, 0.1875, 0.125, 0.0625,
+  0.375, 0.6875, 0.875, 0.4375, 0.625, 0.5625, 0.375, 0.9375,
+  0.625, 0.3125, 0.125, 0.5625, 0.125, 0.8125, 0.375, 0.1875,
+  0.875, 0.9375, 0.875, 0.6875, 0.125, 0.3125, 0.625, 0.8125
 };
 
-static inline Matrixd& GetJitterTable(int level) {
+static inline double* GetJitterTable(int level) {
   if (level == 4) return jitterTable4;
   if (level == 8) return jitterTable8;
   if (level == 12)
@@ -371,13 +139,13 @@ void GraphicCamera::AAPerspectiveDisplay(int width, int height,
                                          render_callback render_frame) {
   float time_factor = 1.0;
 //  cout<<"Do AA at level:"<<level<<endl;
-  Matrixd& jitterTable = GetJitterTable(level);
+  double* jitterTable = GetJitterTable(level);
   glClearAccum(0, 0, 0, 0);
   glClear(GL_ACCUM_BUFFER_BIT);
   for (int i = 0 ; i < level; ++i) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    JitterCamera(jitterTable.get(i, 0) * time_factor,
-                 jitterTable.get(i, 1) * time_factor);
+    JitterCamera(jitterTable[i*2 + 0] * time_factor,
+                 jitterTable[i*2 + 1] * time_factor);
     render_frame();
     glAccum(GL_ACCUM, 1.0/(float)level);
   }
@@ -432,9 +200,9 @@ void GraphicCamera::JitterCamera(GLfloat pix_x, GLfloat pix_y,
   glMatrixMode(GL_MODELVIEW);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  gluLookAt(pos_.x() + eye_x, pos_.y() + eye_y, pos_.z(),
-            aim_.x(), aim_.y(), aim_.z(),
-            up_.x(),  up_.y(),  up_.z());
+  gluLookAt(pos_.x + eye_x, pos_.y + eye_y, pos_.z,
+            aim_.x, aim_.y, aim_.z,
+            up_.x,  up_.y,  up_.z);
 }
 
 // jitter a camera by pixels in x and y
@@ -494,9 +262,6 @@ void GraphicCamera::JitterCamera(GLfloat pix_x, GLfloat pix_y) {
   
   inline double& Frustum::FoV() { return  this->fov; }
   
-  Matrix4d& Frustum::GetMatrix(){ return this->matrix; }
-  
-  
-  
+  double* Frustum::GetMatrix(){ return this->matrix; }
   
 } //ns GraphicCamera

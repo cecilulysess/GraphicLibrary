@@ -27,6 +27,20 @@
 #define WIDTH 1024
 #define HEIGHT 768
 
+unsigned int RENDER_MODE = 0;
+int light_switch[3] = {1, 1, 1};
+int AALevel = 4;
+bool WantToRedraw = false, DrawNormal = false;
+double focus = 1.2;
+
+GraphicModel *model, *ground, *skydome;
+GraphicCamera::GraphicCamera *camera;
+
+GLuint selected_shader_id = 0;
+
+float eye_loc[] = {0.0, 2.0, 4.0}, eye_aim[] = {0.0, 1.0, 0.0};
+
+
 typedef struct LightSource{
   float diffuse[4];
   float specular[4];
@@ -49,16 +63,6 @@ LightSource lights[3] = {
     0.8, 0.4, 0.2    }
 };
 
-unsigned int RENDER_MODE = 0;
-int light_switch[3] = {1, 1, 1};
-int AALevel = 4;
-bool WantToRedraw = false, DrawNormal = false;
-double focus = 1.2;
-
-GraphicModel *model, *ground, *skydome;
-GraphicCamera::GraphicCamera *camera;
-
-GLuint selected_shader_id = 0;
 
 void SwitchLight(){
   for (int i = 0; i < 3; ++i)   {
@@ -96,6 +100,19 @@ void draw_stuff(){
   ground->DrawModel((int) DrawNormal, selected_shader_id);
   skydome->DrawModel((int) DrawNormal, selected_shader_id);
 
+}
+
+void PerspectiveDisplay(int width, int height) {
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  
+  gluPerspective(60, (float) width/ (float) height,
+                 0.01, 30.0);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  gluLookAt(eye_loc[0], eye_loc[1], eye_loc[2],
+            eye_aim[0], eye_aim[1], eye_aim[2],
+            0.0, 1.0, 0.0);
 }
 
 void GLSL_LogReport(int shader, bool is_print){
@@ -166,9 +183,14 @@ void SetShadersOrDie(GLuint &shader, const char* vshader,
 
 void init(const char* model_path, const char* vshader_path, 
     const char* fshader_path) {
-  camera = new GraphicCamera::GraphicCamera(Vec3d(0, 2, 4),
-                                            Vec3d(0, 1, 0),
-                          Vec3d(0, 1 , 0), 0.02, 20, 60, focus);
+
+  float updef[3] = {0.0, 1.0, 0.0};
+  try{
+    camera = new GraphicCamera::GraphicCamera(eye_loc, eye_aim, updef, focus);
+  } catch (...){
+    fprintf(stderr, "error init cam: pos: %f %f %f, aim: %f %f %f\n",
+            eye_loc[0], eye_loc[1], eye_loc[2], eye_aim[0], eye_aim[1], eye_aim[2] );
+  }  
   camera->PerspectiveDisplay(WIDTH, HEIGHT);
   do_lights();
   SetShadersOrDie(selected_shader_id, vshader_path, fshader_path);
@@ -235,7 +257,7 @@ void RenderScene(){
       camera->DoFPerspectiveDisplay(WIDTH, HEIGHT, 10, draw_stuff);
       break;
     default:
-      camera->PerspectiveDisplay(WIDTH, HEIGHT);
+      PerspectiveDisplay(WIDTH, HEIGHT);
       draw_stuff();
   }
   glFlush();
@@ -247,14 +269,6 @@ void Redraw(){
   if (WantToRedraw)  RenderScene();
 }
 
-void mouseEventHandler(int button, int state, int x, int y) {
-  camera->MouseEventHandler(button, state, x, y);
-}
-
-void motionEventHandler(int x, int y) {
-  camera->MouseMotionEventHandler(x, y);
-  glutPostRedisplay();
-}
 
 int main(int argc, char* argv[]){
   if(argc != 6){
@@ -279,8 +293,6 @@ int main(int argc, char* argv[]){
   init(argv[3], argv[1], argv[2]);
   //glutReshapeFunc(doReshape);
   glutDisplayFunc(RenderScene);
-  glutMouseFunc(mouseEventHandler);
-  glutMotionFunc(motionEventHandler);
   glutKeyboardFunc(KeyBoardHandler);
   glutIdleFunc(Redraw);
   glutMainLoop();
